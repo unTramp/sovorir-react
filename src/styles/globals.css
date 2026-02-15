@@ -87,6 +87,7 @@ body.loaded {
 
 /* ==================== Video Section ==================== */
 .video-section {
+  background: var(--color-bg-white);
 }
 
 /* ==================== Scrollbar ==================== */
