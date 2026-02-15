@@ -5,8 +5,8 @@
   /* RGB decomposition (for Tailwind alpha + rgba replacements) */
   --color-primary-rgb: 180, 106, 88;
   --color-primary-dark-rgb: 122, 62, 52;
-  --color-student-rgb: 90, 165, 210;
-  --color-student-border-rgb: 76, 152, 198;
+  --color-student-rgb: 85, 180, 228;
+  --color-student-border-rgb: 72, 166, 216;
   --color-text-rgb: 58, 48, 45;
   --color-text-muted-rgb: 94, 78, 72;
   --color-bg-content-rgb: 250, 248, 246;
@@ -18,8 +18,8 @@
 
   /* Student — logo blue */
   --color-student: rgb(var(--color-student-rgb));
-  --color-student-dark: #2B7AAE;
-  --color-student-muted: #4A94BF;
+  --color-student-dark: #1681C0;
+  --color-student-muted: #3A97C5;
 
   /* Text */
   --color-text: rgb(var(--color-text-rgb));
@@ -49,8 +49,8 @@
   /* Waveform */
   --color-waveform-teacher-played: #B46A58;
   --color-waveform-teacher-unplayed: #DDC9BF;
-  --color-waveform-student-played: #5AA5D2;
-  --color-waveform-student-unplayed: #C2DAE8;
+  --color-waveform-student-played: #55B4E4;
+  --color-waveform-student-unplayed: #BBDFF0;
 
   /* Progress gradient */
   --color-progress-from: #C47A62;
@@ -310,14 +310,15 @@ body.loaded {
 }
 
 .voice-bubble--student .voice-bubble__duration {
-  color: var(--color-text);
+  color: var(--color-text-muted);
 }
 
 .voice-bubble__duration {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--color-text);
+  color: var(--color-text-muted);
+  opacity: 0.7;
   flex-shrink: 0;
   min-width: 32px;
   text-align: right;
@@ -362,7 +363,7 @@ body.loaded {
 }
 
 .profile-star.filled {
-  background: linear-gradient(90deg, var(--color-student), var(--color-student-dark));
+  background: linear-gradient(90deg, #4FC3F7, #0288D1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -38,7 +38,7 @@ export function VideoSection() {
         style={{ gridTemplateRows: videoMinimized ? '0fr' : '1fr' }}
       >
         <div className="overflow-hidden">
-          <div className="relative bg-black rounded-[18px] overflow-hidden mx-8 my-8" style={{ aspectRatio: '16/9', boxShadow: '0 10px 30px rgba(0,0,0,0.04)' }}>
+          <div className="relative bg-black rounded-[18px] overflow-hidden mx-8 my-8" style={{ aspectRatio: '16/9', boxShadow: '0 8px 24px rgb(var(--color-primary-rgb) / 0.10)' }}>
             <iframe
               src={VIMEO_SRC}
               style={{
