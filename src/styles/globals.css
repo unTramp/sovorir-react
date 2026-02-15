@@ -235,7 +235,9 @@ body.loaded {
   font-size: 13px;
   font-weight: 700;
   color: var(--color-primary-dark);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgb(var(--color-primary-dark-rgb) / 0.12);
 }
 
 .voice-bubble__text {
@@ -289,17 +291,18 @@ body.loaded {
 .voice-bubble--student .voice-bubble__name {
   color: var(--color-student-dark);
   margin-bottom: 8px;
+  border-bottom-color: rgb(var(--color-student-rgb) / 0.15);
 }
 
 .voice-bubble--student .voice-bubble__duration {
-  color: var(--color-student-dark);
+  color: var(--color-text);
 }
 
 .voice-bubble__duration {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--color-primary-dark);
+  color: var(--color-text);
   flex-shrink: 0;
   min-width: 32px;
   text-align: right;
@@ -435,12 +438,12 @@ body.loaded {
 }
 
 .dict-group-header {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--color-primary-dark);
-  background: rgb(var(--color-primary-rgb) / 0.10);
+  color: var(--color-text);
+  background: rgb(var(--color-primary-rgb) / 0.13);
   padding: 12px 10px 4px;
   border-radius: 6px;
   margin-bottom: 2px;
