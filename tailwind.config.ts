@@ -14,7 +14,7 @@ export default {
         border: 'var(--color-border)',
         muted: 'var(--color-text-muted)',
         dark: 'var(--color-text)',
-        rightpanel: 'var(--color-bg-teacher-from)',
+        rightpanel: 'rgb(var(--color-bg-chat-rgb) / <alpha-value>)',
         'primary-light': 'var(--color-primary-light)',
         'audio-teacher': 'var(--color-bg-teacher-to)',
         'audio-student': 'var(--color-bg-student-to)',
