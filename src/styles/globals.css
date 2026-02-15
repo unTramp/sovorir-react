@@ -45,7 +45,7 @@
   --color-backdrop: rgb(var(--color-text-rgb) / 0.42);
 
   /* Stars */
-  --color-star-filled: #C9A84C;
+  --color-star-filled: #D4A017;
   --color-star-empty: #D0C4A4;
 
   /* Waveform */
@@ -334,6 +334,7 @@ body.loaded {
 
 .rpg-star.filled {
   color: var(--color-star-filled);
+  text-shadow: 0 0 4px rgba(212, 160, 23, 0.5);
 }
 
 .rpg-trophy {
@@ -345,7 +346,7 @@ body.loaded {
 /* ==================== Progress Star ==================== */
 .progress-star {
   font-size: 28px;
-  color: var(--color-progress-track);
+  color: var(--color-star-empty);
   line-height: 1;
   margin-bottom: 2px;
 }
