@@ -2,10 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { usePdfStore } from '../stores/usePdfStore';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
@@ -21,19 +18,17 @@ export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | nu
 
       try {
         const page = await pdfDoc.getPage(pageNum);
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
         const viewport = page.getViewport({ scale });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: ctx, viewport, canvas } as never).promise;
+        const ctx = canvas.getContext('2d')!;
+        await page.render({ canvasContext: ctx, viewport }).promise;
       } catch (err) {
         console.error('Page render error:', err);
+      } finally {
+        renderingRef.current = false;
       }
-
-      renderingRef.current = false;
     },
     [scale, canvasRef],
   );
@@ -43,7 +38,10 @@ export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | nu
     let cancelled = false;
     async function load() {
       try {
-        const doc = await pdfjs.getDocument('/assets/sample.pdf').promise;
+        const doc = await pdfjs.getDocument({
+          url: '/assets/sample.pdf',
+          isOffscreenCanvasSupported: false,
+        }).promise;
         if (cancelled) return;
         pdfDocRef.current = doc;
         setTotalPages(doc.numPages);
