@@ -1,10 +1,6 @@
-import { useEffect, useRef } from 'react';
 import { lessons } from '../../data/lessons';
 
 export function ProgressCircle() {
-  const circleRef = useRef<SVGCircleElement>(null);
-  const textRef = useRef<HTMLDivElement>(null);
-
   const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
   const totalSections = currentLesson.sections.length;
   const completedSections = currentLesson.sections.filter(
@@ -18,77 +14,33 @@ export function ProgressCircle() {
       ? Math.round(((completedSections + inProgressSections * 0.5) / totalSections) * 100)
       : 0;
 
-  useEffect(() => {
-    const radius = 70;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
-
-    // Animate after a small delay
-    const timer = setTimeout(() => {
-      if (circleRef.current) {
-        circleRef.current.style.strokeDashoffset = String(offset);
-      }
-      if (textRef.current) {
-        textRef.current.textContent = `${percentage}%`;
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [percentage]);
-
   return (
-    <div className="border-t border-border px-6 pt-4 pb-6">
-      <div style={{ position: 'relative', width: 105, height: 105, margin: '0 auto' }}>
-        <svg
-          viewBox="0 0 160 160"
-          style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
-        >
-          <defs>
-            <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#4FC3F7" />
-              <stop offset="100%" stopColor="#0288D1" />
-            </linearGradient>
-          </defs>
-          <circle
-            cx="80"
-            cy="80"
-            r="70"
-            fill="none"
-            stroke="#90A4AE"
-            strokeOpacity="0.12"
-            strokeWidth="12"
-          />
-          <circle
-            ref={circleRef}
-            cx="80"
-            cy="80"
-            r="70"
-            fill="none"
-            stroke="url(#progressGrad)"
-            strokeWidth="12"
-            strokeLinecap="round"
-            strokeDasharray="440"
-            strokeDashoffset="440"
-            style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)' }}
-          />
-        </svg>
+    <div className="px-2 mt-1">
+      <div className="flex items-center justify-end mb-1 gap-1">
+        <span className="text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>
+          {percentage}%
+        </span>
+        {percentage >= 100 && (
+          <span className="text-xs" style={{ color: 'var(--color-star-filled)' }}>★</span>
+        )}
+      </div>
+      <div
+        style={{
+          height: 4,
+          borderRadius: 2,
+          background: 'var(--color-border)',
+          overflow: 'hidden',
+        }}
+      >
         <div
           style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
+            height: '100%',
+            width: `${percentage}%`,
+            borderRadius: 2,
+            background: 'linear-gradient(90deg, #4FC3F7, #0288D1)',
+            transition: 'width 1s ease',
           }}
-        >
-          <div ref={textRef} className="progress-percent">
-            0%
-          </div>
-        </div>
-      </div>
-      <div className="progress-hint">
-        Завершите урок — получите <span className="profile-star filled">{'\u2605'}</span>
+        />
       </div>
     </div>
   );

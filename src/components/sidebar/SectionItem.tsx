@@ -43,7 +43,7 @@ export function SectionItem({ section }: Props) {
 
   return (
     <div
-      className={`sidebar-tree-item flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] cursor-pointer ${
+      className={`sidebar-tree-item flex items-center text-[13px] ${
         isActive ? 'active' : ''
       }`}
       role="listitem"
@@ -51,9 +51,6 @@ export function SectionItem({ section }: Props) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
-      <span className={`flex-shrink-0 ${isActive ? 'text-accent' : 'text-muted'}`}>
-        <Icon />
-      </span>
       <span className="truncate">{section.title}</span>
     </div>
   );

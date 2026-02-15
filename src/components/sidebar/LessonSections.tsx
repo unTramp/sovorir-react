@@ -15,18 +15,17 @@ export function LessonSections() {
         <div className="text-base font-semibold text-dark px-2 leading-snug">
           {currentLesson.title}
         </div>
+        <ProgressCircle />
       </div>
 
       {/* Sections */}
-      <div className="space-y-0.5 pb-4" role="list">
+      <div className="space-y-2 pb-4" role="list">
         {currentLesson.sections
           .filter((s) => s.type !== 'video')
           .map((section) => (
             <SectionItem key={section.id} section={section} />
           ))}
       </div>
-
-      <ProgressCircle />
     </div>
   );
 }
