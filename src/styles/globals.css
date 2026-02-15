@@ -195,7 +195,7 @@ body.loaded {
   border-radius: 18px;
   padding: 10px 14px 8px;
   position: relative;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 .voice-bubble--teacher {
@@ -232,8 +232,8 @@ body.loaded {
 }
 
 .voice-bubble__name {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--color-primary-dark);
   margin-bottom: 4px;
 }
