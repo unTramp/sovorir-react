@@ -54,7 +54,7 @@ export function ProgressCircle() {
             cy="80"
             r="70"
             fill="none"
-            stroke="#8B746C"
+            stroke="#5E4E48"
             strokeOpacity="0.12"
             strokeWidth="8"
           />

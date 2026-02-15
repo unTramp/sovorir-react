@@ -7,7 +7,7 @@ export function NotesView() {
 
   return (
     <div className="view-panel flex flex-col h-full">
-      <div className="h-11 bg-white border-b border-border flex items-center px-4 flex-shrink-0">
+      <div className="h-11 bg-rightpanel border-b border-border flex items-center px-4 flex-shrink-0">
         <span className="text-base font-semibold text-dark">Заметки преподавателя</span>
       </div>
       <div className="flex-1 overflow-y-auto p-6 no-scrollbar">

@@ -8,7 +8,7 @@ export function MobileHeader() {
     <header className="h-14 bg-white/95 backdrop-blur-sm border-b border-border flex items-center px-4 gap-3 flex-shrink-0 z-30 relative lg:hidden">
       <button
         onClick={() => toggleSidebar()}
-        className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary transition-colors"
+        className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent transition-colors"
         aria-label="Меню"
       >
         <HamburgerIcon />

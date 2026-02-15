@@ -25,7 +25,7 @@ export function DictionaryView() {
 
   return (
     <div className="view-panel flex flex-col h-full">
-      <div className="h-11 bg-white border-b border-border flex items-center px-4 gap-3 flex-shrink-0">
+      <div className="h-11 bg-rightpanel border-b border-border flex items-center px-4 gap-3 flex-shrink-0">
         <span className="text-base font-semibold text-dark">Словарь урока</span>
         <div className="flex-1 max-w-xs">
           <input
