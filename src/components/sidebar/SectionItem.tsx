@@ -1,16 +1,6 @@
 import type { Section } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { VideoIcon, PdfIcon, AudioIcon, DictionaryIcon, NotesIcon } from '../../icons';
-import type { SectionType } from '../../types/lesson';
-
-const iconMap: Record<SectionType, React.FC<{ className?: string }>> = {
-  video: VideoIcon,
-  pdf: PdfIcon,
-  audio: AudioIcon,
-  dictionary: DictionaryIcon,
-  notes: NotesIcon,
-};
 
 interface Props {
   section: Section;
@@ -24,8 +14,6 @@ export function SectionItem({ section }: Props) {
   const { isDesktop } = useMediaQuery();
 
   const isActive = section.id === activeSection;
-  const isCompleted = section.status === 'completed';
-  const Icon = iconMap[section.type] || PdfIcon;
 
   function handleClick() {
     setActiveSection(section.id);

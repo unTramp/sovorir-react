@@ -50,7 +50,7 @@ export function MountainProgress() {
               height: state === 'pending' || state === 'locked' ? 28 : 32,
               backgroundColor:
                 state === 'completed'
-                  ? '#4CAF50'
+                  ? 'var(--color-student-dark)'
                   : state === 'in-progress'
                     ? 'var(--color-primary)'
                     : 'transparent',

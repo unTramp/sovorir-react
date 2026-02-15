@@ -9,7 +9,6 @@ export default {
         accent: 'rgb(var(--color-primary-dark-rgb) / <alpha-value>)',
         content: 'rgb(var(--color-bg-content-rgb) / <alpha-value>)',
         app: 'var(--color-bg-app)',
-        sidebar: 'var(--color-bg-sidebar)',
         surface: 'var(--color-bg-surface)',
         border: 'var(--color-border)',
         muted: 'var(--color-text-muted)',

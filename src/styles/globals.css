@@ -5,8 +5,8 @@
   /* RGB decomposition (for Tailwind alpha + rgba replacements) */
   --color-primary-rgb: 180, 106, 88;
   --color-primary-dark-rgb: 122, 62, 52;
-  --color-student-rgb: 139, 155, 107;
-  --color-student-border-rgb: 130, 145, 95;
+  --color-student-rgb: 90, 165, 210;
+  --color-student-border-rgb: 76, 152, 198;
   --color-text-rgb: 58, 48, 45;
   --color-text-muted-rgb: 94, 78, 72;
   --color-bg-content-rgb: 250, 248, 246;
@@ -16,10 +16,10 @@
   --color-primary-light: #C68473;
   --color-primary-dark: rgb(var(--color-primary-dark-rgb));
 
-  /* Student — olive */
+  /* Student — logo blue */
   --color-student: rgb(var(--color-student-rgb));
-  --color-student-dark: #6B7A52;
-  --color-student-muted: #7A8A5C;
+  --color-student-dark: #2B7AAE;
+  --color-student-muted: #4A94BF;
 
   /* Text */
   --color-text: rgb(var(--color-text-rgb));
@@ -28,15 +28,13 @@
 
   /* Backgrounds */
   --color-bg-app: #F6F2EF;
-  --color-bg-sidebar: #ECE4DE;
-  --color-bg-sidebar-to: #E7DDD6;
   --color-bg-content: rgb(var(--color-bg-content-rgb));
   --color-bg-surface: #F1E8E2;
   --color-bg-white: #FFFFFF;
   --color-bg-teacher-from: #FBF9F8;
   --color-bg-teacher-to: #EFE2DA;
-  --color-bg-student-from: #F4F6EF;
-  --color-bg-student-to: #E4E9D8;
+  --color-bg-student-from: #F6F9FA;
+  --color-bg-student-to: #E7F0F4;
 
   /* Borders */
   --color-border: #DDC9BF;
@@ -51,8 +49,8 @@
   /* Waveform */
   --color-waveform-teacher-played: #B46A58;
   --color-waveform-teacher-unplayed: #DDC9BF;
-  --color-waveform-student-played: #8B9B6B;
-  --color-waveform-student-unplayed: #C5CEB1;
+  --color-waveform-student-played: #5AA5D2;
+  --color-waveform-student-unplayed: #C2DAE8;
 
   /* Progress gradient */
   --color-progress-from: #C47A62;
@@ -192,7 +190,7 @@ body.loaded {
   top: 8px;
   bottom: 8px;
   width: 2px;
-  background-color: #0288D1;
+  background-color: var(--color-student-dark);
   border-radius: 2px;
 }
 
@@ -226,7 +224,7 @@ body.loaded {
 
 .voice-bubble--student {
   background: linear-gradient(160deg, var(--color-bg-student-from) 0%, var(--color-bg-student-to) 100%);
-  border: 1px solid rgb(var(--color-student-border-rgb) / 0.2);
+  border: 1px solid rgb(var(--color-student-border-rgb) / 0.18);
   border-bottom-right-radius: 4px;
   padding: 12px 14px 12px;
   min-width: 75%;
@@ -359,12 +357,12 @@ body.loaded {
 
 .profile-star {
   font-size: 18px;
-  color: #90A4AE;
+  color: var(--color-border);
   line-height: 1;
 }
 
 .profile-star.filled {
-  background: linear-gradient(90deg, #4FC3F7, #0288D1);
+  background: linear-gradient(90deg, var(--color-student), var(--color-student-dark));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -728,7 +726,7 @@ body.loaded {
   position: fixed !important;
   inset: 0 !important;
   z-index: 100 !important;
-  background: var(--color-bg-surface) !important;
+  background: #FDFBF9 !important;
   width: 100% !important;
   max-width: 100% !important;
 }
@@ -741,7 +739,7 @@ body.loaded {
 
 /* ==================== Sidebar ==================== */
 .sidebar-desktop {
-  background: #FAF8F6;
+  background: #F5F1ED;
   border-right: 1px solid rgba(0,0,0,0.04);
 }
 
@@ -791,7 +789,7 @@ body.loaded {
 
 .sidebar-ararat img {
   width: 100%;
-  opacity: 0.35;
+  opacity: 0.2;
   display: block;
   mix-blend-mode: multiply;
   margin-bottom: -70px;

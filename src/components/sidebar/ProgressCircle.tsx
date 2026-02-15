@@ -37,7 +37,7 @@ export function ProgressCircle() {
             height: '100%',
             width: `${percentage}%`,
             borderRadius: 2,
-            background: 'linear-gradient(90deg, #4FC3F7, #0288D1)',
+            background: 'linear-gradient(90deg, var(--color-student), var(--color-student-dark))',
             transition: 'width 1s ease',
           }}
         />

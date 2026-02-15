@@ -23,7 +23,7 @@ export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | nu
         canvas.width = viewport.width;
 
         const ctx = canvas.getContext('2d')!;
-        await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport, canvas }).promise;
       } catch (err) {
         console.error('Page render error:', err);
       } finally {
