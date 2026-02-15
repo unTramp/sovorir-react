@@ -337,6 +337,19 @@ body.loaded {
   text-shadow: 0 0 4px rgba(212, 160, 23, 0.5);
 }
 
+.profile-star {
+  font-size: 18px;
+  color: #90A4AE;
+  line-height: 1;
+}
+
+.profile-star.filled {
+  background: linear-gradient(90deg, #4FC3F7, #0288D1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .rpg-trophy {
   font-size: 14px;
   margin-left: 4px;
@@ -724,7 +737,7 @@ body.loaded {
 }
 
 .progress-percent {
-  font-size: 16px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--color-text);
 }
@@ -774,6 +787,45 @@ body.loaded {
   transform-box: fill-box;
   transform-origin: center;
   animation: checkpoint-pulse 2s ease-in-out infinite;
+}
+
+/* ==================== Sidebar Logout ==================== */
+.sidebar-logout-btn {
+  width: 100%;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-logout-btn:hover {
+  background: rgb(var(--color-primary-rgb) / 0.08);
+  color: var(--color-text);
+}
+
+/* ==================== Sidebar Ararat ==================== */
+.sidebar-ararat {
+  flex-shrink: 0;
+  pointer-events: none;
+  overflow: hidden;
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.sidebar-ararat img {
+  width: 100%;
+  opacity: 0.35;
+  display: block;
+  mix-blend-mode: multiply;
+  margin-bottom: -70px;
 }
 
 /* ==================== Focus Visible ==================== */

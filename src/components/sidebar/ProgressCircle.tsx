@@ -37,7 +37,7 @@ export function ProgressCircle() {
   }, [percentage]);
 
   return (
-    <div className="border-t border-border flex-shrink-0 px-6 pt-5 pb-6">
+    <div className="border-t border-border px-6 pt-4 pb-6">
       <div style={{ position: 'relative', width: 105, height: 105, margin: '0 auto' }}>
         <svg
           viewBox="0 0 160 160"
@@ -82,14 +82,13 @@ export function ProgressCircle() {
             justifyContent: 'center',
           }}
         >
-          <div className="progress-star">{'\u2605'}</div>
           <div ref={textRef} className="progress-percent">
             0%
           </div>
         </div>
       </div>
       <div className="progress-hint">
-        Завершите урок — получите <span className="progress-hint-star">{'\u2605'}</span>
+        Завершите урок — получите <span className="profile-star filled">{'\u2605'}</span>
       </div>
     </div>
   );

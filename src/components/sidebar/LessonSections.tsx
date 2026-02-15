@@ -1,5 +1,6 @@
 import { lessons } from '../../data/lessons';
 import { SectionItem } from './SectionItem';
+import { ProgressCircle } from './ProgressCircle';
 
 export function LessonSections() {
   const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
@@ -24,6 +25,8 @@ export function LessonSections() {
             <SectionItem key={section.id} section={section} />
           ))}
       </div>
+
+      <ProgressCircle />
     </div>
   );
 }
