@@ -51,7 +51,7 @@ export function SectionItem({ section }: Props) {
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
-      <span className={`flex-shrink-0 ${isActive ? 'text-primary' : 'text-muted'}`}>
+      <span className={`flex-shrink-0 ${isActive ? 'text-accent' : 'text-muted'}`}>
         <Icon />
       </span>
       <span className="truncate">{section.title}</span>

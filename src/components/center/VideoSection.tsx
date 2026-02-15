@@ -28,7 +28,7 @@ export function VideoSection() {
           <rect width="20" height="14" rx="3" fill="url(#video-icon-grad)" />
           <path d="M8 3.5v7l5.5-3.5L8 3.5z" fill="white" />
         </svg>
-        <span className="absolute right-3 hover:text-primary transition-colors">
+        <span className="absolute right-3 hover:text-accent transition-colors">
           {videoMinimized ? <ChevronDownIcon /> : <ChevronUpIcon />}
         </span>
       </button>

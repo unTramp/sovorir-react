@@ -8,7 +8,7 @@
   --color-student-rgb: 139, 155, 107;
   --color-student-border-rgb: 130, 145, 95;
   --color-text-rgb: 58, 48, 45;
-  --color-text-muted-rgb: 139, 116, 108;
+  --color-text-muted-rgb: 94, 78, 72;
   --color-bg-chat-rgb: 250, 248, 246;
 
   /* Primary — terracotta */
@@ -46,18 +46,18 @@
 
   /* Stars */
   --color-star-filled: #C9A84C;
-  --color-star-empty: #E0D5B8;
+  --color-star-empty: #D0C4A4;
 
   /* Waveform */
   --color-waveform-teacher-played: #B46A58;
   --color-waveform-teacher-unplayed: #DDC9BF;
   --color-waveform-student-played: #8B9B6B;
-  --color-waveform-student-unplayed: #D2DABE;
+  --color-waveform-student-unplayed: #C5CEB1;
 
   /* Progress gradient */
   --color-progress-from: #C47A62;
   --color-progress-to: #9B5A4A;
-  --color-progress-track: rgb(var(--color-text-muted-rgb) / 0.12);
+  --color-progress-track: rgb(var(--color-text-muted-rgb) / 0.20);
 
   /* Matte texture */
   --matte-noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -155,7 +155,7 @@ body.loaded {
   }
 
   .sidebar-toggle-btn:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
   }
 
   .sidebar-toggle-btn svg {
@@ -176,7 +176,7 @@ body.loaded {
 
 .sidebar-tree-item.active {
   background-color: rgb(var(--color-text-muted-rgb) / 0.10);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 .sidebar-tree-item.locked {
@@ -292,14 +292,14 @@ body.loaded {
 }
 
 .voice-bubble--student .voice-bubble__duration {
-  color: var(--color-student-muted);
+  color: var(--color-student-dark);
 }
 
 .voice-bubble__duration {
   font-size: 12px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   flex-shrink: 0;
   min-width: 32px;
   text-align: right;
@@ -469,7 +469,7 @@ body.loaded {
 
 .dict-bubble__tr {
   font-size: 12px;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   white-space: nowrap;
 }
 
@@ -553,7 +553,7 @@ body.loaded {
 }
 
 .bottom-tab-bar button.active {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 
 .bottom-tab-bar button .tab-icon {
@@ -593,9 +593,9 @@ body.loaded {
 }
 
 .speed-btn.active {
-  background: var(--color-primary);
+  background: var(--color-primary-dark);
   color: white;
-  border-color: var(--color-primary);
+  border-color: var(--color-primary-dark);
 }
 
 /* ==================== Progress Bar ==================== */

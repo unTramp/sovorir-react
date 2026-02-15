@@ -11,7 +11,7 @@ export function PdfControls() {
         <button
           onClick={prevPage}
           disabled={currentPage <= 1}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary text-muted disabled:opacity-30 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent text-muted disabled:opacity-30 transition-colors"
           aria-label="Предыдущая страница"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,7 +24,7 @@ export function PdfControls() {
         <button
           onClick={nextPage}
           disabled={currentPage >= totalPages}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary text-muted disabled:opacity-30 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent text-muted disabled:opacity-30 transition-colors"
           aria-label="Следующая страница"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export function PdfControls() {
       <div className="flex items-center gap-1">
         <button
           onClick={zoomOut}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary text-muted transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent text-muted transition-colors"
           aria-label="Уменьшить"
         >
           <MinusIcon />
@@ -45,14 +45,14 @@ export function PdfControls() {
         </span>
         <button
           onClick={zoomIn}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary text-muted transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent text-muted transition-colors"
           aria-label="Увеличить"
         >
           <PlusIcon />
         </button>
         <button
           onClick={toggleFullscreen}
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-primary text-muted transition-colors ml-1"
+          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent/15 hover:text-accent text-muted transition-colors ml-1"
           aria-label="Полный экран"
         >
           {isFullscreen ? '\u2715' : '\u26F6'}
