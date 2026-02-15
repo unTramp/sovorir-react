@@ -20,7 +20,6 @@ export function SectionItem({ section }: Props) {
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   const setCurrentView = useAppStore((s) => s.setCurrentView);
-  const setVideoOpen = useAppStore((s) => s.setVideoOpen);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const { isDesktop } = useMediaQuery();
 
@@ -30,14 +29,7 @@ export function SectionItem({ section }: Props) {
 
   function handleClick() {
     setActiveSection(section.id);
-
-    if (section.type === 'video') {
-      setCurrentView('pdf');
-      setVideoOpen(true);
-    } else {
-      setVideoOpen(false);
-      setCurrentView(section.type);
-    }
+    setCurrentView(section.type);
 
     if (!isDesktop) toggleSidebar(false);
   }

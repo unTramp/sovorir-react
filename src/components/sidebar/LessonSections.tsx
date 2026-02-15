@@ -18,9 +18,11 @@ export function LessonSections() {
 
       {/* Sections */}
       <div className="space-y-0.5 pb-4" role="list">
-        {currentLesson.sections.map((section) => (
-          <SectionItem key={section.id} section={section} />
-        ))}
+        {currentLesson.sections
+          .filter((s) => s.type !== 'video')
+          .map((section) => (
+            <SectionItem key={section.id} section={section} />
+          ))}
       </div>
     </div>
   );

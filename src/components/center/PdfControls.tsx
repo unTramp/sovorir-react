@@ -6,7 +6,7 @@ export function PdfControls() {
     usePdfStore();
 
   return (
-    <div className="h-11 bg-white border-b border-border flex items-center justify-between px-4 gap-2 flex-shrink-0">
+    <div className="h-11 bg-rightpanel border-b border-border flex items-center justify-between px-4 gap-2 flex-shrink-0">
       <div className="flex items-center gap-1">
         <button
           onClick={prevPage}
@@ -18,7 +18,7 @@ export function PdfControls() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <span className="text-sm font-semibold text-primary min-w-[50px] text-center">
+        <span className="text-xs font-normal text-muted min-w-[50px] text-center">
           {currentPage} / {totalPages || 1}
         </span>
         <button
@@ -40,7 +40,7 @@ export function PdfControls() {
         >
           <MinusIcon />
         </button>
-        <span className="text-sm font-semibold text-primary min-w-[40px] text-center">
+        <span className="text-xs font-normal text-muted min-w-[40px] text-center">
           {Math.round(scale * 100)}%
         </span>
         <button
