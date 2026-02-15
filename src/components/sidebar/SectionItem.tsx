@@ -1,7 +1,7 @@
 import type { Section } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { VideoIcon, PdfIcon, AudioIcon, DictionaryIcon, NotesIcon, CheckIcon } from '../../icons';
+import { VideoIcon, PdfIcon, AudioIcon, DictionaryIcon, NotesIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 
 const iconMap: Record<SectionType, React.FC<{ className?: string }>> = {
@@ -55,11 +55,6 @@ export function SectionItem({ section }: Props) {
         <Icon />
       </span>
       <span className="truncate">{section.title}</span>
-      {isCompleted && (
-        <span className="ml-auto flex-shrink-0">
-          <CheckIcon />
-        </span>
-      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useAppStore } from '../../stores/useAppStore';
 import { SidebarHeader } from './SidebarHeader';
 import { LessonSections } from './LessonSections';
+
 import { ProgressCircle } from './ProgressCircle';
 
 export function Sidebar() {

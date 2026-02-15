@@ -38,15 +38,15 @@ export function ProgressCircle() {
 
   return (
     <div className="border-t border-border flex-shrink-0 px-6 pt-5 pb-6">
-      <div style={{ position: 'relative', width: 115, height: 115, margin: '0 auto' }}>
+      <div style={{ position: 'relative', width: 105, height: 105, margin: '0 auto' }}>
         <svg
           viewBox="0 0 160 160"
           style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }}
         >
           <defs>
             <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#C47A62" />
-              <stop offset="100%" stopColor="#9B5A4A" />
+              <stop offset="0%" stopColor="#4FC3F7" />
+              <stop offset="100%" stopColor="#0288D1" />
             </linearGradient>
           </defs>
           <circle
@@ -54,9 +54,9 @@ export function ProgressCircle() {
             cy="80"
             r="70"
             fill="none"
-            stroke="#5E4E48"
+            stroke="#90A4AE"
             strokeOpacity="0.12"
-            strokeWidth="8"
+            strokeWidth="12"
           />
           <circle
             ref={circleRef}
@@ -65,7 +65,7 @@ export function ProgressCircle() {
             r="70"
             fill="none"
             stroke="url(#progressGrad)"
-            strokeWidth="8"
+            strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray="440"
             strokeDashoffset="440"
