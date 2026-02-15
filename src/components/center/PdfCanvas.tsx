@@ -6,7 +6,7 @@ export function PdfCanvas() {
   usePdfRenderer(canvasRef);
 
   return (
-    <div className="pdf-canvas-container flex-1 bg-center no-scrollbar">
+    <div className="pdf-canvas-container flex-1 bg-content no-scrollbar">
       <canvas ref={canvasRef} />
     </div>
   );

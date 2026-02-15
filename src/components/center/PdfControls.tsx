@@ -6,7 +6,7 @@ export function PdfControls() {
     usePdfStore();
 
   return (
-    <div className="h-11 bg-rightpanel border-b border-border flex items-center justify-between px-4 gap-2 flex-shrink-0">
+    <div className="h-11 bg-content border-b border-border flex items-center justify-between px-4 gap-2 flex-shrink-0">
       <div className="flex items-center gap-1">
         <button
           onClick={prevPage}

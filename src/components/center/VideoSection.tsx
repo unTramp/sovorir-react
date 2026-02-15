@@ -15,7 +15,7 @@ export function VideoSection() {
       {/* Toggle bar — always visible at top */}
       <button
         onClick={toggleVideoMinimized}
-        className="w-full h-7 px-3 bg-rightpanel border-b border-border flex items-center justify-center relative text-muted hover:bg-accent/10 transition-colors"
+        className="w-full h-7 px-3 bg-content border-b border-border flex items-center justify-center relative text-muted hover:bg-accent/10 transition-colors"
         aria-label={videoMinimized ? 'Развернуть видео' : 'Свернуть видео'}
       >
         <svg className="w-5 h-4" viewBox="0 0 20 14" fill="none">

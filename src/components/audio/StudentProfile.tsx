@@ -3,7 +3,7 @@ const FILLED_STARS = 3;
 
 export function StudentProfile() {
   return (
-    <div className="h-[72px] bg-rightpanel border-b border-border px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
+    <div className="h-[72px] bg-content border-b border-border px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
       <div className="flex-1 min-w-0">
         <div className="text-base font-semibold text-dark leading-tight truncate">
           Андрей Дорофеев

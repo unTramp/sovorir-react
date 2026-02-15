@@ -9,7 +9,7 @@ export function CenterPanel() {
   const currentView = useAppStore((s) => s.currentView);
 
   return (
-    <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-center">
+    <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-content">
       <VideoSection />
       {currentView === 'pdf' && <PdfView />}
       {currentView === 'audio' && <AudioMobileView />}
