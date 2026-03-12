@@ -2,7 +2,11 @@ import { useEffect, useRef, useCallback } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { usePdfStore } from '../stores/usePdfStore';
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+const hasNativeToHex = typeof Uint8Array.prototype.toHex === 'function';
+
+pdfjs.GlobalWorkerOptions.workerSrc = hasNativeToHex
+  ? '/pdf.worker.min.mjs'
+  : '/pdf.worker.polyfilled.mjs';
 
 export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
@@ -21,9 +25,8 @@ export function usePdfRenderer(canvasRef: React.RefObject<HTMLCanvasElement | nu
         const viewport = page.getViewport({ scale });
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-
         const ctx = canvas.getContext('2d')!;
-        await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+        await page.render({ canvasContext: ctx, viewport }).promise;
       } catch (err) {
         console.error('Page render error:', err);
       } finally {

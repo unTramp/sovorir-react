@@ -1,7 +1,10 @@
-// Polyfill: Uint8Array.prototype.toHex (Chrome < 134)
+// Polyfills for older browsers (Safari < 18.2, Chrome < 134)
 declare global {
   interface Uint8Array {
     toHex(): string;
+  }
+  interface PromiseConstructor {
+    try<T>(fn: (...args: any[]) => T, ...args: any[]): Promise<Awaited<T>>;
   }
 }
 
@@ -12,6 +15,12 @@ if (!Uint8Array.prototype.toHex) {
       result += this[i].toString(16).padStart(2, '0');
     }
     return result;
+  };
+}
+
+if (typeof Promise.try !== 'function') {
+  Promise.try = function (fn: (...args: any[]) => any, ...args: any[]) {
+    return new Promise((resolve) => resolve(fn(...args)));
   };
 }
 
