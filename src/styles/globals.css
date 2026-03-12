@@ -542,42 +542,6 @@ body.loaded {
   transform: scale(0.95);
 }
 
-/* ==================== Bottom Tab Bar (Mobile) ==================== */
-.bottom-tab-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-  background: var(--color-bg-white);
-  border-top: 1px solid var(--color-border);
-  display: none;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.bottom-tab-bar button {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 0;
-  border: none;
-  background: transparent;
-  font-size: 12px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  transition: color 0.15s;
-}
-
-.bottom-tab-bar button.active {
-  color: var(--color-primary-dark);
-}
-
-.bottom-tab-bar button .tab-icon {
-  font-size: 20px;
-}
-
 /* ==================== Sidebar Overlay (Mobile/Tablet) ==================== */
 .sidebar-backdrop {
   position: fixed;
@@ -703,12 +667,8 @@ body.loaded {
 }
 
 @media (max-width: 767px) {
-  .bottom-tab-bar {
-    display: flex;
-  }
-
   .main-content-area {
-    padding-bottom: 60px;
+    padding-bottom: 0;
   }
 }
 

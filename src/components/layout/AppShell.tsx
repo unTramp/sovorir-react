@@ -2,7 +2,6 @@ import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useKeyboard } from '../../hooks/useKeyboard';
 import { useAppStore } from '../../stores/useAppStore';
 import { MobileHeader } from './MobileHeader';
-import { BottomTabBar } from './BottomTabBar';
 import { SidebarBackdrop } from './SidebarBackdrop';
 import { Sidebar } from '../sidebar/Sidebar';
 import { CenterPanel } from '../center/CenterPanel';
@@ -40,8 +39,6 @@ export function AppShell() {
         {/* Right Panel — Audio (desktop only) */}
         {isDesktop && <AudioPanel />}
       </div>
-
-      <BottomTabBar />
     </div>
   );
 }
