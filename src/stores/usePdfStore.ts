@@ -18,7 +18,7 @@ interface PdfState {
 
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 3.0;
-const SCALE_STEP = 0.25;
+const SCALE_STEP = 0.05;
 
 export const usePdfStore = create<PdfState>((set, get) => ({
   currentPage: 1,
