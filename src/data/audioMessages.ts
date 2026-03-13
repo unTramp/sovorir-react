@@ -1,6 +1,7 @@
 import type { AudioMessage } from '../types/audio';
 
 export const audioMessages: AudioMessage[] = [
+  // ── Страница 1 ──
   {
     id: 'v1',
     sender: 'teacher',
@@ -12,6 +13,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 0,
     src: '',
     time: '10:28',
+    page: 1,
   },
   {
     id: 'a1',
@@ -21,6 +23,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 15,
     src: 'https://pub-eda80acf66874b9e9fa764f5722fdf1b.r2.dev/audio1.opus',
     time: '10:30',
+    page: 1,
   },
   {
     id: 'a2',
@@ -30,6 +33,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 22,
     src: 'https://cdn.freesound.org/previews/612/612092_5674468-lq.mp3',
     time: '10:32',
+    page: 1,
   },
   {
     id: 'a3',
@@ -39,6 +43,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 8,
     src: 'https://cdn.freesound.org/previews/612/612091_5674468-lq.mp3',
     time: '10:35',
+    page: 1,
   },
   {
     id: 'a4',
@@ -48,6 +53,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 18,
     src: 'https://cdn.freesound.org/previews/612/612087_5674468-lq.mp3',
     time: '10:37',
+    page: 1,
   },
   {
     id: 'a5',
@@ -57,6 +63,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 12,
     src: 'https://cdn.freesound.org/previews/612/612095_5674468-lq.mp3',
     time: '10:40',
+    page: 1,
   },
   {
     id: 'a6',
@@ -66,6 +73,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 6,
     src: 'https://cdn.freesound.org/previews/612/612091_5674468-lq.mp3',
     time: '10:42',
+    page: 1,
   },
   {
     id: 'a7',
@@ -75,7 +83,9 @@ export const audioMessages: AudioMessage[] = [
     duration: 14,
     src: 'https://cdn.freesound.org/previews/612/612092_5674468-lq.mp3',
     time: '10:44',
+    page: 1,
   },
+  // ── Страница 2 ──
   {
     id: 'a8',
     sender: 'student',
@@ -84,6 +94,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 7,
     src: 'https://cdn.freesound.org/previews/612/612091_5674468-lq.mp3',
     time: '10:46',
+    page: 2,
   },
   {
     id: 'a9',
@@ -93,15 +104,17 @@ export const audioMessages: AudioMessage[] = [
     duration: 20,
     src: 'https://cdn.freesound.org/previews/612/612087_5674468-lq.mp3',
     time: '10:48',
+    page: 2,
   },
   {
     id: 'a10',
     sender: 'teacher',
     senderName: 'Лусине',
-    text: 'Послушайте как звучит слово Շնորհակალdelays — спасибо',
+    text: 'Послушайте как звучит слово Շնորհակалdelays — спасибо',
     duration: 16,
     src: 'https://cdn.freesound.org/previews/612/612095_5674468-lq.mp3',
     time: '10:50',
+    page: 2,
   },
   {
     id: 'a11',
@@ -111,6 +124,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 9,
     src: 'https://cdn.freesound.org/previews/612/612091_5674468-lq.mp3',
     time: '10:52',
+    page: 2,
   },
   {
     id: 'a12',
@@ -120,6 +134,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 15,
     src: 'https://cdn.freesound.org/previews/612/612092_5674468-lq.mp3',
     time: '10:54',
+    page: 2,
   },
   {
     id: 'a13',
@@ -129,6 +144,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 10,
     src: 'https://cdn.freesound.org/previews/612/612087_5674468-lq.mp3',
     time: '10:56',
+    page: 2,
   },
   {
     id: 'a14',
@@ -138,6 +154,7 @@ export const audioMessages: AudioMessage[] = [
     duration: 5,
     src: 'https://cdn.freesound.org/previews/612/612091_5674468-lq.mp3',
     time: '10:58',
+    page: 2,
   },
   {
     id: 'a15',
@@ -147,5 +164,6 @@ export const audioMessages: AudioMessage[] = [
     duration: 22,
     src: 'https://cdn.freesound.org/previews/612/612095_5674468-lq.mp3',
     time: '11:00',
+    page: 2,
   },
 ];

@@ -12,4 +12,5 @@ export interface AudioMessage {
   type?: MessageType;
   videoSrc?: string;
   thumbnail?: string;
+  page?: number;
 }
