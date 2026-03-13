@@ -19,7 +19,6 @@ export function VideoBubble({ message }: Props) {
             alt={message.senderName}
           />
           <div className="voice-bubble__name">{message.senderName}</div>
-          <div className="voice-bubble__text">{message.text}</div>
           <button
             className="relative w-full mt-1 rounded-xl overflow-hidden cursor-pointer group"
             style={{ aspectRatio: '16/9' }}
