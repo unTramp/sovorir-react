@@ -75,6 +75,12 @@ body.loaded {
   height: 100%;
 }
 
+html, body {
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* ==================== Hide scrollbar (center panel) ==================== */
 .no-scrollbar {
   scrollbar-width: none;          /* Firefox */
@@ -180,18 +186,19 @@ body.loaded {
 
 .sidebar-tree-item.active {
   color: var(--color-primary-dark);
-  background-color: transparent;
+  background-color: rgb(var(--color-primary-rgb) / 0.10);
+  font-weight: 600;
 }
 
 .sidebar-tree-item.active::before {
   content: "";
   position: absolute;
-  left: 8px;
-  top: 8px;
-  bottom: 8px;
-  width: 2px;
-  background-color: var(--color-student-dark);
-  border-radius: 2px;
+  left: 4px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary-dark));
+  border-radius: 3px;
 }
 
 .sidebar-tree-item.locked {
@@ -431,8 +438,8 @@ body.loaded {
 .dict-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
-  padding: 4px;
+  gap: 12px;
+  padding: 8px;
 }
 
 .dict-group-header {
@@ -450,7 +457,7 @@ body.loaded {
 
 .dict-bubble {
   border-radius: 14px;
-  padding: 8px 12px;
+  padding: 12px 16px;
   background: var(--color-bg-white);
   border: 1px solid var(--color-border);
   box-shadow: 0 2px 10px rgb(var(--color-primary-rgb) / 0.06);
@@ -495,12 +502,12 @@ body.loaded {
   font-size: 14px;
   font-weight: 400;
   color: var(--color-text);
-  margin-top: 2px;
+  margin-top: 6px;
 }
 
 .dict-bubble__detail {
-  margin-top: 6px;
-  padding-top: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid rgb(var(--color-primary-rgb) / 0.15);
 }
 
@@ -599,22 +606,22 @@ body.loaded {
 .markdown-content h2 {
   font-size: 1.35rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
-  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 2rem;
   color: var(--color-text);
 }
 
 .markdown-content h3 {
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+  margin-top: 1.75rem;
   color: var(--color-text);
 }
 
 .markdown-content p {
-  margin-bottom: 0.75rem;
-  line-height: 1.65;
+  margin-bottom: 1rem;
+  line-height: 1.75;
   font-size: 16px;
   color: var(--color-text);
 }
@@ -626,8 +633,8 @@ body.loaded {
 }
 
 .markdown-content li {
-  margin-bottom: 0.35rem;
-  line-height: 1.65;
+  margin-bottom: 0.5rem;
+  line-height: 1.75;
   font-size: 16px;
   color: var(--color-text);
 }
