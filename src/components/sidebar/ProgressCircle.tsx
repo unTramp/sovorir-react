@@ -1,18 +1,7 @@
-import { lessons } from '../../data/lessons';
+import { useLessonProgress } from '../../stores/useLessonProgress';
 
 export function ProgressCircle() {
-  const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
-  const totalSections = currentLesson.sections.length;
-  const completedSections = currentLesson.sections.filter(
-    (s) => s.status === 'completed',
-  ).length;
-  const inProgressSections = currentLesson.sections.filter(
-    (s) => s.status === 'current' || s.status === 'in-progress',
-  ).length;
-  const percentage =
-    totalSections > 0
-      ? Math.round(((completedSections + inProgressSections * 0.5) / totalSections) * 100)
-      : 0;
+  const percentage = useLessonProgress((s) => s.getOverallPercentage());
 
   return (
     <div className="px-2 mt-1">
