@@ -24,7 +24,6 @@ export default {
       },
       width: {
         sidebar: '280px',
-        'audio-panel': '300px',
       },
     },
   },

@@ -7,7 +7,7 @@ export function VideoIcon({ className = '' }: { className?: string }) {
   );
 }
 
-export function PdfIcon({ className = '' }: { className?: string }) {
+export function LessonIcon({ className = '' }: { className?: string }) {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M1.5 3C3.5 2.25 6.5 2.25 9 3.75c2.5-1.5 5.5-1.5 7.5-.75v11.25c-2-.75-5-.75-7.5.75-2.5-1.5-5.5-1.5-7.5-.75V3z" />

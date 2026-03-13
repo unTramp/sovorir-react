@@ -1,16 +1,14 @@
 import { create } from 'zustand';
 import type { SectionType } from '../types/lesson';
 
-type ViewType = SectionType | 'pdf';
-
 interface AppState {
-  currentView: ViewType;
+  currentView: SectionType;
   currentLesson: number;
   activeSection: string;
   sidebarOpen: boolean;
   sidebarCollapsed: boolean;
 
-  setCurrentView: (view: ViewType) => void;
+  setCurrentView: (view: SectionType) => void;
   setCurrentLesson: (lesson: number) => void;
   setActiveSection: (section: string) => void;
   toggleSidebar: (force?: boolean) => void;
@@ -19,7 +17,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  currentView: 'pdf',
+  currentView: 'lesson',
   currentLesson: 3,
   activeSection: 's3-1',
   sidebarOpen: false,

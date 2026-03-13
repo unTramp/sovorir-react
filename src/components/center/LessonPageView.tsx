@@ -1,21 +1,42 @@
 import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { ContentBlock, PhraseBlock, RuleBlock, AudioBubbleBlock, RecordBlock } from '../../types/lessonContent';
 import { lessonPages } from '../../data/lessonPages';
-import { usePdfStore } from '../../stores/usePdfStore';
+import { useLessonStore } from '../../stores/useLessonStore';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useAudioStore } from '../../stores/useAudioStore';
 import { PlayIcon, PauseIcon, MicIcon } from '../../icons';
 import { WaveformBars } from '../audio/WaveformBars';
 import { formatDuration } from '../../lib/formatDuration';
 
+/* ── Speaker Icon ── */
+function SpeakerIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+    </svg>
+  );
+}
+
 /* ── Phrase Card ── */
 function PhraseCard({ block }: { block: PhraseBlock }) {
+  const { togglePlay } = useAudioPlayer();
+  const msgId = `phrase-${block.armenian}`;
+
   return (
     <div className="lesson-phrase">
       <div className="lesson-phrase__top">
         <div className="lesson-phrase__left">
           <span className="lesson-phrase__armenian" lang="hy">{block.armenian}</span>
-          <span className="lesson-phrase__transcription">[{block.transcription}]</span>
+          <span className="lesson-phrase__transcription">
+            / {block.transcription} /
+            <button
+              className="lesson-phrase__audio-btn"
+              aria-label="Прослушать произношение"
+              onClick={() => block.audioSrc && togglePlay(msgId, block.audioSrc)}
+            >
+              <SpeakerIcon />
+            </button>
+          </span>
         </div>
       </div>
       <div className="lesson-phrase__russian">{block.russian}</div>
@@ -180,7 +201,7 @@ interface Props {
 }
 
 export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
-  const currentPage = usePdfStore((s) => s.currentPage);
+  const currentPage = useLessonStore((s) => s.currentPage);
   const page = lessonPages.find((p) => p.id === currentPage);
   const bottomRef = useRef<HTMLDivElement>(null);
 

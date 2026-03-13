@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useCallback } from 'react';
-import { usePdfStore } from '../../stores/usePdfStore';
+import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { lessonPages } from '../../data/lessonPages';
-import { PdfControls } from './PdfControls';
+import { LessonControls } from './LessonControls';
 import { LessonPageView } from './LessonPageView';
 
-export function PdfView() {
-  const isFullscreen = usePdfStore((s) => s.isFullscreen);
-  const currentPage = usePdfStore((s) => s.currentPage);
-  const setTotalPages = usePdfStore((s) => s.setTotalPages);
+export function LessonView() {
+  const isFullscreen = useLessonStore((s) => s.isFullscreen);
+  const currentPage = useLessonStore((s) => s.currentPage);
+  const setTotalPages = useLessonStore((s) => s.setTotalPages);
   const { completeRecord, getCompletedCount, getTotalRecords } = useLessonProgress();
 
   useEffect(() => {
@@ -38,8 +38,8 @@ export function PdfView() {
   }, [completeRecord, currentPage, nextRecordIndex]);
 
   return (
-    <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'pdf-fullscreen' : ''}`}>
-      <PdfControls totalRecords={totalRecords} completedRecords={completedRecords} />
+    <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'lesson-fullscreen' : ''}`}>
+      <LessonControls totalRecords={totalRecords} completedRecords={completedRecords} />
       <LessonPageView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}

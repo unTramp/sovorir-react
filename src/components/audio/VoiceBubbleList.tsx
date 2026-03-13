@@ -1,10 +1,10 @@
 import { audioMessages } from '../../data/audioMessages';
-import { usePdfStore } from '../../stores/usePdfStore';
+import { useLessonStore } from '../../stores/useLessonStore';
 import { VoiceBubble } from './VoiceBubble';
 import { VideoBubble } from './VideoBubble';
 
 export function VoiceBubbleList() {
-  const currentPage = usePdfStore((s) => s.currentPage);
+  const currentPage = useLessonStore((s) => s.currentPage);
   const filtered = audioMessages.filter((msg) => msg.page === currentPage);
 
   return (

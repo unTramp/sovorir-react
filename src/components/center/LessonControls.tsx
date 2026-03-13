@@ -1,13 +1,13 @@
-import { usePdfStore } from '../../stores/usePdfStore';
+import { useLessonStore } from '../../stores/useLessonStore';
 
 interface Props {
   totalRecords?: number;
   completedRecords?: number;
 }
 
-export function PdfControls({ totalRecords = 0, completedRecords = 0 }: Props) {
+export function LessonControls({ totalRecords = 0, completedRecords = 0 }: Props) {
   const { currentPage, totalPages, prevPage, nextPage, toggleFullscreen, isFullscreen } =
-    usePdfStore();
+    useLessonStore();
 
   return (
     <div className="h-11 bg-content border-b border-border flex items-center px-4 gap-2 flex-shrink-0">

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useAppStore } from '../stores/useAppStore';
-import { usePdfStore } from '../stores/usePdfStore';
+import { useLessonStore } from '../stores/useLessonStore';
 
 export function useKeyboard() {
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
@@ -12,23 +12,15 @@ export function useKeyboard() {
       // Escape closes overlays
       if (e.key === 'Escape') {
         if (sidebarOpen) toggleSidebar(false);
-        const { isFullscreen, toggleFullscreen } = usePdfStore.getState();
+        const { isFullscreen, toggleFullscreen } = useLessonStore.getState();
         if (isFullscreen) toggleFullscreen();
       }
 
-      // PDF shortcuts
-      if (currentView === 'pdf') {
-        const store = usePdfStore.getState();
+      // Lesson shortcuts
+      if (currentView === 'lesson') {
+        const store = useLessonStore.getState();
         if (e.key === 'ArrowLeft') store.prevPage();
         if (e.key === 'ArrowRight') store.nextPage();
-        if ((e.ctrlKey || e.metaKey) && e.key === '+') {
-          e.preventDefault();
-          store.zoomIn();
-        }
-        if ((e.ctrlKey || e.metaKey) && e.key === '-') {
-          e.preventDefault();
-          store.zoomOut();
-        }
       }
     }
     document.addEventListener('keydown', handleKeydown);

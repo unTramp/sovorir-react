@@ -430,21 +430,6 @@ html, body {
   background-color: var(--color-waveform-student-unplayed);
 }
 
-/* ==================== PDF Viewer ==================== */
-.pdf-canvas-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  overflow: auto;
-  flex: 1;
-  background: #FDFBF9;
-}
-
-.pdf-canvas-container canvas {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-  background: var(--color-bg-white);
-}
-
 /* ==================== Dictionary Grid ==================== */
 .dict-grid {
   display: grid;
@@ -702,8 +687,8 @@ html, body {
   }
 }
 
-/* ==================== Fullscreen PDF ==================== */
-.pdf-fullscreen {
+/* ==================== Fullscreen Lesson ==================== */
+.lesson-fullscreen {
   position: fixed !important;
   inset: 0 !important;
   z-index: 100 !important;
@@ -811,7 +796,7 @@ html, body {
 }
 
 .lesson-phrase:hover {
-  border-color: rgb(var(--color-primary-rgb) / 0.25);
+  border-color: var(--color-border);
   transform: translateY(-2px);
   box-shadow:
     0 6px 12px rgba(0,0,0,0.06),
@@ -844,6 +829,29 @@ html, body {
   font-size: 13px;
   color: var(--color-primary-dark);
   font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lesson-phrase__audio-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  color: var(--color-primary);
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.lesson-phrase__audio-btn:focus {
+  outline: none;
+}
+
+.lesson-phrase__audio-btn:hover {
+  opacity: 0.6;
 }
 
 .lesson-phrase__russian {

@@ -1,5 +1,5 @@
 import { useAppStore } from '../../stores/useAppStore';
-import { PdfView } from './PdfView';
+import { LessonView } from './LessonView';
 import { AudioMobileView } from './AudioMobileView';
 import { DictionaryView } from './DictionaryView';
 import { NotesView } from './NotesView';
@@ -9,7 +9,7 @@ export function CenterPanel() {
 
   return (
     <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-content">
-      {currentView === 'pdf' && <PdfView />}
+      {currentView === 'lesson' && <LessonView />}
       {currentView === 'audio' && <AudioMobileView />}
       {currentView === 'dictionary' && <DictionaryView />}
       {currentView === 'notes' && <NotesView />}
