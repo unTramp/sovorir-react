@@ -1,4 +1,5 @@
 export type Sender = 'teacher' | 'student';
+export type MessageType = 'audio' | 'video';
 
 export interface AudioMessage {
   id: string;
@@ -8,4 +9,7 @@ export interface AudioMessage {
   duration: number;
   src: string;
   time: string;
+  type?: MessageType;
+  videoSrc?: string;
+  thumbnail?: string;
 }

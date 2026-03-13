@@ -2,6 +2,18 @@ import type { AudioMessage } from '../types/audio';
 
 export const audioMessages: AudioMessage[] = [
   {
+    id: 'v1',
+    sender: 'teacher',
+    senderName: 'Лусине',
+    text: 'Приветствие преподавателя',
+    type: 'video',
+    videoSrc: 'https://player.vimeo.com/video/1158598174?h=5a76718eef',
+    thumbnail: '/assets/teacher-avatar.png',
+    duration: 0,
+    src: '',
+    time: '10:28',
+  },
+  {
     id: 'a1',
     sender: 'teacher',
     senderName: 'Лусине',

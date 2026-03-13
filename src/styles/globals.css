@@ -664,11 +664,10 @@ body.loaded {
   .sidebar-desktop.open {
     transform: translateX(0);
   }
-}
 
-@media (max-width: 767px) {
-  .main-content-area {
-    padding-bottom: 0;
+  .sidebar-wrapper {
+    width: 0;
+    min-width: 0;
   }
 }
 
