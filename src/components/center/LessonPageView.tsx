@@ -181,7 +181,7 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar" style={{ background: '#FDFBF9' }}>
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8">
         {visibleBlocks.map((block, i) => (
           <div key={`${currentPage}-${i}`} className="lesson-block-enter">
             <BlockRenderer
