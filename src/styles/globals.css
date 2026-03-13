@@ -781,8 +781,8 @@ html, body {
   font-size: 1.35rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-top: 2rem;
-  margin-bottom: 1rem;
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid rgb(var(--color-primary-rgb) / 0.12);
 }
@@ -797,7 +797,7 @@ html, body {
   font-size: 16px;
   line-height: 1.75;
   color: var(--color-text);
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .lesson-phrase {
@@ -805,7 +805,7 @@ html, body {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 14px 18px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.09);
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
@@ -890,7 +890,7 @@ html, body {
   border-left: 3px solid var(--color-primary);
   border-radius: 0 10px 10px 0;
   padding: 14px 18px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
   box-shadow: 0 3px 12px rgb(var(--color-primary-rgb) / 0.07);
   transition: box-shadow 0.15s, transform 0.15s;
 }
@@ -933,12 +933,14 @@ html, body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--color-border);
-  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  transition: background 0.3s, border-color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .lesson-progress__dot.completed {
   background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 .lesson-progress__dot.current {
@@ -963,6 +965,54 @@ html, body {
   animation: blockSlideIn 0.35s ease-out both;
 }
 
+/* ==================== Typing Indicator ==================== */
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: linear-gradient(160deg, var(--color-bg-teacher-from) 0%, var(--color-bg-teacher-to) 100%);
+  border: 1px solid rgb(var(--color-primary-rgb) / 0.18);
+  margin-left: 8px;
+  animation: blockSlideIn 0.25s ease-out both;
+}
+
+.typing-indicator__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.typing-indicator__dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.typing-indicator__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  opacity: 0.4;
+  animation: typing-bounce 1.4s ease-in-out infinite;
+}
+
+.typing-indicator__dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator__dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
 @keyframes trophy-pop {
   0% { transform: scale(0); opacity: 0; }
   60% { transform: scale(1.4); opacity: 1; }
@@ -975,7 +1025,7 @@ html, body {
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
-  margin: 18px 0;
+  margin: 24px 0;
   border-radius: 14px;
   border: 1px dashed var(--color-border);
   background: rgb(var(--color-primary-rgb) / 0.04);

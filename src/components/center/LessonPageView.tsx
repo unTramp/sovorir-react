@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { ContentBlock, PhraseBlock, RuleBlock, AudioBubbleBlock, RecordBlock } from '../../types/lessonContent';
 import { lessonPages } from '../../data/lessonPages';
 import { usePdfStore } from '../../stores/usePdfStore';
@@ -51,7 +51,7 @@ function InlineAudioBubble({ block, index }: { block: AudioBubbleBlock; index: n
     : block.duration;
 
   return (
-    <div className={`flex ${isTeacher ? 'justify-start' : 'justify-end'} my-3`}>
+    <div className={`flex ${isTeacher ? 'justify-start' : 'justify-end'} my-5`}>
       <div className={`voice-bubble ${isTeacher ? 'voice-bubble--teacher' : 'voice-bubble--student'}`}>
         {isTeacher && (
           <img
@@ -108,6 +108,42 @@ function InlineRecordButton({ block, onComplete }: { block: RecordBlock; onCompl
   );
 }
 
+/* ── Typing Indicator ── */
+function TypingIndicator({ name }: { name: string }) {
+  return (
+    <div className="flex justify-start my-5">
+      <div className="typing-indicator">
+        <span className="typing-indicator__name">{name} печатает</span>
+        <span className="typing-indicator__dots">
+          <span className="typing-indicator__dot" />
+          <span className="typing-indicator__dot" />
+          <span className="typing-indicator__dot" />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ── Delayed Teacher Block ── */
+function DelayedTeacherBlock({ children, senderName }: { children: React.ReactNode; senderName: string }) {
+  const [ready, setReady] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (ready && ref.current) {
+      ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [ready]);
+
+  if (!ready) return <TypingIndicator name={senderName} />;
+  return <div ref={ref}>{children}</div>;
+}
+
 /* ── Block Renderer ── */
 function BlockRenderer({ block, index, onRecordComplete }: {
   block: ContentBlock;
@@ -124,6 +160,13 @@ function BlockRenderer({ block, index, onRecordComplete }: {
     case 'rule':
       return <RuleCard block={block} />;
     case 'audio':
+      if (block.sender === 'teacher') {
+        return (
+          <DelayedTeacherBlock senderName={block.senderName}>
+            <InlineAudioBubble block={block} index={index} />
+          </DelayedTeacherBlock>
+        );
+      }
       return <InlineAudioBubble block={block} index={index} />;
     case 'record':
       return <InlineRecordButton block={block} onComplete={onRecordComplete} />;
@@ -181,7 +224,7 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar" style={{ background: '#FDFBF9' }}>
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
         {visibleBlocks.map((block, i) => (
           <div key={`${currentPage}-${i}`} className="lesson-block-enter">
             <BlockRenderer
