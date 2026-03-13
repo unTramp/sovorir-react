@@ -39,7 +39,7 @@ export function VoiceBubble({ message }: Props) {
           <button
             className="voice-bubble__play"
             aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
-            onClick={() => togglePlay(message.id, message.src)}
+            onClick={() => togglePlay(message.id, message.src, message.duration)}
           >
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>

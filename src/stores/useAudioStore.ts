@@ -19,7 +19,11 @@ export const useAudioStore = create<AudioState>((set) => ({
   setPlayingId: (id) => set({ playingId: id }),
   setPlaybackRate: (rate) => set({ playbackRate: rate }),
   setProgress: (id, value) =>
-    set((s) => ({ progress: { ...s.progress, [id]: value } })),
+    set((s) => {
+      const rounded = Math.round(value * 200) / 200; // update every 0.5%
+      if (s.progress[id] === rounded) return s;
+      return { progress: { ...s.progress, [id]: rounded } };
+    }),
   resetProgress: (id) =>
     set((s) => {
       const next = { ...s.progress };

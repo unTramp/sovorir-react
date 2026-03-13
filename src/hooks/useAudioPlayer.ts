@@ -1,96 +1,121 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Howl } from 'howler';
 import { useAudioStore } from '../stores/useAudioStore';
 
-// Module-level Howl cache — shared across all component instances
 const howlCache = new Map<string, Howl>();
+let activeRaf = 0;
+let isActive = false;
 
-function getOrCreateHowl(id: string, src: string, rate: number, onEnd: () => void): Howl {
+let playStartedAt = 0;
+let playStartOffset = 0;
+let knownDuration = 0;
+
+function startProgressLoop(id: string) {
+  cancelAnimationFrame(activeRaf);
+  playStartedAt = performance.now();
+
+  function update() {
+    if (!isActive || useAudioStore.getState().playingId !== id) return;
+
+    const howl = howlCache.get(id);
+    const howlDuration = howl ? howl.duration() || 0 : 0;
+    const duration = howlDuration > 0 ? howlDuration : knownDuration;
+
+    if (duration <= 0) {
+      activeRaf = requestAnimationFrame(update);
+      return;
+    }
+
+    let seek = howl ? (howl.seek() as number) || 0 : 0;
+    if (seek <= 0) {
+      const rate = useAudioStore.getState().playbackRate;
+      const elapsed = (performance.now() - playStartedAt) / 1000 * rate;
+      seek = playStartOffset + elapsed;
+    }
+
+    const progress = Math.min(1, seek / duration);
+    useAudioStore.getState().setProgress(id, progress);
+    activeRaf = requestAnimationFrame(update);
+  }
+  activeRaf = requestAnimationFrame(update);
+}
+
+function stop(id: string) {
+  const howl = howlCache.get(id);
+  if (howl) howl.stop();
+  isActive = false;
+  playStartOffset = 0;
+  cancelAnimationFrame(activeRaf);
+  useAudioStore.getState().resetProgress(id);
+}
+
+function togglePlay(id: string, src: string, duration?: number) {
+  const { playingId, playbackRate, setPlayingId } = useAudioStore.getState();
+
+  // Same sound — toggle pause/resume
+  if (playingId === id) {
+    const howl = howlCache.get(id);
+    if (howl) {
+      if (isActive) {
+        // Save accumulated time on pause
+        const rate = playbackRate;
+        const elapsed = (performance.now() - playStartedAt) / 1000 * rate;
+        playStartOffset += elapsed;
+        howl.pause();
+        isActive = false;
+        cancelAnimationFrame(activeRaf);
+        setPlayingId(null);
+      } else {
+        howl.rate(playbackRate);
+        howl.play();
+        isActive = true;
+        setPlayingId(id);
+        startProgressLoop(id);
+      }
+    }
+    return;
+  }
+
+  // Stop previous
+  if (playingId) {
+    stop(playingId);
+  }
+
+  // Play new
+  playStartOffset = 0;
+  knownDuration = duration || 0;
+
+  const onEnd = () => {
+    isActive = false;
+    playStartOffset = 0;
+    cancelAnimationFrame(activeRaf);
+    useAudioStore.getState().setPlayingId(null);
+    useAudioStore.getState().resetProgress(id);
+  };
+
   let howl = howlCache.get(id);
   if (!howl) {
     howl = new Howl({
       src: [src],
-      html5: true,
-      rate,
+      format: ['opus'],
+      rate: playbackRate,
       onend: onEnd,
-      onloaderror: () => {
-        console.warn('Audio load error for', id);
-      },
+      onloaderror: () => console.warn('Audio load error for', id),
     });
     howlCache.set(id, howl);
   }
-  return howl;
+
+  howl.rate(playbackRate);
+  howl.play();
+  isActive = true;
+  setPlayingId(id);
+  startProgressLoop(id);
 }
 
 export function useAudioPlayer() {
-  const { playingId, playbackRate, setPlayingId, setProgress, resetProgress } =
-    useAudioStore();
-  const rafRef = useRef<number>(0);
+  const playingId = useAudioStore((s) => s.playingId);
+  const playbackRate = useAudioStore((s) => s.playbackRate);
 
-  const startProgressLoop = useCallback(
-    (id: string) => {
-      const howl = howlCache.get(id);
-      if (!howl) return;
-
-      function update() {
-        if (!howl!.playing()) return;
-        const seek = (howl!.seek() as number) || 0;
-        const duration = howl!.duration() || 1;
-        setProgress(id, duration > 0 ? seek / duration : 0);
-        rafRef.current = requestAnimationFrame(update);
-      }
-      rafRef.current = requestAnimationFrame(update);
-    },
-    [setProgress],
-  );
-
-  const togglePlay = useCallback(
-    (id: string, src: string) => {
-      // If same sound is playing, toggle pause/resume
-      if (playingId === id) {
-        const howl = howlCache.get(id);
-        if (howl) {
-          if (howl.playing()) {
-            howl.pause();
-            cancelAnimationFrame(rafRef.current);
-            setPlayingId(null);
-          } else {
-            howl.rate(playbackRate);
-            howl.play();
-            setPlayingId(id);
-            startProgressLoop(id);
-          }
-        }
-        return;
-      }
-
-      // Stop current
-      if (playingId) {
-        const current = howlCache.get(playingId);
-        if (current) {
-          current.stop();
-        }
-        cancelAnimationFrame(rafRef.current);
-        resetProgress(playingId);
-      }
-
-      // Play new
-      const onEnd = () => {
-        setPlayingId(null);
-        resetProgress(id);
-        cancelAnimationFrame(rafRef.current);
-      };
-
-      const howl = getOrCreateHowl(id, src, playbackRate, onEnd);
-      howl.rate(playbackRate);
-      howl.play();
-      setPlayingId(id);
-      startProgressLoop(id);
-    },
-    [playingId, playbackRate, setPlayingId, resetProgress, startProgressLoop],
-  );
-
-  // Update rate on currently playing
   useEffect(() => {
     if (playingId) {
       const howl = howlCache.get(playingId);
@@ -98,11 +123,8 @@ export function useAudioPlayer() {
     }
   }, [playbackRate, playingId]);
 
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-    };
+    return () => cancelAnimationFrame(activeRaf);
   }, []);
 
   return { togglePlay, playingId };

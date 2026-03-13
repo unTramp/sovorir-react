@@ -87,7 +87,7 @@ function InlineAudioBubble({ block, index }: { block: AudioBubbleBlock; index: n
           <button
             className="voice-bubble__play"
             aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
-            onClick={() => togglePlay(msgId, block.src)}
+            onClick={() => togglePlay(msgId, block.src, block.duration)}
           >
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </button>

@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 
-const BAR_COUNT = 40;
+const BAR_WIDTH = 2.5;
+const GAP = 1.5;
 
 // Deterministic PRNG seeded by message ID
 function seededRandom(seed: string) {
@@ -16,6 +17,19 @@ function seededRandom(seed: string) {
   };
 }
 
+function generateBars(seed: string, count: number): number[] {
+  const rng = seededRandom(seed);
+  const result: number[] = [];
+  const center = count / 2;
+  for (let i = 0; i < count; i++) {
+    const dist = Math.abs(i - center) / center;
+    const base = (1 - dist * 0.5) * 22;
+    const variation = (rng() - 0.5) * 14;
+    result.push(Math.max(3, Math.min(30, Math.round(base + variation))));
+  }
+  return result;
+}
+
 interface Props {
   messageId: string;
   progress: number;
@@ -23,23 +37,28 @@ interface Props {
 }
 
 export function WaveformBars({ messageId, progress }: Props) {
-  const bars = useMemo(() => {
-    const rng = seededRandom(messageId);
-    const result: number[] = [];
-    const center = BAR_COUNT / 2;
-    for (let i = 0; i < BAR_COUNT; i++) {
-      const dist = Math.abs(i - center) / center;
-      const base = (1 - dist * 0.5) * 22;
-      const variation = (rng() - 0.5) * 14;
-      result.push(Math.max(3, Math.min(30, Math.round(base + variation))));
-    }
-    return result;
-  }, [messageId]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [barCount, setBarCount] = useState(40);
 
-  const playedCount = Math.floor(progress * BAR_COUNT);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry.contentRect.width;
+      const count = Math.floor((width + GAP) / (BAR_WIDTH + GAP));
+      setBarCount(Math.max(1, count));
+    });
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const bars = useMemo(() => generateBars(messageId, barCount), [messageId, barCount]);
+  const playedCount = Math.floor(progress * barCount);
 
   return (
-    <div className="waveform-container">
+    <div className="waveform-container" ref={containerRef}>
       {bars.map((height, i) => (
         <div
           key={i}
