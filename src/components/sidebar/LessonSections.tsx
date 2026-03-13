@@ -1,6 +1,5 @@
 import { lessons } from '../../data/lessons';
 import { SectionItem } from './SectionItem';
-import { ProgressCircle } from './ProgressCircle';
 
 export function LessonSections() {
   const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
@@ -15,7 +14,6 @@ export function LessonSections() {
         <div className="text-base font-semibold text-dark px-2 leading-snug">
           {currentLesson.title}
         </div>
-        <ProgressCircle />
       </div>
 
       {/* Sections */}
