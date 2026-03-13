@@ -174,20 +174,23 @@ html, body {
   border-radius: 8px;
   color: var(--color-text-muted);
   position: relative;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
   cursor: pointer;
   user-select: none;
+  box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 0.06);
 }
 
 .sidebar-tree-item:hover {
   background-color: #FBF8F6;
   color: var(--color-text);
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.10);
 }
 
 .sidebar-tree-item.active {
   color: var(--color-primary-dark);
   background-color: rgb(var(--color-primary-rgb) / 0.10);
   font-weight: 600;
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.12);
 }
 
 .sidebar-tree-item.active::before {
@@ -217,7 +220,7 @@ html, body {
   border-radius: 18px;
   padding: 10px 14px 8px;
   position: relative;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
 }
 
 .voice-bubble--teacher {
@@ -460,14 +463,17 @@ html, body {
   padding: 12px 16px;
   background: var(--color-bg-white);
   border: 1px solid var(--color-border);
-  box-shadow: 0 2px 10px rgb(var(--color-primary-rgb) / 0.06);
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.09);
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s, transform 0.15s;
 }
 
 .dict-bubble:hover {
   background: var(--color-bg-surface);
   border-color: rgb(var(--color-primary-rgb) / 0.18);
-  box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 0.12);
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.06),
+    0 14px 32px rgba(0,0,0,0.08);
 }
 
 .dict-bubble__head {
@@ -783,7 +789,7 @@ html, body {
   font-size: 16px;
   line-height: 1.75;
   color: var(--color-text);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .lesson-phrase {
@@ -791,14 +797,17 @@ html, body {
   border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 14px 18px;
-  margin-bottom: 10px;
-  box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 0.05);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.09);
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
 .lesson-phrase:hover {
   border-color: rgb(var(--color-primary-rgb) / 0.25);
-  box-shadow: 0 4px 16px rgb(var(--color-primary-rgb) / 0.10);
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.06),
+    0 14px 32px rgba(0,0,0,0.08);
 }
 
 .lesson-phrase__top {
@@ -873,7 +882,16 @@ html, body {
   border-left: 3px solid var(--color-primary);
   border-radius: 0 10px 10px 0;
   padding: 14px 18px;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 3px 12px rgb(var(--color-primary-rgb) / 0.07);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.lesson-rule:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.06),
+    0 14px 32px rgba(0,0,0,0.08);
 }
 
 .lesson-rule__title {
@@ -943,16 +961,21 @@ html, body {
   align-items: center;
   gap: 14px;
   padding: 14px 18px;
-  margin: 12px 0;
+  margin: 18px 0;
   border-radius: 14px;
   border: 1px dashed var(--color-border);
   background: rgb(var(--color-primary-rgb) / 0.04);
-  transition: border-color 0.15s, background 0.15s;
+  box-shadow: 0 3px 12px rgb(var(--color-primary-rgb) / 0.07);
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
 }
 
 .lesson-record:hover {
   border-color: rgb(var(--color-primary-rgb) / 0.3);
   background: rgb(var(--color-primary-rgb) / 0.07);
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 12px rgba(0,0,0,0.06),
+    0 14px 32px rgba(0,0,0,0.08);
 }
 
 .lesson-record__btn {
