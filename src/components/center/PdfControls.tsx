@@ -1,13 +1,33 @@
 import { usePdfStore } from '../../stores/usePdfStore';
 
-export function PdfControls() {
+interface Props {
+  totalRecords?: number;
+  completedRecords?: number;
+}
+
+export function PdfControls({ totalRecords = 0, completedRecords = 0 }: Props) {
   const { currentPage, totalPages, prevPage, nextPage, toggleFullscreen, isFullscreen } =
     usePdfStore();
 
   return (
-    <div className="h-11 bg-content border-b border-border flex items-center justify-between px-4 gap-2 flex-shrink-0">
-      <span className="text-base font-semibold text-dark">Материалы урока</span>
-      <div className="flex items-center gap-1">
+    <div className="h-11 bg-content border-b border-border flex items-center px-4 gap-2 flex-shrink-0">
+      <span className="text-base font-semibold text-dark flex-shrink-0">Материалы урока</span>
+
+      {/* Progress dots — centered */}
+      <div className="flex-1 flex justify-center">
+        {totalRecords > 0 && (
+          <div className="lesson-progress">
+            {Array.from({ length: totalRecords }, (_, i) => (
+              <div
+                key={i}
+                className={`lesson-progress__dot ${i < completedRecords ? 'completed' : i === completedRecords ? 'current' : ''}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1 flex-shrink-0">
         <button
           onClick={prevPage}
           disabled={currentPage <= 1}

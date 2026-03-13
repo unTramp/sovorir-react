@@ -23,7 +23,21 @@ export interface RuleBlock {
   items: string[];
 }
 
-export type ContentBlock = PhraseBlock | HeadingBlock | TextBlock | RuleBlock;
+export interface AudioBubbleBlock {
+  type: 'audio';
+  sender: 'teacher' | 'student';
+  senderName: string;
+  text: string;
+  duration: number;
+  src: string;
+}
+
+export interface RecordBlock {
+  type: 'record';
+  prompt: string;
+}
+
+export type ContentBlock = PhraseBlock | HeadingBlock | TextBlock | RuleBlock | AudioBubbleBlock | RecordBlock;
 
 export interface LessonPage {
   id: number;
