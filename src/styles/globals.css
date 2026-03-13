@@ -762,6 +762,139 @@ html, body {
   margin-bottom: -70px;
 }
 
+/* ==================== Lesson Content Blocks ==================== */
+.lesson-heading {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgb(var(--color-primary-rgb) / 0.12);
+}
+
+.lesson-heading:first-child {
+  font-size: 1.6rem;
+  margin-top: 0;
+  border-bottom: 2px solid rgb(var(--color-primary-rgb) / 0.2);
+}
+
+.lesson-text {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.lesson-phrase {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgb(var(--color-primary-rgb) / 0.05);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.lesson-phrase:hover {
+  border-color: rgb(var(--color-primary-rgb) / 0.25);
+  box-shadow: 0 4px 16px rgb(var(--color-primary-rgb) / 0.10);
+}
+
+.lesson-phrase__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.lesson-phrase__left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.lesson-phrase__armenian {
+  font-family: 'Noto Sans Armenian', 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.lesson-phrase__transcription {
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  font-weight: 500;
+}
+
+.lesson-phrase__russian {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-top: 6px;
+}
+
+.lesson-phrase__translation {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.lesson-phrase__play {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 2px 6px rgb(var(--color-primary-rgb) / 0.28);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.lesson-phrase__play:hover {
+  transform: scale(1.08);
+  box-shadow: 0 3px 10px rgb(var(--color-primary-rgb) / 0.38);
+}
+
+.lesson-phrase__play:active {
+  transform: scale(0.95);
+}
+
+.lesson-rule {
+  background: rgb(var(--color-primary-rgb) / 0.06);
+  border-left: 3px solid var(--color-primary);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+}
+
+.lesson-rule__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.lesson-rule__list {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.lesson-rule__list li {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-text);
+  margin-bottom: 4px;
+}
+
 /* ==================== Focus Visible ==================== */
 button:focus-visible {
   outline: 2px solid var(--color-primary);
