@@ -5,6 +5,11 @@ import { lessonPages } from '../../data/lessonPages';
 import { LessonControls } from './LessonControls';
 import { LessonPageView } from './LessonPageView';
 
+const pageTitles = lessonPages.map(page => {
+  const heading = page.blocks.find(b => b.type === 'heading');
+  return heading?.type === 'heading' ? heading.text : `Часть ${page.id}`;
+});
+
 export function LessonView() {
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentPage = useLessonStore((s) => s.currentPage);
@@ -39,7 +44,7 @@ export function LessonView() {
 
   return (
     <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'lesson-fullscreen' : ''}`}>
-      <LessonControls totalRecords={totalRecords} completedRecords={completedRecords} />
+      <LessonControls pageTitles={pageTitles} />
       <LessonPageView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}

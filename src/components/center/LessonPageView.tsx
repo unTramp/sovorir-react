@@ -146,23 +146,8 @@ function TypingIndicator({ name }: { name: string }) {
 }
 
 /* ── Delayed Teacher Block ── */
-function DelayedTeacherBlock({ children, senderName }: { children: React.ReactNode; senderName: string }) {
-  const [ready, setReady] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setReady(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (ready && ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [ready]);
-
-  if (!ready) return <TypingIndicator name={senderName} />;
-  return <div ref={ref}>{children}</div>;
+function DelayedTeacherBlock({ children }: { children: React.ReactNode; senderName?: string }) {
+  return <div>{children}</div>;
 }
 
 /* ── Block Renderer ── */
@@ -194,6 +179,53 @@ function BlockRenderer({ block, index, onRecordComplete }: {
   }
 }
 
+/* ── Lesson Complete Card ── */
+function LessonCompleteCard() {
+  const currentPage = useLessonStore((s) => s.currentPage);
+  const totalPages = useLessonStore((s) => s.totalPages);
+  const nextPage = useLessonStore((s) => s.nextPage);
+
+  const page = lessonPages.find((p) => p.id === currentPage);
+  const nextPageData = lessonPages.find((p) => p.id === currentPage + 1);
+
+  // Find the first heading block for the current page summary
+  const currentHeading = page?.blocks.find((b) => b.type === 'heading');
+  const summaryText = currentHeading?.type === 'heading' ? currentHeading.text : 'этот урок';
+
+  // Find the first heading block for the next page
+  const nextHeading = nextPageData?.blocks.find((b) => b.type === 'heading');
+  const nextPageTitle = nextHeading?.type === 'heading' ? nextHeading.text : '';
+
+  const isLastPage = currentPage >= totalPages;
+
+  return (
+    <div className="lesson-complete">
+      <div className="lesson-complete__emoji">🎉</div>
+      <div className="lesson-complete__title">Отлично!</div>
+      <div className="lesson-complete__summary">
+        Вы изучили: {summaryText.toLowerCase()}.
+      </div>
+      {!isLastPage && nextPageTitle && (
+        <div className="lesson-complete__next-hint">
+          <img
+            src="/assets/teacher-avatar.png"
+            className="lesson-complete__avatar"
+            alt="Лусине"
+          />
+          <span>Готовы перейти к: {nextPageTitle.toLowerCase()}?</span>
+        </div>
+      )}
+      <button
+        className="lesson-complete__btn"
+        onClick={isLastPage ? undefined : nextPage}
+        disabled={isLastPage}
+      >
+        {isLastPage ? 'Урок завершён ✓' : 'Следующий урок →'}
+      </button>
+    </div>
+  );
+}
+
 /* ── Main Component ── */
 interface Props {
   completedRecords: number;
@@ -205,23 +237,25 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
   const page = lessonPages.find((p) => p.id === currentPage);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Compute visible blocks
-  const visibleBlocks = useMemo(() => {
-    if (!page) return [];
+  // Compute record indices and visible blocks
+  const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
+    if (!page) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
     const recIndices: number[] = [];
     page.blocks.forEach((b, i) => {
       if (b.type === 'record') recIndices.push(i);
     });
 
+    const allDone = completedRecords >= recIndices.length;
+
     // If all records completed, show everything
-    if (completedRecords >= recIndices.length) {
-      return page.blocks;
+    if (allDone) {
+      return { visibleBlocks: page.blocks, allRecordsCompleted: true };
     }
 
     // Show up to and including the current incomplete record
     const cutoffIndex = recIndices[completedRecords];
-    return page.blocks.slice(0, cutoffIndex + 1);
+    return { visibleBlocks: page.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
   }, [page, completedRecords]);
 
   // Scroll to bottom when new blocks appear
@@ -229,7 +263,7 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [visibleBlocks.length]);
+  }, [visibleBlocks.length, allRecordsCompleted]);
 
   const handleRecordComplete = useCallback(() => {
     onRecordComplete();
@@ -255,6 +289,11 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
             />
           </div>
         ))}
+        {allRecordsCompleted && (
+          <div className="lesson-block-enter">
+            <LessonCompleteCard />
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
     </div>
