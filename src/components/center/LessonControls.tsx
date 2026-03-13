@@ -20,17 +20,17 @@ export function LessonControls({ pageTitles }: Props) {
       </button>
       <div className="lesson-controls__center">
         <span className="lesson-controls__title">{pageTitles?.[currentPage - 1]}</span>
+        {totalPages > 1 && (
+          <div className="lesson-controls__dots">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <span
+                key={i}
+                className={`lesson-controls__dot ${i + 1 === currentPage ? 'current' : ''}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
-      {totalPages > 1 && (
-        <div className="lesson-controls__dots">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <span
-              key={i}
-              className={`lesson-controls__dot ${i + 1 === currentPage ? 'current' : ''}`}
-            />
-          ))}
-        </div>
-      )}
       <button
         onClick={nextPage}
         disabled={currentPage >= totalPages}

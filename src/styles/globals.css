@@ -944,10 +944,11 @@ html, body {
 .lesson-controls__center {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
   min-width: 0;
+  gap: 2px;
 }
 
 .lesson-controls__title {
@@ -965,7 +966,6 @@ html, body {
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  margin-right: 4px;
 }
 
 .lesson-controls__dot {
@@ -1137,83 +1137,168 @@ html, body {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* ==================== Inline Record Button ==================== */
-.lesson-record {
+/* ==================== Inline Record Prompt (text only) ==================== */
+.lesson-record-prompt {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   padding: 14px 18px;
   margin: 24px 0;
   border-radius: 14px;
   border: 1px dashed var(--color-border);
   background: rgb(var(--color-primary-rgb) / 0.04);
-  box-shadow: 0 3px 12px rgb(var(--color-primary-rgb) / 0.07);
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.15s;
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.12);
+  transition: box-shadow 0.15s, transform 0.15s;
+  transform: translateY(-2px);
 }
 
-.lesson-record:hover {
-  border-color: rgb(var(--color-primary-rgb) / 0.3);
-  background: rgb(var(--color-primary-rgb) / 0.07);
-  transform: translateY(-2px);
+.lesson-record-prompt:hover {
+  transform: translateY(-4px);
   box-shadow:
     0 6px 12px rgba(0,0,0,0.06),
     0 14px 32px rgba(0,0,0,0.08);
 }
 
-.lesson-record__btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: white;
-  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark));
-  box-shadow: 0 3px 10px rgb(var(--color-primary-rgb) / 0.3);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-
-.lesson-record__btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.4);
-}
-
-.lesson-record__btn:active {
-  transform: scale(0.95);
-}
-
-.lesson-record__body {
+.lesson-record-prompt__body {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1;
   min-width: 0;
 }
 
-.lesson-record__prompt {
-  font-size: 14px;
-  color: var(--color-text);
+.lesson-record-prompt__label {
+  font-size: 13px;
   font-weight: 500;
+  color: var(--color-text-muted);
 }
 
-.lesson-record__skip {
-  font-size: 12px;
+.lesson-record-prompt__phrase {
+  font-family: 'Noto Sans Armenian', 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.lesson-record-prompt--done {
+  opacity: 0.55;
+  transform: none;
+  border-style: solid;
+}
+
+.lesson-record-prompt--done:hover {
+  transform: none;
+  box-shadow: 0 4px 14px rgb(var(--color-primary-rgb) / 0.12);
+}
+
+.lesson-record-prompt__skip {
+  font-size: 13px;
   color: var(--color-text-muted);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
-  text-align: left;
+  padding: 4px 8px;
   text-decoration: underline;
   text-decoration-style: dashed;
   text-underline-offset: 2px;
+  flex-shrink: 0;
   transition: color 0.15s;
 }
 
-.lesson-record__skip:hover {
+.lesson-record-prompt__skip:hover {
   color: var(--color-text);
+}
+
+/* ==================== Sticky Record CTA ==================== */
+.lesson-record-sticky {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(253, 251, 249, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgb(var(--color-primary-rgb) / 0.12);
+  z-index: 10;
+  animation: blockSlideIn 0.3s ease-out both;
+}
+
+.lesson-record-sticky__actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.lesson-record-sticky__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+.lesson-record-sticky__btn--record {
+  background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary-dark));
+  color: white;
+  box-shadow: 0 3px 10px rgb(var(--color-primary-rgb) / 0.3);
+  flex: 1;
+}
+
+.lesson-record-sticky__btn--record:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 16px rgb(var(--color-primary-rgb) / 0.4);
+}
+
+.lesson-record-sticky__btn--record:active {
+  transform: translateY(0);
+}
+
+.lesson-record-sticky__btn--recording {
+  background: #DC2626;
+  color: white;
+  box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3);
+  flex: 1;
+  cursor: default;
+}
+
+.lesson-record-sticky__pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  animation: recordPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes recordPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.lesson-record-sticky__btn--stop {
+  background: var(--color-bg-white);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.lesson-record-sticky__btn--stop:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.lesson-record-sticky__btn--stop:active {
+  transform: translateY(0);
 }
 
 /* ==================== Lesson Complete Card ==================== */

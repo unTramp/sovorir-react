@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import { useMemo, useEffect, useRef, useCallback, useState, forwardRef } from 'react';
 import type { ContentBlock, PhraseBlock, RuleBlock, AudioBubbleBlock, RecordBlock } from '../../types/lessonContent';
 import { lessonPages } from '../../data/lessonPages';
 import { useLessonStore } from '../../stores/useLessonStore';
@@ -105,24 +105,54 @@ function InlineAudioBubble({ block, index }: { block: AudioBubbleBlock; index: n
   );
 }
 
-/* ── Inline Record with Record / Skip ── */
-function InlineRecordButton({ block, onComplete }: { block: RecordBlock; onComplete: () => void }) {
+/* ── Inline Record Prompt ── */
+const InlineRecordPrompt = forwardRef<HTMLDivElement, { block: RecordBlock; onSkip?: () => void; completed?: boolean }>(
+  ({ block, onSkip, completed }, ref) => {
+    const colonIdx = block.prompt.indexOf(':');
+    const label = colonIdx !== -1 ? block.prompt.slice(0, colonIdx).trim() : 'Произнесите';
+    const phrase = colonIdx !== -1 ? block.prompt.slice(colonIdx + 1).trim() : block.prompt;
+
+    return (
+      <div ref={ref} className={`lesson-record-prompt ${completed ? 'lesson-record-prompt--done' : ''}`}>
+        <div className="lesson-record-prompt__body">
+          <div className="lesson-record-prompt__label">{completed ? '✓' : '🎤'} {label}</div>
+          <div className="lesson-record-prompt__phrase" lang="hy">{phrase}</div>
+        </div>
+        {onSkip && (
+          <button className="lesson-record-prompt__skip" onClick={onSkip}>
+            Пропустить
+          </button>
+        )}
+      </div>
+    );
+  },
+);
+
+/* ── Sticky Record CTA ── */
+function StickyRecordCTA({ onComplete }: { onComplete: () => void }) {
+  const [recording, setRecording] = useState(false);
+
+  const start = useCallback(() => setRecording(true), []);
+  const stop = useCallback(() => {
+    setRecording(false);
+    onComplete();
+  }, [onComplete]);
+
   return (
-    <div className="lesson-record">
-      <button
-        className="lesson-record__btn"
-        aria-label="Записать произношение"
-        onClick={onComplete}
-      >
-        <MicIcon />
-      </button>
-      <div className="lesson-record__body">
-        <span className="lesson-record__prompt">{block.prompt}</span>
+    <div className="lesson-record-sticky">
+      <div className="lesson-record-sticky__actions">
         <button
-          className="lesson-record__skip"
-          onClick={onComplete}
+          className={`lesson-record-sticky__btn ${recording ? 'lesson-record-sticky__btn--recording' : 'lesson-record-sticky__btn--record'}`}
+          onMouseDown={recording ? undefined : start}
+          onTouchStart={recording ? undefined : start}
+          onMouseUp={recording ? stop : undefined}
+          onTouchEnd={recording ? stop : undefined}
         >
-          Пропустить
+          {recording ? (
+            <><span className="lesson-record-sticky__pulse" /> Запись...</>
+          ) : (
+            <><MicIcon /> Удерживайте</>
+          )}
         </button>
       </div>
     </div>
@@ -151,10 +181,12 @@ function DelayedTeacherBlock({ children }: { children: React.ReactNode; senderNa
 }
 
 /* ── Block Renderer ── */
-function BlockRenderer({ block, index, onRecordComplete }: {
+function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted }: {
   block: ContentBlock;
   index: number;
-  onRecordComplete: () => void;
+  onSkipRecord?: () => void;
+  recordRef?: React.Ref<HTMLDivElement>;
+  recordCompleted?: boolean;
 }) {
   switch (block.type) {
     case 'heading':
@@ -175,7 +207,7 @@ function BlockRenderer({ block, index, onRecordComplete }: {
       }
       return <InlineAudioBubble block={block} index={index} />;
     case 'record':
-      return <InlineRecordButton block={block} onComplete={onRecordComplete} />;
+      return <InlineRecordPrompt ref={recordRef} block={block} onSkip={onSkipRecord} completed={recordCompleted} />;
   }
 }
 
@@ -236,6 +268,15 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
   const currentPage = useLessonStore((s) => s.currentPage);
   const page = lessonPages.find((p) => p.id === currentPage);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevPageRef = useRef(currentPage);
+  const recordPromptRef = useRef<HTMLDivElement>(null);
+  const [recordPromptVisible, setRecordPromptVisible] = useState(false);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [currentPage]);
 
   // Compute record indices and visible blocks
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
@@ -258,12 +299,30 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     return { visibleBlocks: page.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
   }, [page, completedRecords]);
 
-  // Scroll to bottom when new blocks appear
+  // Scroll to bottom when new blocks appear (skip on page change)
   useEffect(() => {
+    if (prevPageRef.current !== currentPage) {
+      prevPageRef.current = currentPage;
+      return;
+    }
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [visibleBlocks.length, allRecordsCompleted]);
+  }, [visibleBlocks.length, allRecordsCompleted, currentPage]);
+
+  // Show/hide sticky CTA based on record prompt visibility
+  useEffect(() => {
+    const el = recordPromptRef.current;
+    const root = scrollRef.current;
+    if (!el || !root) { setRecordPromptVisible(false); return; }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setRecordPromptVisible(entry.isIntersecting),
+      { root, threshold: 0.3 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [visibleBlocks.length, currentPage]);
 
   const handleRecordComplete = useCallback(() => {
     onRecordComplete();
@@ -277,18 +336,30 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     );
   }
 
+  // Show sticky CTA when last visible block is a record, not all completed, and prompt is in view
+  const hasActiveRecord = !allRecordsCompleted &&
+    visibleBlocks.length > 0 &&
+    visibleBlocks[visibleBlocks.length - 1].type === 'record';
+  const showRecordCTA = hasActiveRecord && recordPromptVisible;
+
   return (
-    <div className="flex-1 overflow-y-auto no-scrollbar" style={{ background: '#FDFBF9' }}>
+    <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar" style={{ background: '#FDFBF9' }}>
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
-        {visibleBlocks.map((block, i) => (
-          <div key={`${currentPage}-${i}`} className="lesson-block-enter">
-            <BlockRenderer
-              block={block}
-              index={i}
-              onRecordComplete={handleRecordComplete}
-            />
-          </div>
-        ))}
+        {visibleBlocks.map((block, i) => {
+          const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
+          const isCompletedRecord = block.type === 'record' && !isLastRecord;
+          return (
+            <div key={`${currentPage}-${i}`} className="lesson-block-enter">
+              <BlockRenderer
+                block={block}
+                index={i}
+                onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
+                recordRef={isLastRecord ? recordPromptRef : undefined}
+                recordCompleted={isCompletedRecord}
+              />
+            </div>
+          );
+        })}
         {allRecordsCompleted && (
           <div className="lesson-block-enter">
             <LessonCompleteCard />
@@ -296,6 +367,9 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
         )}
         <div ref={bottomRef} />
       </div>
+      {showRecordCTA && (
+        <StickyRecordCTA onComplete={handleRecordComplete} />
+      )}
     </div>
   );
 }
