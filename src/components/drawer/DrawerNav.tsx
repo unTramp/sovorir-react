@@ -74,7 +74,7 @@ export function DrawerNav() {
   }
 
   return (
-    <div className="py-2 px-2" role="list">
+    <div className="py-2 px-3" role="list">
       <DrawerItem label="Главная" icon={<HouseIcon />} viewId="home" />
 
       {/* Уроки — custom click to navigate to lesson section */}
@@ -95,12 +95,6 @@ export function DrawerNav() {
       <DrawerItem label="Тренировка" icon={<ZapIcon />} viewId="practice" />
       <DrawerItem label="Живые уроки" icon={<VideoIcon />} viewId="live-lessons" pro />
 
-      <div className="drawer-divider" />
-
-      <DrawerItem label="Статистика" icon={<BarChartIcon />} viewId="statistics" utility />
-      <DrawerItem label="Настройки" icon={<SettingsIcon />} viewId="settings" utility />
-
-      <div className="drawer-version">Sovorir v1.0</div>
     </div>
   );
 }
