@@ -25,6 +25,7 @@ export function DrawerProfile() {
   return (
     <div className="drawer-profile">
       {/* Avatar row */}
+      <div className="drawer-profile__card">
       <div className="flex items-center gap-3">
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <div className="drawer-profile__avatar">
@@ -35,10 +36,18 @@ export function DrawerProfile() {
         <div className="flex-1 min-w-0">
           <div className="drawer-profile__name truncate">Андрей Дорофеев</div>
           <div className="drawer-profile__meta">
+            <span>{currentLevel.label}</span>
+            <span>·</span>
             <span className="drawer-profile__meta-xp">{xp} XP</span>
-            {streak > 0 && <span>· 🔥 {streak} дней</span>}
+            {streak > 0 && (
+              <>
+                <span>·</span>
+                <span>🔥 {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</span>
+              </>
+            )}
           </div>
         </div>
+      </div>
       </div>
 
       {/* Progress card */}

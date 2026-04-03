@@ -74,7 +74,7 @@ export function DrawerNav() {
   }
 
   return (
-    <div className="py-2 px-3" role="list">
+    <div className="pt-5 pb-2 px-3" role="list">
       <DrawerItem label="Главная" icon={<HouseIcon />} viewId="home" />
 
       {/* Уроки — custom click to navigate to lesson section */}
