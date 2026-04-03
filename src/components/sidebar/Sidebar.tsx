@@ -1,5 +1,6 @@
 import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
+import { FlameIcon } from '../../icons';
 import { LessonSections } from './LessonSections';
 import { StudentProfile } from '../audio/StudentProfile';
 import { ProgressCircle } from './ProgressCircle';
@@ -67,7 +68,7 @@ function StandaloneNavItem({ label, icon, viewId }: { label: string; icon: React
 function StreakBadge() {
   const streak = useStreakStore((s) => s.currentStreak);
   if (streak <= 0) return null;
-  return <span className="home-streak" style={{ fontSize: 11, padding: '2px 8px' }}>{'\uD83D\uDD25'} {streak}</span>;
+  return <span className="home-streak" style={{ fontSize: 11, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 3 }}><FlameIcon size={11} /> {streak}</span>;
 }
 
 export function Sidebar() {

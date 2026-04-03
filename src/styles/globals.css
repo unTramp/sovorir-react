@@ -1761,6 +1761,35 @@ html, body {
   50% { opacity: 0.4; transform: scale(0.8); }
 }
 
+.lesson-record-sticky__mic-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.lesson-record-sticky__mic-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+  transition: transform 0.15s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lesson-record-sticky__mic-btn:active {
+  transform: scale(0.93);
+}
+
+.lesson-record-sticky__hint {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+  margin-top: -8px;
+}
+
 .lesson-record-sticky__btn--stop {
   background: var(--color-bg-white);
   color: var(--color-text);

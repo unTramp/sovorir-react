@@ -1,6 +1,6 @@
 import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
-import { HamburgerIcon } from '../../icons';
+import { HamburgerIcon, FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 
 const VIEW_TITLES: Record<SectionType, { title: string; subtitle?: string }> = {
@@ -15,14 +15,6 @@ const VIEW_TITLES: Record<SectionType, { title: string; subtitle?: string }> = {
   statistics: { title: '\u0421\u0442\u0430\u0442\u0438\u0441\u0442\u0438\u043A\u0430' },
   settings: { title: '\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438' },
 };
-
-function FlameIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2C12 2 7 8 7 13a5 5 0 0 0 10 0c0-3-2-6-2-6s-1 3-3 3c-1.5 0-2-1.5-2-1.5S12 2 12 2z" />
-    </svg>
-  );
-}
 
 export function MobileHeader() {
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
@@ -42,7 +34,7 @@ export function MobileHeader() {
       <span className="flex-1 text-lg font-semibold text-dark">{title}</span>
       {subtitle && <span className="text-xs text-muted">{subtitle}</span>}
       <div className="mobile-header__streak">
-        <FlameIcon />
+        <FlameIcon size={16} />
         <span>{streak}</span>
       </div>
     </header>

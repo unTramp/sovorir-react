@@ -1,6 +1,7 @@
 import { lessons } from '../../data/lessons';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useUserStore } from '../../stores/useUserStore';
+import { FlameIcon } from '../../icons';
 
 const LEVELS = [
   { label: 'A1', min: 0,   next: 200,  nextLabel: 'A2'  },
@@ -42,7 +43,7 @@ export function DrawerProfile() {
             {streak > 0 && (
               <>
                 <span>·</span>
-                <span>🔥 {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</span>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><FlameIcon size={13} /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</span>
               </>
             )}
           </div>

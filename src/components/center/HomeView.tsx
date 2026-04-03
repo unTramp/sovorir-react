@@ -6,6 +6,7 @@ import { useUserStore } from '../../stores/useUserStore';
 import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
 import { todayISO, getWeekDays } from '../../lib/dateUtils';
+import { FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 
 function CheckIcon() {
@@ -71,7 +72,7 @@ export function HomeView() {
       {/* Greeting */}
       <div className="home-greeting-section">
         <h1 className="home-greeting__title">Բарев, {firstName}!</h1>
-        <p className="home-greeting__sub">Не прерви серию сегодня 🔥</p>
+        <p className="home-greeting__sub">Не прерви серию сегодня <FlameIcon size={14} /></p>
       </div>
 
       {/* Hero Lesson Card */}
@@ -135,7 +136,7 @@ export function HomeView() {
         <div className="home-weekly-section__header">
           <h3 className="home-weekly__title">Недельная активность</h3>
           {streak > 0 && (
-            <div className="home-weekly__streak-badge">🔥 {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</div>
+            <div className="home-weekly__streak-badge" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><FlameIcon size={12} color="#C87941" /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</div>
           )}
         </div>
         <div className="home-weekly-days">
