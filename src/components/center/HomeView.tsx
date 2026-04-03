@@ -46,8 +46,8 @@ function ArrowIcon() {
 }
 
 const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: SectionType; xp: number; iconBg: string }[] = [
-  { label: 'Карточки', sub: 'Быстрое повторение слов', emoji: '🃏', view: 'practice', xp: 15, iconBg: '#FFDBCD' },
-  { label: 'Ежедневный квиз', sub: 'Проверь себя', emoji: '🧠', view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
+  { label: 'Карточки', sub: 'Повтори слова за 2 минуты', emoji: '🃏', view: 'practice', xp: 15, iconBg: '#FFDBCD' },
+  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', emoji: '🧠', view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
 ];
 
 export function HomeView() {
@@ -67,10 +67,15 @@ export function HomeView() {
   const totalSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
   const completedSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
   const completedPct = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
+  const stepsLeft = totalSections - completedSections;
 
-  const streakTitle = streak > 0
-    ? `🔥 ${streak} ${streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'} подряд`
-    : 'Начни сегодня 🔥';
+  const streakTitle = streak === 0
+    ? 'Начни сегодня 🔥'
+    : streak === 1
+    ? '🔥 Начни серию'
+    : `🔥 Уже ${streak} ${streak < 5 ? 'дня' : 'дней'} подряд`;
+
+  const streakSubtitle = practicedToday ? 'Отлично! Серия продолжается' : 'Сохрани серию сегодня 🔥';
 
   return (
     <div className="home-screen">
@@ -78,7 +83,7 @@ export function HomeView() {
       {/* Greeting */}
       <div className="home-greeting-section">
         <h1 className="home-greeting__title">Բարև, Андрей!</h1>
-        <p className="home-greeting__sub">Поддержи свою серию 🔥</p>
+        <p className="home-greeting__sub">Не прерви серию сегодня 🔥</p>
       </div>
 
       {/* Hero Lesson Card */}
@@ -87,7 +92,7 @@ export function HomeView() {
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
-              <div className="home-hero__label">Текущий урок</div>
+              <div className="home-hero__label">Продолжить урок</div>
               <div className="home-hero__title">
                 Урок {currentLesson.id} · {currentLesson.title}
               </div>
@@ -95,12 +100,14 @@ export function HomeView() {
             <div className="home-hero__play"><PlayIcon /></div>
           </div>
           <div className="home-hero__bottom">
-            <div className="home-hero__progress-row">
-              <span className="home-hero__urgency">Прогресс</span>
-              <span className="home-hero__pct-label">{completedPct}%</span>
-            </div>
             <div className="home-hero__bar">
               <div className="home-hero__bar-fill" style={{ width: `${completedPct}%` }} />
+            </div>
+            <div className="home-hero__footer-row">
+              <span className="home-hero__steps-hint">
+                Осталось {stepsLeft} {stepsLeft === 1 ? 'шаг' : stepsLeft < 5 ? 'шага' : 'шагов'} · +20 XP
+              </span>
+              <span className="home-hero__pct-label">{completedPct}%</span>
             </div>
           </div>
         </button>
@@ -108,7 +115,7 @@ export function HomeView() {
 
       {/* Daily Practice */}
       <div className="home-section">
-        <h3 className="home-section__title">Ежедневная практика</h3>
+        <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
           {PRACTICE_ITEMS.map((item) => (
             <button
@@ -140,9 +147,7 @@ export function HomeView() {
         <div className="home-weekly-section__header">
           <div>
             <h3 className="home-section__title">{streakTitle}</h3>
-            <p className="home-weekly__subtitle">
-              {practicedToday ? 'Отлично! Серия продолжается' : 'Не прерви серию'}
-            </p>
+            <p className="home-weekly__subtitle">{streakSubtitle}</p>
           </div>
           {longestStreak > 0 && (
             <div className="home-weekly__record">Рекорд: {longestStreak} дн.</div>
