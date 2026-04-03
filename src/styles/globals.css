@@ -3205,6 +3205,87 @@ html, body {
   white-space: nowrap; flex-shrink: 0;
 }
 
+/* --- Practice Cards Grid (Figma) --- */
+.home-practice-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.home-practice-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  background: #FBF7F4;
+  border: 1px dashed #D9C2B9;
+  border-radius: 28px;
+  cursor: pointer;
+  gap: 0;
+  text-align: center;
+  transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+  -webkit-tap-highlight-color: transparent;
+  width: 100%;
+}
+
+.home-practice-card:hover {
+  transform: translateY(-2px);
+}
+
+.home-practice-card:active {
+  transform: scale(0.97);
+}
+
+.home-practice-card__icon-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 12px;
+}
+
+.home-practice-card__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  background: #F7F3EE;
+  box-shadow: 0px 6px 16px rgba(141, 74, 42, 0.08);
+  border-radius: 20px;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.home-practice-card__title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1C1C19;
+  letter-spacing: -0.4px;
+  line-height: 24px;
+  margin-bottom: 8px;
+}
+
+.home-practice-card__sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: #54433D;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.home-practice-card__xp {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #5C3320;
+  background: #F5D9C8;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  margin-top: 8px;
+}
+
 /* --- Weekly Activity --- */
 .home-weekly__title {
   font-size: 18px;
@@ -3317,22 +3398,37 @@ html, body {
 .home-teacher__view-tips { margin-top: 8px; font-size: 12px; font-weight: 700; color: #8D4A2A; background: none; border: none; cursor: pointer; padding: 0; display: block; }
 
 /* ==================== Mobile Header ==================== */
+.mobile-header {
+  background: var(--color-bg-app);
+}
+
 .mobile-header__btn {
+  position: relative;
   width: 36px;
   height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: #ffffff; 
+  background: transparent;
   color: rgb(var(--color-primary-rgb) / 0.55);
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 150ms ease, color 150ms ease;
+  transition: color 150ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.mobile-header__btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: #ffffff;
+  z-index: -1;
 }
 .mobile-header__btn:hover {
-  background: rgb(var(--color-primary-rgb) / 0.13);
   color: var(--color-primary);
 }
 
@@ -3350,6 +3446,29 @@ html, body {
 }
 .mobile-header__streak svg {
   color: var(--color-primary);
+}
+
+/* ==================== Lesson Header ==================== */
+
+.lesson-header__dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+.lesson-header__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: #EDE5DF;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.lesson-header__dot--done {
+  background: var(--color-primary);
 }
 
 /* ==================== Header Level Bar ==================== */

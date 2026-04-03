@@ -107,11 +107,7 @@ export function HomeView() {
         <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
           {PRACTICE_ITEMS.map((item) => (
-            <button
-              key={item.label}
-              className="home-daily-item"
-              onClick={() => setCurrentView(item.view)}
-            >
+            <button key={item.label} className="home-daily-item" onClick={() => setCurrentView(item.view)}>
               <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
                 <span>{item.emoji}</span>
               </div>
