@@ -24,9 +24,7 @@ export function DrawerProfile() {
 
   return (
     <div className="drawer-profile">
-      {/* Avatar row */}
-      <div className="drawer-profile__card">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <div className="drawer-profile__avatar">
             <img src="/assets/student-avatar.png" alt="Андрей Дорофеев" className="w-full h-full object-cover" />
@@ -34,11 +32,11 @@ export function DrawerProfile() {
           <span className="drawer-profile__level-badge">{currentLevel.label}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="drawer-profile__name truncate">Андрей Дорофеев</div>
+          <div className="drawer-profile__name truncate">Андрей</div>
           <div className="drawer-profile__meta">
-            <span>{currentLevel.label}</span>
+            <span>Уровень {currentLevel.label}</span>
             <span>·</span>
-            <span className="drawer-profile__meta-xp">{xp} XP</span>
+            <span>{xp} XP</span>
             {streak > 0 && (
               <>
                 <span>·</span>
@@ -48,22 +46,17 @@ export function DrawerProfile() {
           </div>
         </div>
       </div>
-      </div>
 
-      {/* Progress card */}
-      <div className="drawer-profile__progress-card">
+      <div className="drawer-profile__progress-section">
         <div className="drawer-profile__progress-header">
           <span>Прогресс уровня</span>
-          <span className="drawer-profile__progress-pct">{progressPct}%</span>
+          <span className="drawer-profile__progress-pct">{progressPct}% до {currentLevel.nextLabel}</span>
         </div>
         <div className="drawer-profile__progress-track">
           <div
             className="drawer-profile__progress-bar"
             style={{ width: `${progressPct}%` }}
           />
-        </div>
-        <div className="drawer-profile__progress-sub">
-          {xp} / {currentLevel.next} XP до {currentLevel.nextLabel}
         </div>
       </div>
     </div>

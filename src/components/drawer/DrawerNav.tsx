@@ -74,27 +74,34 @@ export function DrawerNav() {
   }
 
   return (
-    <div className="pt-5 pb-2 px-3" role="list">
-      <DrawerItem label="Главная" icon={<HouseIcon />} viewId="home" />
-
-      {/* Уроки — custom click to navigate to lesson section */}
-      <div
-        className={`drawer-item${currentView === 'lesson' ? ' active' : ''}`}
-        role="listitem"
-        tabIndex={0}
-        onClick={handleLessonsClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLessonsClick(); }
-        }}
-      >
-        <span className="drawer-item__icon-box"><BookOpenIcon /></span>
-        <span className="truncate flex-1">Уроки</span>
-        <span className="drawer-item-badge">{lessonBadge}</span>
+    <div className="drawer-nav px-3 pt-4 pb-2" role="list">
+      {/* Group: УЧЁБА */}
+      <div className="drawer-nav-group">
+        <div className="drawer-nav-group__label">УЧЁБА</div>
+        <DrawerItem label="Главная" icon={<HouseIcon />} viewId="home" />
+        <div
+          className={`drawer-item${currentView === 'lesson' ? ' active' : ''}`}
+          role="listitem"
+          tabIndex={0}
+          onClick={handleLessonsClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleLessonsClick(); }
+          }}
+        >
+          <span className="drawer-item__icon"><BookOpenIcon /></span>
+          <span className="truncate flex-1">Уроки</span>
+          <span className="drawer-item-badge">{lessonBadge}</span>
+        </div>
+        <DrawerItem label="Тренировка" icon={<ZapIcon />} viewId="practice" />
       </div>
 
-      <DrawerItem label="Тренировка" icon={<ZapIcon />} viewId="practice" />
-      <DrawerItem label="Живые уроки" icon={<VideoIcon />} viewId="live-lessons" pro />
-
+      {/* Group: ЕЩЁ */}
+      <div className="drawer-nav-group">
+        <div className="drawer-nav-group__label">ЕЩЁ</div>
+        <DrawerItem label="Живые уроки" icon={<VideoIcon />} viewId="live-lessons" pro />
+        <DrawerItem label="Статистика" icon={<BarChartIcon />} viewId="statistics" />
+        <DrawerItem label="Настройки" icon={<SettingsIcon />} viewId="settings" />
+      </div>
     </div>
   );
 }
