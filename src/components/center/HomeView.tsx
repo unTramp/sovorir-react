@@ -4,7 +4,6 @@ import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
-import { liveLessons } from '../../data/liveLessons';
 import type { SectionType } from '../../types/lesson';
 
 function getWeekDays(): { label: string; date: string; isToday: boolean }[] {
@@ -12,10 +11,8 @@ function getWeekDays(): { label: string; date: string; isToday: boolean }[] {
   const day = now.getDay();
   const monday = new Date(now);
   monday.setDate(now.getDate() - ((day + 6) % 7));
-
   const labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
   const todayISO = now.toISOString().slice(0, 10);
-
   return labels.map((label, i) => {
     const d = new Date(monday);
     d.setDate(monday.getDate() + i);
@@ -24,25 +21,34 @@ function getWeekDays(): { label: string; date: string; isToday: boolean }[] {
   });
 }
 
-function getDailyTask(_practicedToday: boolean): { label: string; emoji: string; view: SectionType } {
-  const dayOfYear = Math.floor(
-    (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
+function CheckIcon() {
+  return (
+    <svg width="13" height="10" viewBox="0 0 13 10" fill="none">
+      <path d="M1 5L5 9L12 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
-  const tasks: { label: string; emoji: string; view: SectionType; duration: string; xp: number }[] = [
-    { label: 'Карточки', emoji: '\uD83C\uDCCF', view: 'practice', duration: '2 минуты', xp: 15 },
-    { label: 'Квиз', emoji: '\uD83E\uDDE0', view: 'lesson', duration: '3 минуты', xp: 20 },
-    { label: 'Запись речи', emoji: '\uD83C\uDF99\uFE0F', view: 'practice', duration: '5 минут', xp: 25 },
-  ];
-  return tasks[dayOfYear % 3];
 }
 
 function PlayIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-      <polygon points="5 3 19 12 5 21 5 3" />
+    <svg width="14" height="17" viewBox="0 0 18 22" fill="none">
+      <path d="M1 1L17 11L1 21V1Z" fill="#8D4A2A" stroke="#8D4A2A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
+
+function ArrowIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M12 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: SectionType; xp: number; iconBg: string }[] = [
+  { label: 'Карточки', sub: 'Быстрое повторение слов', emoji: '🃏', view: 'practice', xp: 15, iconBg: '#FFDBCD' },
+  { label: 'Ежедневный квиз', sub: 'Проверь себя', emoji: '🧠', view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
+];
 
 export function HomeView() {
   const [noteExpanded, setNoteExpanded] = useState(false);
@@ -55,176 +61,142 @@ export function HomeView() {
   const todayISO = new Date().toISOString().slice(0, 10);
   const practicedToday = practiceDates.includes(todayISO);
   const weekDays = getWeekDays();
-  const dailyTask = getDailyTask(practicedToday);
-
   const currentLesson = lessons.find((l) => l.status === 'current');
   const latestNote = teacherNotes[0];
 
-  const now = new Date();
-  const nextLive = liveLessons.find((ll) => new Date(ll.date) >= now);
+  const totalSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
+  const completedSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
+  const completedPct = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
 
-  const completedLessonsCount = lessons.filter(l => l.status === 'completed').length;
-  const wordsLearned = lessons.flatMap(l => l.sections)
-    .filter(s => s.type !== 'video' && s.status === 'completed').length;
+  const streakTitle = streak > 0
+    ? `🔥 ${streak} ${streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'} подряд`
+    : 'Начни сегодня 🔥';
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
+    <div className="home-screen">
+
       {/* Greeting */}
-      <div className="home-card home-greeting">
+      <div className="home-greeting-section">
         <h1 className="home-greeting__title">Բարև, Андрей!</h1>
-        <p className="home-greeting__sub">Продолжай изучать армянский</p>
-        <div className="home-stat-row">
-          <div className="home-stat-box">
-            <div className="home-stat-box__value">{wordsLearned}</div>
-            <div className="home-stat-box__label">слов изучено</div>
-          </div>
-          <div className="home-stat-box">
-            <div className="home-stat-box__value">{completedLessonsCount}</div>
-            <div className="home-stat-box__label">урока</div>
-          </div>
-          <div className="home-stat-box">
-            <div className="home-stat-box__value">{overallPct}%</div>
-            <div className="home-stat-box__label">до A1+</div>
-          </div>
-        </div>
+        <p className="home-greeting__sub">Поддержи свою серию 🔥</p>
       </div>
 
-      {/* Continue Lesson — Hero CTA */}
+      {/* Hero Lesson Card */}
       {currentLesson && (
         <button className="home-hero__card" onClick={() => setCurrentView('lesson')}>
-          <div className="home-hero__card-top">
-            <div>
-              <div className="home-hero__label">Продолжить урок</div>
-              <div className="home-hero__card-title">
+          <div className="home-hero__deco" />
+          <div className="home-hero__top-row">
+            <div className="home-hero__left">
+              <div className="home-hero__label">Текущий урок</div>
+              <div className="home-hero__title">
                 Урок {currentLesson.id} · {currentLesson.title}
               </div>
             </div>
             <div className="home-hero__play"><PlayIcon /></div>
           </div>
-          <div className="home-hero__bar-row">
-            <div className="home-hero__bar">
-              <div className="home-hero__bar-fill" style={{ width: `${overallPct}%` }} />
+          <div className="home-hero__bottom">
+            <div className="home-hero__progress-row">
+              <span className="home-hero__urgency">Прогресс</span>
+              <span className="home-hero__pct-label">{completedPct}%</span>
             </div>
-            <span className="home-hero__pct">{overallPct}%</span>
+            <div className="home-hero__bar">
+              <div className="home-hero__bar-fill" style={{ width: `${completedPct}%` }} />
+            </div>
           </div>
-          <div className="home-hero__urgency">Начни сейчас и получи +20 XP</div>
         </button>
       )}
 
       {/* Daily Practice */}
-      <div
-        className={`home-card home-daily${practicedToday ? ' home-daily--done' : ''}`}
-        role="button"
-        tabIndex={0}
-        onClick={() => !practicedToday && setCurrentView(dailyTask.view)}
-        onKeyDown={(e) => { if (e.key === 'Enter' && !practicedToday) setCurrentView(dailyTask.view); }}
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="home-daily__header">
-              <span className="home-daily__label">Ежедневная практика</span>
-            </div>
-            {practicedToday ? (
-              <>
-                <div className="home-daily__done-title">Выполнено!</div>
-                <div className="home-daily__done-sub">Отличная работа. Завтра новая практика.</div>
-              </>
-            ) : (
-              <>
-                <div className="home-daily__task">{dailyTask.emoji} {dailyTask.label}</div>
-                <div className="home-daily__meta">
-                  <span className="home-daily__meta-pill">⏱ {dailyTask.duration}</span>
-                  <span className="home-daily__meta-pill home-daily__meta-pill--xp">+{dailyTask.xp} XP</span>
-                </div>
-              </>
-            )}
-          </div>
-          {practicedToday
-            ? <div className="home-daily__check">✓</div>
-            : <span className="text-2xl">{dailyTask.emoji}</span>}
+      <div className="home-section">
+        <h3 className="home-section__title">Ежедневная практика</h3>
+        <div className="home-daily-list">
+          {PRACTICE_ITEMS.map((item) => (
+            <button
+              key={item.label}
+              className="home-daily-item"
+              onClick={() => setCurrentView(item.view)}
+            >
+              <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
+                <span>{item.emoji}</span>
+              </div>
+              <div className="home-daily-item__body">
+                <div className="home-daily-item__name">{item.label}</div>
+                <div className="home-daily-item__sub">{item.sub}</div>
+              </div>
+              <div className="home-daily-item__xp">+{item.xp} XP</div>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Weekly Calendar */}
-      <div className="home-card">
-        <div className="flex items-center justify-between mb-3">
+      {/* Weekly Activity */}
+      <div
+        className="home-weekly-section"
+        role="button"
+        tabIndex={0}
+        onClick={() => setCurrentView('practice')}
+        onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('practice'); }}
+      >
+        <div className="home-weekly-section__header">
           <div>
-            <div className="text-xs font-semibold text-muted uppercase tracking-wide">Неделя</div>
-            <div className="text-sm font-semibold mt-0.5" style={{ color: streak > 0 ? '#C87941' : undefined }}>
-              {streak > 0
-                ? `🔥 ${streak} ${streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'} подряд`
-                : 'Начни сегодня!'}
-            </div>
-            {streak > 0 && !practicedToday && (
-              <div className="home-streak__pressure">Не прерви серию 🔥</div>
-            )}
+            <h3 className="home-section__title">{streakTitle}</h3>
+            <p className="home-weekly__subtitle">
+              {practicedToday ? 'Отлично! Серия продолжается' : 'Не прерви серию'}
+            </p>
           </div>
           {longestStreak > 0 && (
-            <div className="text-xs text-muted">Рекорд: {longestStreak} дн.</div>
+            <div className="home-weekly__record">Рекорд: {longestStreak} дн.</div>
           )}
         </div>
-        <div className="home-weekly">
+        <div className="home-weekly-days">
           {weekDays.map((d) => {
             const done = practiceDates.includes(d.date);
             const missed = !done && !d.isToday && d.date < todayISO;
+            const future = !done && !d.isToday && d.date > todayISO;
             return (
               <div key={d.date} className="home-weekly__col">
-                <span className="text-[11px] text-muted font-medium">{d.label}</span>
-                <div
-                  className={`home-weekly__day${d.isToday ? ' home-weekly__day--today' : ''}${done ? ' home-weekly__day--done' : ''}${missed ? ' home-weekly__day--missed' : ''}`}
-                >
-                  {done ? '✓' : missed ? '✕' : ''}
+                <div className={[
+                  'home-weekly__day',
+                  d.isToday ? 'today' : '',
+                  done ? 'done' : '',
+                  missed ? 'missed' : '',
+                  future ? 'future' : '',
+                ].filter(Boolean).join(' ')}>
+                  {done ? <CheckIcon /> : missed ? '✕' : ''}
                 </div>
+                <span className="home-weekly__day-label">{d.label}</span>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Latest Teacher Note */}
+      {/* Teacher Section */}
       {latestNote && (
-        <div className="home-card">
-          <div className="home-teacher__header">
-            <div className="home-teacher__avatar-row">
-              <div className="home-teacher__avatar">Л</div>
-              <div>
-                <div className="home-teacher__name">Лусине</div>
-                <div className="home-teacher__role">Ваш преподаватель</div>
-              </div>
-            </div>
-            <button className="home-teacher__link" onClick={() => setCurrentView('notes')}>
-              Все заметки →
+        <div className="home-teacher-section">
+          <div className="home-teacher__photo-wrap">
+            <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
+            <div className="home-teacher__online-dot" />
+          </div>
+          <div className="home-teacher__body">
+            <div className="home-teacher__role">Ваш преподаватель</div>
+            <div className="home-teacher__name">Лусине</div>
+            <p className="home-teacher__note home-teacher__note--clamped">
+              {latestNote.text}
+            </p>
+            <button
+              className="home-teacher__view-tips"
+              onClick={() => setCurrentView('notes')}
+            >
+              Смотреть советы →
             </button>
           </div>
-          <p className={`home-teacher__text${noteExpanded ? '' : ' home-teacher__text--clamped'}`}>
-            {latestNote.text}
-          </p>
-          {!noteExpanded && (
-            <button className="home-teacher__expand" onClick={() => setNoteExpanded(true)}>
-              читать дальше
-            </button>
-          )}
+          <button className="home-teacher__arrow-btn" onClick={() => setCurrentView('notes')}>
+            <ArrowIcon />
+          </button>
         </div>
       )}
 
-      {/* Next Live Lesson */}
-      {nextLive && (
-        <div
-          className="home-card"
-          role="button"
-          tabIndex={0}
-          onClick={() => setCurrentView('live-lessons')}
-          onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('live-lessons'); }}
-        >
-          <div className="text-xs font-semibold text-muted uppercase tracking-wide mb-2">{'\u0411\u043B\u0438\u0436\u0430\u0439\u0448\u0438\u0439 \u0443\u0440\u043E\u043A'}</div>
-          <div className="text-base font-semibold text-dark mb-1">{nextLive.title}</div>
-          <div className="flex items-center gap-3 text-sm text-muted">
-            <span>{new Date(nextLive.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>
-            <span>{nextLive.time}</span>
-            <span>{nextLive.spotsTotal - nextLive.spotsTaken} {'\u043C\u0435\u0441\u0442'}</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
