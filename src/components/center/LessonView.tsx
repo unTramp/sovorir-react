@@ -1,31 +1,33 @@
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
-import { lessonPages } from '../../data/lessonPages';
-import { LessonControls } from './LessonControls';
+import { contentRepository } from '../../lib/contentRepository';
 import { LessonPageView } from './LessonPageView';
-
-const pageTitles = lessonPages.map(page => {
-  const heading = page.blocks.find(b => b.type === 'heading');
-  return heading?.type === 'heading' ? heading.text : `Часть ${page.id}`;
-});
+import type { LessonPage } from '../../types/lessonContent';
 
 export function LessonView() {
+  const [allPages, setAllPages] = useState<LessonPage[]>([]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentPage = useLessonStore((s) => s.currentPage);
   const setTotalPages = useLessonStore((s) => s.setTotalPages);
-  const { completeRecord, getCompletedCount, getTotalRecords } = useLessonProgress();
+  const { completeRecord, getCompletedCount } = useLessonProgress();
 
   useEffect(() => {
-    setTotalPages(lessonPages.length);
+    contentRepository.getLessonPages().then((pages) => {
+      setAllPages(pages);
+      setTotalPages(pages.length);
+    });
   }, [setTotalPages]);
 
-  const completedRecords = getCompletedCount(currentPage);
-  const totalRecords = getTotalRecords(currentPage);
+  const pageTitles = useMemo(() => allPages.map((page) => {
+    const heading = page.blocks.find((b) => b.type === 'heading');
+    return heading?.type === 'heading' ? heading.text : `Часть ${page.id}`;
+  }), [allPages]);
 
-  // Find the next incomplete record index for this page
+  const completedRecords = getCompletedCount(currentPage);
+
   const nextRecordIndex = useMemo(() => {
-    const page = lessonPages.find((p) => p.id === currentPage);
+    const page = allPages.find((p) => p.id === currentPage);
     if (!page) return 0;
     const completedSet = useLessonProgress.getState().pages[currentPage]?.completedRecords || [];
     let recordCounter = 0;
@@ -36,7 +38,7 @@ export function LessonView() {
       }
     }
     return recordCounter;
-  }, [currentPage, completedRecords]);
+  }, [currentPage, completedRecords, allPages]);
 
   const handleRecordComplete = useCallback(() => {
     completeRecord(currentPage, nextRecordIndex);
@@ -44,7 +46,6 @@ export function LessonView() {
 
   return (
     <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'lesson-fullscreen' : ''}`}>
-      <LessonControls pageTitles={pageTitles} />
       <LessonPageView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}

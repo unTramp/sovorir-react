@@ -1,0 +1,91 @@
+import type { Quiz } from '../types/quiz';
+
+export const quizzes: Quiz[] = [
+  {
+    id: 'quiz-page-1',
+    pageId: 1,
+    questions: [
+      {
+        type: 'multiple-choice',
+        question: 'Как переводится "\u0532\u0561\u0580\u0587" [barev]?',
+        options: ['\u0421\u043f\u0430\u0441\u0438\u0431\u043e', '\u041f\u0440\u0438\u0432\u0435\u0442', '\u0414\u043e \u0441\u0432\u0438\u0434\u0430\u043d\u0438\u044f', '\u041f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430'],
+        correctIndex: 1,
+        explanation: '\u0532\u0561\u0580\u0587 [barev] \u2014 \u044d\u0442\u043e \u043f\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0438\u0435, \u043e\u0437\u043d\u0430\u0447\u0430\u044e\u0449\u0435\u0435 "\u041f\u0440\u0438\u0432\u0435\u0442"',
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u0427\u0442\u043e \u043e\u0437\u043d\u0430\u0447\u0430\u0435\u0442 "\u0547\u0576\u0578\u0580\u0570\u0561\u056f\u0561\u056c\u0578\u0582\u0569\u0575\u0578\u0582\u0576" [shnorhakalutyun]?',
+        options: ['\u0418\u0437\u0432\u0438\u043d\u0438\u0442\u0435', '\u041f\u0440\u0438\u0432\u0435\u0442', '\u0421\u043f\u0430\u0441\u0438\u0431\u043e', '\u0425\u043e\u0440\u043e\u0448\u043e'],
+        correctIndex: 2,
+      },
+      {
+        type: 'match-pairs',
+        pairs: [
+          { left: '\u0532\u0561\u0580\u0587', right: '\u041f\u0440\u0438\u0432\u0435\u0442' },
+          { left: '\u0531\u0575\u0578', right: '\u0414\u0430' },
+          { left: '\u0548\u0579', right: '\u041d\u0435\u0442' },
+          { left: '\u053c\u0561\u057e', right: '\u0425\u043e\u0440\u043e\u0448\u043e' },
+        ],
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043f\u0440\u0430\u0432\u0438\u043b\u044c\u043d\u0443\u044e \u0442\u0440\u0430\u043d\u0441\u043a\u0440\u0438\u043f\u0446\u0438\u044e \u0441\u043b\u043e\u0432\u0430 "\u0531\u0575\u0578":',
+        options: ['[voch]', '[barev]', '[ayo]', '[lav]'],
+        correctIndex: 2,
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u041a\u0430\u043a \u0441\u043a\u0430\u0437\u0430\u0442\u044c "\u041e\u0447\u0435\u043d\u044c \u0445\u043e\u0440\u043e\u0448\u043e!" \u043f\u043e-\u0430\u0440\u043c\u044f\u043d\u0441\u043a\u0438?',
+        options: ['\u0547\u0561\u057f \u056c\u0561\u057e!', '\u0532\u0561\u0580\u0587, \u056b\u0576\u0579\u057a\u0565\u057d \u0565\u057d?', '\u0548\u0579, \u0577\u0576\u0578\u0580\u0570\u0561\u056f\u0561\u056c\u0578\u0582\u0569\u0575\u0578\u0582\u0576', '\u0531\u0575\u0578, \u056b\u0570\u0561\u0580\u056f\u0565'],
+        correctIndex: 0,
+        explanation: '\u0547\u0561\u057f \u056c\u0561\u057e! \u2014 \u0434\u043e\u0441\u043b\u043e\u0432\u043d\u043e "\u041e\u0447\u0435\u043d\u044c \u0445\u043e\u0440\u043e\u0448\u043e!"',
+      },
+    ],
+  },
+  {
+    id: 'quiz-page-2',
+    pageId: 2,
+    questions: [
+      {
+        type: 'multiple-choice',
+        question: '\u041a\u0430\u043a \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0438\u0442\u0441\u044f "\u0531\u0576\u0578\u0582\u0576" [anun]?',
+        options: ['\u0414\u043e\u043c', '\u041a\u043d\u0438\u0433\u0430', '\u0418\u043c\u044f', '\u0412\u043e\u0434\u0430'],
+        correctIndex: 2,
+      },
+      {
+        type: 'match-pairs',
+        pairs: [
+          { left: '\u0544\u0561\u0575\u0580', right: '\u041c\u0430\u0442\u044c' },
+          { left: '\u0540\u0561\u0575\u0580', right: '\u041e\u0442\u0435\u0446' },
+          { left: '\u054f\u0578\u0582\u0576', right: '\u0414\u043e\u043c' },
+          { left: '\u0533\u056b\u0580\u0584', right: '\u041a\u043d\u0438\u0433\u0430' },
+        ],
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u0427\u0442\u043e \u043e\u0437\u043d\u0430\u0447\u0430\u0435\u0442 \u0441\u043b\u043e\u0432\u043e "\u054b\u0578\u0582\u0580" [jur]?',
+        options: ['\u0425\u043b\u0435\u0431', '\u0412\u043e\u0434\u0430', '\u0414\u043e\u043c', '\u041a\u043d\u0438\u0433\u0430'],
+        correctIndex: 1,
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u041a\u0430\u043a \u0441\u043a\u0430\u0437\u0430\u0442\u044c "\u041b\u044e\u0431\u043e\u0432\u044c" \u043f\u043e-\u0430\u0440\u043c\u044f\u043d\u0441\u043a\u0438?',
+        options: ['\u0531\u0580\u0565\u057e', '\u053e\u0561\u0572\u056b\u056f', '\u054d\u0565\u0580', '\u0540\u0561\u0581'],
+        correctIndex: 2,
+        explanation: '\u054d\u0565\u0580 [ser] \u043e\u0437\u043d\u0430\u0447\u0430\u0435\u0442 "\u041b\u044e\u0431\u043e\u0432\u044c"',
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u043f\u0435\u0440\u0435\u0432\u043e\u0434 "\u053e\u0561\u0572\u056b\u056f" [tsaghik]:',
+        options: ['\u0421\u043e\u043b\u043d\u0446\u0435', '\u041b\u044e\u0431\u043e\u0432\u044c', '\u0426\u0432\u0435\u0442\u043e\u043a', '\u0412\u043e\u0434\u0430'],
+        correctIndex: 2,
+      },
+      {
+        type: 'multiple-choice',
+        question: '\u041a\u0430\u043a \u043f\u0435\u0440\u0435\u0432\u043e\u0434\u0438\u0442\u0441\u044f "\u0540\u0561\u0581" [hats]?',
+        options: ['\u0412\u043e\u0434\u0430', '\u041c\u0430\u0442\u044c', '\u0425\u043b\u0435\u0431', '\u0421\u043e\u043b\u043d\u0446\u0435'],
+        correctIndex: 2,
+      },
+    ],
+  },
+];

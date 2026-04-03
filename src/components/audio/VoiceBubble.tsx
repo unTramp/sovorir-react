@@ -1,6 +1,7 @@
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useAudioStore } from '../../stores/useAudioStore';
 import { WaveformBars } from './WaveformBars';
+import { SpeedToggle } from './SpeedToggle';
 import { PlayIcon, PauseIcon } from '../../icons';
 import { formatDuration } from '../../lib/formatDuration';
 import type { AudioMessage } from '../../types/audio';
@@ -12,6 +13,8 @@ interface Props {
 export function VoiceBubble({ message }: Props) {
   const { togglePlay, playingId } = useAudioPlayer();
   const progress = useAudioStore((s) => s.progress[message.id] || 0);
+  const isLooping = useAudioStore((s) => s.isLooping);
+  const toggleLoop = useAudioStore((s) => s.toggleLoop);
   const isPlaying = playingId === message.id;
   const isTeacher = message.sender === 'teacher';
 
@@ -51,6 +54,16 @@ export function VoiceBubble({ message }: Props) {
           <span className="voice-bubble__duration">
             {formatDuration(remaining)}
           </span>
+        </div>
+        <div className="voice-bubble__controls">
+          <SpeedToggle />
+          <button
+            className={`voice-bubble__loop-btn${isLooping ? ' active' : ''}`}
+            aria-label={isLooping ? 'Отключить повтор' : 'Повторять'}
+            onClick={toggleLoop}
+          >
+            🔁
+          </button>
         </div>
       </div>
     </div>

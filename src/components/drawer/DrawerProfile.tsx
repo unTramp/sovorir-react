@@ -1,5 +1,6 @@
 import { lessons } from '../../data/lessons';
 import { useStreakStore } from '../../stores/useStreakStore';
+import { useUserStore } from '../../stores/useUserStore';
 
 const LEVELS = [
   { label: 'A1', min: 0,   next: 200,  nextLabel: 'A2'  },
@@ -10,6 +11,7 @@ const LEVELS = [
 
 export function DrawerProfile() {
   const streak = useStreakStore((s) => s.currentStreak);
+  const user = useUserStore();
 
   const xp = lessons
     .flatMap((l) => l.sections)
@@ -27,12 +29,12 @@ export function DrawerProfile() {
       <div className="flex items-center gap-4">
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <div className="drawer-profile__avatar">
-            <img src="/assets/student-avatar.png" alt="Андрей Дорофеев" className="w-full h-full object-cover" />
+            <img src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="w-full h-full object-cover" />
           </div>
           <span className="drawer-profile__level-badge">{currentLevel.label}</span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="drawer-profile__name truncate">Андрей</div>
+          <div className="drawer-profile__name truncate">{user.firstName}</div>
           <div className="drawer-profile__meta">
             <span>Уровень {currentLevel.label}</span>
             <span>·</span>

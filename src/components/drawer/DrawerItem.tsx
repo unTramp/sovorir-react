@@ -16,9 +16,7 @@ export function DrawerItem({ label, icon, viewId, badge, pro }: DrawerItemProps)
   const setCurrentView = useAppStore((s) => s.setCurrentView);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
 
-  const isActive = viewId
-    ? activeSection === viewId || currentView === viewId
-    : false;
+  const isActive = viewId ? currentView === viewId : false;
 
   function handleClick() {
     if (viewId) {

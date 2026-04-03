@@ -34,9 +34,10 @@ interface Props {
   messageId: string;
   progress: number;
   isTeacher: boolean;
+  isPlaying?: boolean;
 }
 
-export function WaveformBars({ messageId, progress }: Props) {
+export function WaveformBars({ messageId, progress, isPlaying }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [barCount, setBarCount] = useState(40);
 
@@ -58,7 +59,7 @@ export function WaveformBars({ messageId, progress }: Props) {
   const playedCount = Math.floor(progress * barCount);
 
   return (
-    <div className="waveform-container" ref={containerRef}>
+    <div className={`waveform-container${isPlaying ? ' waveform-container--playing' : ''}`} ref={containerRef}>
       {bars.map((height, i) => (
         <div
           key={i}

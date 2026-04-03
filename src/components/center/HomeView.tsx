@@ -1,25 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
+import { useUserStore } from '../../stores/useUserStore';
 import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
+import { todayISO, getWeekDays } from '../../lib/dateUtils';
 import type { SectionType } from '../../types/lesson';
-
-function getWeekDays(): { label: string; date: string; isToday: boolean }[] {
-  const now = new Date();
-  const day = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((day + 6) % 7));
-  const labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-  const todayISO = now.toISOString().slice(0, 10);
-  return labels.map((label, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    const iso = d.toISOString().slice(0, 10);
-    return { label, date: iso, isToday: iso === todayISO };
-  });
-}
 
 function CheckIcon() {
   return (
@@ -57,10 +44,11 @@ export function HomeView() {
   const longestStreak = useStreakStore((s) => s.longestStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
   const overallPct = useLessonProgress.getState().getOverallPercentage();
+  const { firstName } = useUserStore();
 
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const practicedToday = practiceDates.includes(todayISO);
-  const weekDays = getWeekDays();
+  const today = todayISO();
+  const practicedToday = practiceDates.includes(today);
+  const weekDays = useMemo(() => getWeekDays(), []);
   const currentLesson = lessons.find((l) => l.status === 'current');
   const latestNote = teacherNotes[0];
 
@@ -82,7 +70,7 @@ export function HomeView() {
 
       {/* Greeting */}
       <div className="home-greeting-section">
-        <h1 className="home-greeting__title">Բարև, Андрей!</h1>
+        <h1 className="home-greeting__title">Բарев, {firstName}!</h1>
         <p className="home-greeting__sub">Не прерви серию сегодня 🔥</p>
       </div>
 
@@ -145,19 +133,16 @@ export function HomeView() {
         onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('practice'); }}
       >
         <div className="home-weekly-section__header">
-          <div>
-            <h3 className="home-section__title">{streakTitle}</h3>
-            <p className="home-weekly__subtitle">{streakSubtitle}</p>
-          </div>
-          {longestStreak > 0 && (
-            <div className="home-weekly__record">Рекорд: {longestStreak} дн.</div>
+          <h3 className="home-weekly__title">Недельная активность</h3>
+          {streak > 0 && (
+            <div className="home-weekly__streak-badge">🔥 {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</div>
           )}
         </div>
         <div className="home-weekly-days">
           {weekDays.map((d) => {
             const done = practiceDates.includes(d.date);
-            const missed = !done && !d.isToday && d.date < todayISO;
-            const future = !done && !d.isToday && d.date > todayISO;
+            const missed = !done && !d.isToday && d.date < today;
+            const future = !done && !d.isToday && d.date > today;
             return (
               <div key={d.date} className="home-weekly__col">
                 <div className={[
@@ -167,9 +152,9 @@ export function HomeView() {
                   missed ? 'missed' : '',
                   future ? 'future' : '',
                 ].filter(Boolean).join(' ')}>
-                  {done ? <CheckIcon /> : missed ? '✕' : ''}
+                  {done || d.isToday ? <CheckIcon /> : null}
                 </div>
-                <span className="home-weekly__day-label">{d.label}</span>
+                <span className={`home-weekly__day-label${d.isToday ? ' today' : ''}`}>{d.label}</span>
               </div>
             );
           })}
@@ -179,13 +164,11 @@ export function HomeView() {
       {/* Teacher Section */}
       {latestNote && (
         <div className="home-teacher-section">
-          <div className="home-teacher__photo-wrap">
-            <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
-            <div className="home-teacher__online-dot" />
-          </div>
-          <div className="home-teacher__body">
-            <div className="home-teacher__role">Ваш преподаватель</div>
-            <div className="home-teacher__name">Лусине</div>
+          <div className="home-teacher__bubble" onClick={() => setCurrentView('notes')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('notes'); }}>
+            <div className="home-teacher__photo-wrap">
+              <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
+            </div>
+            <div className="home-teacher__role">Ваш преподаватель · Лусине</div>
             <p className="home-teacher__note home-teacher__note--clamped">
               {latestNote.text}
             </p>
@@ -196,9 +179,6 @@ export function HomeView() {
               Смотреть советы →
             </button>
           </div>
-          <button className="home-teacher__arrow-btn" onClick={() => setCurrentView('notes')}>
-            <ArrowIcon />
-          </button>
         </div>
       )}
 

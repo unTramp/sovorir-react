@@ -1,12 +1,14 @@
 import { lessons } from '../../data/lessons';
+import { useStreakStore } from '../../stores/useStreakStore';
 
 export function StudentProfile() {
   const completedLessons = lessons.filter((l) => l.status === 'completed').length;
   const totalStars = lessons.length;
   const allDone = completedLessons >= totalStars;
+  const streak = useStreakStore((s) => s.currentStreak);
 
   return (
-    <div className="h-[72px] bg-content border-b border-border px-3 py-2.5 flex items-center gap-3 flex-shrink-0">
+    <div className="h-[72px] bg-content px-3 py-3 flex items-center gap-3 flex-shrink-0">
       <div className="flex-1 min-w-0">
         <div className="text-base font-semibold text-dark leading-tight truncate">
           Андрей Дорофеев
@@ -23,6 +25,7 @@ export function StudentProfile() {
             ))}
           </div>
           {allDone && <span className="rpg-trophy rpg-trophy--earned">{'\u{1F3C6}'}</span>}
+          {streak > 0 && <span style={{ fontSize: 12, marginLeft: 4 }}>{'\uD83D\uDD25'} {streak}</span>}
         </div>
       </div>
       <div className="rpg-avatar">

@@ -1,6 +1,5 @@
 import type { Section } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
-import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 interface Props {
   section: Section;
@@ -11,15 +10,13 @@ export function SectionItem({ section }: Props) {
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   const setCurrentView = useAppStore((s) => s.setCurrentView);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-  const { isDesktop } = useMediaQuery();
 
   const isActive = section.id === activeSection;
 
   function handleClick() {
     setActiveSection(section.id);
     setCurrentView(section.type);
-
-    if (!isDesktop) toggleSidebar(false);
+    toggleSidebar(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {

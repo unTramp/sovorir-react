@@ -4,8 +4,8 @@ import { HamburgerIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 
 const VIEW_TITLES: Record<SectionType, { title: string; subtitle?: string }> = {
-  home: { title: 'Sovorir' },
-  lesson: { title: '\u0423\u0440\u043E\u043A 3', subtitle: '\u0427\u0442\u0435\u043D\u0438\u0435 \u0438 \u043F\u0440\u043E\u0438\u0437\u043D\u043E\u0448\u0435\u043D\u0438\u0435' },
+  home: { title: 'Главная' },
+  lesson: { title: '\u0423\u0440\u043E\u043A 3' },
   video: { title: '\u0412\u0438\u0434\u0435\u043E' },
   audio: { title: '\u0410\u0443\u0434\u0438\u043E' },
   practice: { title: '\u0422\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430' },

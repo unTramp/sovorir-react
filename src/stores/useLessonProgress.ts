@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { lessonPages } from '../data/lessonPages';
+import { contentRepository } from '../lib/contentRepository';
+import type { LessonPage } from '../types/lessonContent';
+import type { QuizResult } from '../types/quiz';
+import { practiceEvents } from '../lib/practiceEvents';
 
 interface PageProgress {
   completedRecords: number[];  // indices of completed record blocks
@@ -9,6 +12,7 @@ interface PageProgress {
 interface LessonProgressState {
   // pageId → PageProgress
   pages: Record<number, PageProgress>;
+  quizResults: Record<number, QuizResult>;
 
   // Actions
   completeRecord: (pageId: number, recordIndex: number) => void;
@@ -17,10 +21,17 @@ interface LessonProgressState {
   isPageCompleted: (pageId: number) => boolean;
   getOverallPercentage: () => number;
   getCompletedLessons: () => number;
+  saveQuizResult: (pageId: number, result: QuizResult) => void;
+  isQuizPassed: (pageId: number) => boolean;
 }
 
+// Module-level cache — populated once from the async interface.
+// Safe to use synchronously after app initialises (Promise.resolve resolves in the next microtask).
+let _lessonPages: LessonPage[] = [];
+contentRepository.getLessonPages().then((pages) => { _lessonPages = pages; });
+
 function countRecords(pageId: number): number {
-  const page = lessonPages.find((p) => p.id === pageId);
+  const page = _lessonPages.find((p) => p.id === pageId);
   if (!page) return 0;
   return page.blocks.filter((b) => b.type === 'record').length;
 }
@@ -29,6 +40,7 @@ export const useLessonProgress = create<LessonProgressState>()(
   persist(
     (set, get) => ({
       pages: {},
+      quizResults: {},
 
       completeRecord: (pageId, recordIndex) =>
         set((state) => {
@@ -59,7 +71,7 @@ export const useLessonProgress = create<LessonProgressState>()(
         const state = get();
         let totalRecords = 0;
         let completedRecords = 0;
-        for (const page of lessonPages) {
+        for (const page of _lessonPages) {
           const recs = page.blocks.filter((b) => b.type === 'record').length;
           totalRecords += recs;
           completedRecords += Math.min(
@@ -73,12 +85,26 @@ export const useLessonProgress = create<LessonProgressState>()(
       getCompletedLessons: () => {
         const state = get();
         let count = 0;
-        for (const page of lessonPages) {
+        for (const page of _lessonPages) {
           const total = page.blocks.filter((b) => b.type === 'record').length;
           const completed = state.pages[page.id]?.completedRecords.length || 0;
           if (total === 0 || completed >= total) count++;
         }
         return count;
+      },
+
+      saveQuizResult: (pageId, result) => {
+        if (result.passed) {
+          practiceEvents.emit('quiz');
+        }
+        return set((state) => ({
+          quizResults: { ...state.quizResults, [pageId]: result },
+        }));
+      },
+
+      isQuizPassed: (pageId) => {
+        const result = get().quizResults[pageId];
+        return result?.passed ?? false;
       },
     }),
     {
