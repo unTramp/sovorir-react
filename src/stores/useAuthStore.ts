@@ -2,10 +2,12 @@ import { create } from 'zustand';
 import type { Profile } from '../types/api';
 import { apiClient, saveTokens, clearTokens, getRefreshToken } from '../lib/apiClient';
 import { LoginResponseSchema, ProfileSchema } from '../lib/apiSchemas';
-import { useUserStore } from './useUserStore';
 
 interface AuthState {
   profile: Profile | null;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
   isLoading: boolean;
   error: string | null;
 
@@ -15,8 +17,20 @@ interface AuthState {
   tryRestoreSession: () => Promise<void>;
 }
 
+function deriveUser(profile: Profile) {
+  const parts = profile.fullName.split(' ');
+  return {
+    firstName: parts[0] ?? '',
+    lastName: parts.slice(1).join(' '),
+    avatarUrl: profile.avatarUrl ?? '/assets/student-avatar.png',
+  };
+}
+
 export const useAuthStore = create<AuthState>()((set, get) => ({
   profile: null,
+  firstName: 'Андрей',
+  lastName: 'Дорофеев',
+  avatarUrl: '/assets/student-avatar.png',
   isLoading: false,
   error: null,
 
@@ -26,8 +40,7 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
       const raw = await apiClient.post<unknown>('/auth/login', { email, password });
       const data = LoginResponseSchema.parse(raw);
       saveTokens(data.accessToken, data.refreshToken);
-      useUserStore.getState().setFromProfile(data.profile);
-      set({ profile: data.profile, isLoading: false });
+      set({ profile: data.profile, ...deriveUser(data.profile), isLoading: false });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Ошибка входа';
       set({ error: msg, isLoading: false });
@@ -47,11 +60,9 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
 
     set({ isLoading: true });
     try {
-      // Re-use apiClient.get which will auto-refresh via the refresh token logic in apiClient
       const raw = await apiClient.get<unknown>('/auth/me');
       const profile = ProfileSchema.parse(raw);
-      useUserStore.getState().setFromProfile(profile);
-      set({ profile, isLoading: false });
+      set({ profile, ...deriveUser(profile), isLoading: false });
     } catch {
       clearTokens();
       set({ isLoading: false });

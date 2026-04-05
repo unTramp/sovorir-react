@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStreakStore } from '../../stores/useStreakStore';
-import { useUserStore } from '../../stores/useUserStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
 import { todayISO, getWeekDays } from '../../lib/dateUtils';
@@ -33,7 +33,7 @@ export function HomeView() {
   const navigate = useNavigate();
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
-  const { firstName } = useUserStore();
+  const { firstName } = useAuthStore();
 
   const today = todayISO();
   const weekDays = useMemo(() => getWeekDays(), []);

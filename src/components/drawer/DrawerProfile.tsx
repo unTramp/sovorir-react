@@ -1,6 +1,6 @@
 import { lessons } from '../../data/lessons';
 import { useStreakStore } from '../../stores/useStreakStore';
-import { useUserStore } from '../../stores/useUserStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { FlameIcon } from '../../icons';
 
 const LEVELS = [
@@ -12,7 +12,7 @@ const LEVELS = [
 
 export function DrawerProfile() {
   const streak = useStreakStore((s) => s.currentStreak);
-  const user = useUserStore();
+  const user = useAuthStore();
 
   const xp = lessons
     .flatMap((l) => l.sections)
