@@ -111,7 +111,7 @@ export function HomeView() {
         <div className="home-weekly-section__header">
           <h3 className="home-weekly__title">Недельная активность</h3>
           {streak > 0 && (
-            <div className="home-weekly__streak-badge" style={{ display: 'flex', alignItems: 'center', gap: 4 }}><FlameIcon size={12} color="#C87941" /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</div>
+            <div className="home-weekly__streak-badge streak-inline"><FlameIcon size={12} /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</div>
           )}
         </div>
         <div className="home-weekly-days">

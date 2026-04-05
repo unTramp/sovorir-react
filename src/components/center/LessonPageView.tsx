@@ -94,7 +94,7 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
   const showRecordCTA = hasActiveRecord && recordPromptVisible;
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar" style={{ background: 'var(--color-bg-content)' }}>
+    <div ref={scrollRef} className="lesson-scroll">
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
         {visibleBlocks.map((block, i) => {
           const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;

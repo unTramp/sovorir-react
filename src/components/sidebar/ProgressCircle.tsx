@@ -8,12 +8,10 @@ export function ProgressCircle() {
   return (
     <div className="px-3 mt-2 mb-1">
       <div className="flex items-center gap-2">
-        <div style={{ flex: 1, height: 8, borderRadius: 4, background: 'rgb(var(--color-student-border-rgb) / 0.25)', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${percentage}%`, borderRadius: 4, background: 'linear-gradient(90deg, #4FC3F7, #0288D1)', transition: 'width 1s ease' }} />
+        <div className="progress-bar-track">
+          <div className="progress-bar-fill" style={{ width: `${percentage}%` }} />
         </div>
-        <span className="text-xs font-medium whitespace-nowrap" style={{ color: 'var(--color-text-muted)' }}>
-          {completedCount}/{totalCount}
-        </span>
+        <span className="progress-bar-label">{completedCount}/{totalCount}</span>
       </div>
     </div>
   );

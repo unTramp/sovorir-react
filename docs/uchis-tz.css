@@ -1,0 +1,66 @@
+@page {
+  size: A4;
+  margin: 20mm 16mm 20mm 16mm;
+}
+
+html {
+  font-size: 11pt;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.45;
+  color: #1f2937;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: #111827;
+  line-height: 1.2;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+h1 {
+  font-size: 22pt;
+  border-bottom: 2px solid #7a3e34;
+  padding-bottom: 8px;
+}
+
+h2 {
+  font-size: 16pt;
+  margin-top: 1.6em;
+  border-bottom: 1px solid #d1d5db;
+  padding-bottom: 4px;
+}
+
+h3 {
+  font-size: 13pt;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+ul {
+  margin: 0.4em 0 0.8em 1.2em;
+  padding: 0;
+}
+
+li {
+  margin: 0.2em 0;
+}
+
+strong {
+  color: #111827;
+}
+
+code {
+  font-family: Menlo, Monaco, Consolas, monospace;
+  font-size: 0.95em;
+  background: #f3f4f6;
+  padding: 0.08em 0.28em;
+  border-radius: 4px;
+}

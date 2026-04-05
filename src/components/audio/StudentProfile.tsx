@@ -26,7 +26,7 @@ export function StudentProfile() {
             ))}
           </div>
           {allDone && <span className="rpg-trophy rpg-trophy--earned">{'\u{1F3C6}'}</span>}
-          {streak > 0 && <span style={{ fontSize: 12, marginLeft: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}><FlameIcon size={12} /> {streak}</span>}
+          {streak > 0 && <span className="streak-inline" style={{ marginLeft: 4 }}><FlameIcon size={12} /> {streak}</span>}
         </div>
       </div>
       <div className="rpg-avatar">

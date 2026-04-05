@@ -28,7 +28,7 @@ export function DrawerProfile() {
   return (
     <div className="drawer-profile">
       <div className="flex items-center gap-4">
-        <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div className="relative flex-shrink-0">
           <div className="drawer-profile__avatar">
             <img src={user.avatarUrl} alt={`${user.firstName} ${user.lastName}`} className="w-full h-full object-cover" />
           </div>
@@ -43,7 +43,7 @@ export function DrawerProfile() {
             {streak > 0 && (
               <>
                 <span>·</span>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><FlameIcon size={13} /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</span>
+                <span className="streak-inline"><FlameIcon size={13} /> {streak} {streak === 1 ? 'день' : streak < 5 ? 'дня' : 'дней'}</span>
               </>
             )}
           </div>

@@ -8,7 +8,9 @@ import { practiceEvents } from '../lib/practiceEvents';
 interface FlashcardState {
   progress: Record<string, FlashcardProgress>;
   session: FlashcardSession | null;
+  wordsReady: boolean;
 
+  _initWords: (words: DictionaryWord[]) => void;
   startSession: () => void;
   answerCard: (wordId: string, quality: 'again' | 'hard' | 'easy') => void;
   getNextReviewDate: (wordId: string) => number;
@@ -17,9 +19,11 @@ interface FlashcardState {
 
 const SESSION_SIZE = 10;
 
-// Module-level cache — populated once from the async interface.
 let _flashcardWords: DictionaryWord[] = [];
-contentRepository.getFlashcardWords().then((words) => { _flashcardWords = words; });
+
+contentRepository.getFlashcardWords().then((words) => {
+  useFlashcardStore.getState()._initWords(words);
+});
 
 function selectCards(progress: Record<string, FlashcardProgress>): string[] {
   const now = Date.now();
@@ -65,6 +69,12 @@ export const useFlashcardStore = create<FlashcardState>()(
     (set, get) => ({
       progress: {},
       session: null,
+      wordsReady: false,
+
+      _initWords: (words: DictionaryWord[]) => {
+        _flashcardWords = words;
+        set({ wordsReady: true });
+      },
 
       startSession: () => {
         const cards = selectCards(get().progress);
