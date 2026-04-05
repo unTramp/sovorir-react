@@ -2,49 +2,49 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { contentRepository } from '../../lib/contentRepository';
-import { LessonPageView } from './LessonPageView';
-import type { LessonPage } from '../../types/lessonContent';
+import { LessonSectionView } from './LessonPageView';
+import type { LessonContentSection } from '../../types/lessonContent';
 
 const EMPTY_COMPLETED_RECORDS: number[] = [];
 
 export function LessonView() {
-  const [allPages, setAllPages] = useState<LessonPage[]>([]);
+  const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
-  const currentPage = useLessonStore((s) => s.currentPage);
-  const setTotalPages = useLessonStore((s) => s.setTotalPages);
+  const currentSection = useLessonStore((s) => s.currentSection);
+  const setTotalSections = useLessonStore((s) => s.setTotalSections);
   const completeRecord = useLessonProgress((s) => s.completeRecord);
-  const pageProgress = useLessonProgress((s) => s.pages[currentPage]);
+  const sectionProgress = useLessonProgress((s) => s.sections[currentSection]);
 
   useEffect(() => {
-    contentRepository.getLessonPages().then((pages) => {
-      setAllPages(pages);
-      setTotalPages(pages.length);
+    contentRepository.getLessonSections().then((sections) => {
+      setAllSections(sections);
+      setTotalSections(sections.length);
     });
-  }, [setTotalPages]);
+  }, [setTotalSections]);
 
-  const completedSet = pageProgress?.completedRecords ?? EMPTY_COMPLETED_RECORDS;
+  const completedSet = sectionProgress?.completedRecords ?? EMPTY_COMPLETED_RECORDS;
   const completedRecords = completedSet.length;
 
   const nextRecordIndex = useMemo(() => {
-    const page = allPages.find((p) => p.id === currentPage);
-    if (!page) return 0;
+    const section = allSections.find((item) => item.id === currentSection);
+    if (!section) return 0;
     let recordCounter = 0;
-    for (let i = 0; i < page.blocks.length; i++) {
-      if (page.blocks[i].type === 'record') {
+    for (let i = 0; i < section.blocks.length; i++) {
+      if (section.blocks[i].type === 'record') {
         if (!completedSet.includes(recordCounter)) return recordCounter;
         recordCounter++;
       }
     }
     return recordCounter;
-  }, [allPages, completedSet, currentPage]);
+  }, [allSections, completedSet, currentSection]);
 
   const handleRecordComplete = useCallback(() => {
-    completeRecord(currentPage, nextRecordIndex);
-  }, [completeRecord, currentPage, nextRecordIndex]);
+    completeRecord(currentSection, nextRecordIndex);
+  }, [completeRecord, currentSection, nextRecordIndex]);
 
   return (
     <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'lesson-fullscreen' : ''}`}>
-      <LessonPageView
+      <LessonSectionView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}
       />

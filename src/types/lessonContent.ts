@@ -48,9 +48,13 @@ export interface RecordBlock {
 
 export type ContentBlock = PhraseBlock | HeadingBlock | TextBlock | RuleBlock | AudioBubbleBlock | VideoBubbleBlock | RecordBlock;
 
-export interface LessonPage {
+export interface LessonContentSection {
   id: number;
+  title?: string;
   blocks: ContentBlock[];
   quizId?: string;
   dictionaryWordIds?: string[];
 }
+
+// Backward-compatible alias while UI moves from pages to sections.
+export type LessonPage = LessonContentSection;

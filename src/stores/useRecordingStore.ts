@@ -10,7 +10,7 @@ interface RecordingState {
   saveRecording: (meta: Recording, blob: Blob) => Promise<void>;
   getRecordingUrl: (id: string) => Promise<string | null>;
   deleteRecording: (id: string) => Promise<void>;
-  getRecordingForPrompt: (pageId: number, recordIndex: number) => Recording | undefined;
+  getRecordingForPrompt: (sectionId: number, recordIndex: number) => Recording | undefined;
 }
 
 export const useRecordingStore = create<RecordingState>()(
@@ -41,10 +41,10 @@ export const useRecordingStore = create<RecordingState>()(
         });
       },
 
-      getRecordingForPrompt: (pageId, recordIndex) => {
+      getRecordingForPrompt: (sectionId, recordIndex) => {
         const recordings = get().recordings;
         return Object.values(recordings).find(
-          (r) => r.pageId === pageId && r.recordIndex === recordIndex,
+          (r) => r.sectionId === sectionId && r.recordIndex === recordIndex,
         );
       },
     }),

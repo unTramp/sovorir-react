@@ -3,7 +3,7 @@ import type { Quiz } from '../types/quiz';
 export const quizzes: Quiz[] = [
   {
     id: 'quiz-page-1',
-    pageId: 1,
+    sectionId: 1,
     questions: [
       {
         type: 'multiple-choice',
@@ -44,7 +44,7 @@ export const quizzes: Quiz[] = [
   },
   {
     id: 'quiz-page-2',
-    pageId: 2,
+    sectionId: 2,
     questions: [
       {
         type: 'multiple-choice',

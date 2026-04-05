@@ -3,42 +3,42 @@ import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
-import type { LessonPage } from '../../types/lessonContent';
+import type { LessonContentSection } from '../../types/lessonContent';
 import type { Quiz, QuizResult } from '../../types/quiz';
 
 export function LessonCompleteCard() {
-  const currentPage = useLessonStore((s) => s.currentPage);
-  const totalPages = useLessonStore((s) => s.totalPages);
-  const nextPage = useLessonStore((s) => s.nextPage);
-  const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentPage));
+  const currentSection = useLessonStore((s) => s.currentSection);
+  const totalSections = useLessonStore((s) => s.totalSections);
+  const nextSection = useLessonStore((s) => s.nextSection);
+  const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
 
-  const [allPages, setAllPages] = useState<LessonPage[]>([]);
+  const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
-    contentRepository.getLessonPages().then(setAllPages);
+    contentRepository.getLessonSections().then(setAllSections);
   }, []);
 
   useEffect(() => {
-    contentRepository.getQuizForPage(currentPage).then(setQuiz);
-  }, [currentPage]);
+    contentRepository.getQuizForSection(currentSection).then(setQuiz);
+  }, [currentSection]);
 
-  const page = allPages.find((p) => p.id === currentPage);
-  const nextPageData = allPages.find((p) => p.id === currentPage + 1);
+  const section = allSections.find((item) => item.id === currentSection);
+  const nextSectionData = allSections.find((item) => item.id === currentSection + 1);
 
-  const currentHeading = page?.blocks.find((b) => b.type === 'heading');
-  const summaryText = currentHeading?.type === 'heading' ? currentHeading.text : 'этот урок';
+  const currentHeading = section?.blocks.find((b) => b.type === 'heading');
+  const summaryText = section?.title ?? (currentHeading?.type === 'heading' ? currentHeading.text : 'эту секцию');
 
-  const nextHeading = nextPageData?.blocks.find((b) => b.type === 'heading');
-  const nextPageTitle = nextHeading?.type === 'heading' ? nextHeading.text : '';
+  const nextHeading = nextSectionData?.blocks.find((b) => b.type === 'heading');
+  const nextSectionTitle = nextSectionData?.title ?? (nextHeading?.type === 'heading' ? nextHeading.text : '');
 
-  const isLastPage = currentPage >= totalPages;
+  const isLastSection = currentSection >= totalSections;
   const needsQuiz = !!quiz && !isQuizPassed;
 
   const handleQuizComplete = useCallback((result: QuizResult) => {
-    saveQuizResult(currentPage, result);
-  }, [currentPage, saveQuizResult]);
+    saveQuizResult(currentSection, result);
+  }, [currentSection, saveQuizResult]);
 
   return (
     <>
@@ -48,22 +48,22 @@ export function LessonCompleteCard() {
         <div className="lesson-complete__summary">
           Вы изучили: {summaryText.toLowerCase()}.
         </div>
-        {!isLastPage && nextPageTitle && (
+        {!isLastSection && nextSectionTitle && (
           <div className="lesson-complete__next-hint">
             <img
               src="/assets/teacher-avatar.png"
               className="lesson-complete__avatar"
               alt="Лусине"
             />
-            <span>Готовы перейти к: {nextPageTitle.toLowerCase()}?</span>
+            <span>Готовы перейти к: {nextSectionTitle.toLowerCase()}?</span>
           </div>
         )}
         <button
           className="lesson-complete__btn"
-          onClick={isLastPage ? undefined : nextPage}
-          disabled={isLastPage || needsQuiz}
+          onClick={isLastSection ? undefined : nextSection}
+          disabled={isLastSection || needsQuiz}
         >
-          {isLastPage ? 'Урок завершён ✓' : needsQuiz ? 'Пройдите тест ↓' : 'Следующий урок →'}
+          {isLastSection ? 'Урок завершён ✓' : needsQuiz ? 'Пройдите тест ↓' : 'Следующая секция →'}
         </button>
       </div>
       {quiz && (

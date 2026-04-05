@@ -1,31 +1,31 @@
 import { create } from 'zustand';
 
 interface LessonState {
-  currentPage: number;
-  totalPages: number;
+  currentSection: number;
+  totalSections: number;
   isFullscreen: boolean;
 
-  setCurrentPage: (page: number) => void;
-  setTotalPages: (total: number) => void;
-  nextPage: () => void;
-  prevPage: () => void;
+  setCurrentSection: (section: number) => void;
+  setTotalSections: (total: number) => void;
+  nextSection: () => void;
+  prevSection: () => void;
   toggleFullscreen: () => void;
 }
 
 export const useLessonStore = create<LessonState>((set, get) => ({
-  currentPage: 1,
-  totalPages: 0,
+  currentSection: 1,
+  totalSections: 0,
   isFullscreen: false,
 
-  setCurrentPage: (page) => set({ currentPage: page }),
-  setTotalPages: (total) => set({ totalPages: total }),
-  nextPage: () => {
-    const { currentPage, totalPages } = get();
-    if (currentPage < totalPages) set({ currentPage: currentPage + 1 });
+  setCurrentSection: (section) => set({ currentSection: section }),
+  setTotalSections: (total) => set({ totalSections: total }),
+  nextSection: () => {
+    const { currentSection, totalSections } = get();
+    if (currentSection < totalSections) set({ currentSection: currentSection + 1 });
   },
-  prevPage: () => {
-    const { currentPage } = get();
-    if (currentPage > 1) set({ currentPage: currentPage - 1 });
+  prevSection: () => {
+    const { currentSection } = get();
+    if (currentSection > 1) set({ currentSection: currentSection - 1 });
   },
   toggleFullscreen: () => set((s) => ({ isFullscreen: !s.isFullscreen })),
 }));

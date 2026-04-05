@@ -12,7 +12,7 @@ interface Props {
   onSkipRecord?: () => void;
   recordRef?: React.Ref<HTMLDivElement>;
   recordCompleted?: boolean;
-  pageId?: number;
+  sectionId?: number;
   recordIndex?: number;
 }
 
@@ -28,7 +28,7 @@ function toAudioMessage(block: Extract<ContentBlock, { type: 'audio' }>, index: 
   };
 }
 
-export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, pageId, recordIndex }: Props) {
+export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex }: Props) {
   switch (block.type) {
     case 'heading':
       return <h2 className="lesson-heading">{block.text}</h2>;
@@ -53,7 +53,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
           block={block}
           onSkip={onSkipRecord}
           completed={recordCompleted}
-          pageId={pageId}
+          sectionId={sectionId}
           recordIndex={recordIndex}
         />
       );

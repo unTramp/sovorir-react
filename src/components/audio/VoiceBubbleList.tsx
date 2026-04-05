@@ -4,8 +4,8 @@ import { VoiceBubble } from './VoiceBubble';
 import { VideoBubble } from './VideoBubble';
 
 export function VoiceBubbleList() {
-  const currentPage = useLessonStore((s) => s.currentPage);
-  const filtered = audioMessages.filter((msg) => msg.page === currentPage);
+  const currentSection = useLessonStore((s) => s.currentSection);
+  const filtered = audioMessages.filter((msg) => msg.page === currentSection);
 
   return (
     <div className="flex flex-col gap-5" style={{ paddingTop: 8 }}>

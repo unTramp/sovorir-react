@@ -1,6 +1,6 @@
 export interface Recording {
   id: string;
-  pageId: number;
+  sectionId: number;
   recordIndex: number;
   duration: number;
   createdAt: number;

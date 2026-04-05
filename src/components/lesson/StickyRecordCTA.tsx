@@ -5,22 +5,22 @@ import { AudioLevelMeter } from '../audio/AudioLevelMeter';
 
 interface Props {
   onComplete: () => void;
-  pageId: number;
+  sectionId: number;
   recordIndex: number;
 }
 
-export function StickyRecordCTA({ onComplete, pageId, recordIndex }: Props) {
+export function StickyRecordCTA({ onComplete, sectionId, recordIndex }: Props) {
   const { start, stop, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
   const saveRecording = useRecordingStore((s) => s.saveRecording);
 
   useEffect(() => {
     if (!audioBlob) return;
-    const id = `rec-${pageId}-${recordIndex}-${Date.now()}`;
+    const id = `rec-${sectionId}-${recordIndex}-${Date.now()}`;
     void saveRecording(
-      { id, pageId, recordIndex, duration, createdAt: Date.now() },
+      { id, sectionId, recordIndex, duration, createdAt: Date.now() },
       audioBlob,
     ).then(() => onComplete());
-  }, [audioBlob, duration, onComplete, pageId, recordIndex, saveRecording]);
+  }, [audioBlob, duration, onComplete, recordIndex, saveRecording, sectionId]);
 
   const handleStart = useCallback(() => {
     void start();

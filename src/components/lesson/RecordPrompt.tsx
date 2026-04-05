@@ -7,12 +7,12 @@ interface Props {
   block: RecordBlock;
   onSkip?: () => void;
   completed?: boolean;
-  pageId?: number;
+  sectionId?: number;
   recordIndex?: number;
 }
 
 export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
-  ({ block, onSkip, completed, pageId, recordIndex }, ref) => {
+  ({ block, onSkip, completed, sectionId, recordIndex }, ref) => {
     const colonIdx = block.prompt.indexOf(':');
     const label = colonIdx !== -1 ? block.prompt.slice(0, colonIdx).trim() : 'Произнесите';
     const phrase = colonIdx !== -1 ? block.prompt.slice(colonIdx + 1).trim() : block.prompt;
@@ -21,9 +21,9 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
     const getRecordingUrl = useRecordingStore((s) => s.getRecordingUrl);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
     const recording = useMemo(() => {
-      if (!completed || pageId == null || recordIndex == null) return undefined;
-      return getRecordingForPrompt(pageId, recordIndex);
-    }, [completed, getRecordingForPrompt, pageId, recordIndex]);
+      if (!completed || sectionId == null || recordIndex == null) return undefined;
+      return getRecordingForPrompt(sectionId, recordIndex);
+    }, [completed, getRecordingForPrompt, recordIndex, sectionId]);
 
     useEffect(() => {
       if (!recording) return;

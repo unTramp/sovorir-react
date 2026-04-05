@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { ContentBlock } from '../../types/lessonContent';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { contentRepository } from '../../lib/contentRepository';
-import type { LessonPage } from '../../types/lessonContent';
+import type { LessonContentSection } from '../../types/lessonContent';
 import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
@@ -12,55 +12,55 @@ interface Props {
   onRecordComplete: () => void;
 }
 
-export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
-  const currentPage = useLessonStore((s) => s.currentPage);
-  const [allPages, setAllPages] = useState<LessonPage[]>([]);
+export function LessonSectionView({ completedRecords, onRecordComplete }: Props) {
+  const currentSection = useLessonStore((s) => s.currentSection);
+  const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
 
   useEffect(() => {
-    contentRepository.getLessonPages().then(setAllPages);
+    contentRepository.getLessonSections().then(setAllSections);
   }, []);
 
-  const page = allPages.find((p) => p.id === currentPage);
+  const section = allSections.find((item) => item.id === currentSection);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const prevPageRef = useRef(currentPage);
+  const prevSectionRef = useRef(currentSection);
   const recordPromptRef = useRef<HTMLDivElement>(null);
   const [recordPromptVisible, setRecordPromptVisible] = useState(false);
 
-  // Scroll to top on page change
+  // Scroll to top on section change
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: 0 });
-  }, [currentPage]);
+  }, [currentSection]);
 
   // Compute record indices and visible blocks
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
-    if (!page) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
+    if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
     const recIndices: number[] = [];
-    page.blocks.forEach((b, i) => {
+    section.blocks.forEach((b, i) => {
       if (b.type === 'record') recIndices.push(i);
     });
 
     const allDone = completedRecords >= recIndices.length;
 
     if (allDone) {
-      return { visibleBlocks: page.blocks, allRecordsCompleted: true };
+      return { visibleBlocks: section.blocks, allRecordsCompleted: true };
     }
 
     const cutoffIndex = recIndices[completedRecords];
-    return { visibleBlocks: page.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [page, completedRecords]);
+    return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
+  }, [section, completedRecords]);
 
-  // Scroll to bottom when new blocks appear (skip on page change)
+  // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
-    if (prevPageRef.current !== currentPage) {
-      prevPageRef.current = currentPage;
+    if (prevSectionRef.current !== currentSection) {
+      prevSectionRef.current = currentSection;
       return;
     }
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
-  }, [visibleBlocks.length, allRecordsCompleted, currentPage]);
+  }, [visibleBlocks.length, allRecordsCompleted, currentSection]);
 
   // Show/hide sticky CTA based on record prompt visibility
   useEffect(() => {
@@ -74,7 +74,7 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [visibleBlocks.length, currentPage]);
+  }, [visibleBlocks.length, currentSection]);
 
   const handleRecordComplete = useCallback(() => {
     onRecordComplete();
@@ -91,10 +91,10 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     return map;
   }, [visibleBlocks]);
 
-  if (!page) {
+  if (!section) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted">
-        Страница не найдена
+        Секция не найдена
       </div>
     );
   }
@@ -112,14 +112,14 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
           const isCompletedRecord = block.type === 'record' && !isLastRecord;
           const recIdx = recordIndexMap.get(i);
           return (
-            <div key={`${currentPage}-${i}`} className="lesson-block-enter">
+            <div key={`${currentSection}-${i}`} className="lesson-block-enter">
               <BlockRenderer
                 block={block}
                 index={i}
                 onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
                 recordRef={isLastRecord ? recordPromptRef : undefined}
                 recordCompleted={isCompletedRecord}
-                pageId={currentPage}
+                sectionId={currentSection}
                 recordIndex={recIdx}
               />
             </div>
@@ -129,11 +129,11 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
           <div className="lesson-block-enter">
             <LessonCompleteCard />
           </div>
-        )}
-        <div ref={bottomRef} />
+      )}
+      <div ref={bottomRef} />
       </div>
       {showRecordCTA && (
-        <StickyRecordCTA onComplete={handleRecordComplete} pageId={currentPage} recordIndex={completedRecords} />
+        <StickyRecordCTA onComplete={handleRecordComplete} sectionId={currentSection} recordIndex={completedRecords} />
       )}
     </div>
   );

@@ -19,8 +19,8 @@ export function useKeyboard() {
 
       if (isLesson) {
         const store = useLessonStore.getState();
-        if (e.key === 'ArrowLeft') store.prevPage();
-        if (e.key === 'ArrowRight') store.nextPage();
+        if (e.key === 'ArrowLeft') store.prevSection();
+        if (e.key === 'ArrowRight') store.nextSection();
       }
     }
     document.addEventListener('keydown', handleKeydown);

@@ -1,81 +1,81 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { contentRepository } from '../lib/contentRepository';
-import type { LessonPage } from '../types/lessonContent';
+import type { LessonContentSection } from '../types/lessonContent';
 import type { QuizResult } from '../types/quiz';
 import { practiceEvents } from '../lib/practiceEvents';
 
-interface PageProgress {
+interface SectionProgress {
   completedRecords: number[];  // indices of completed record blocks
 }
 
 interface LessonProgressState {
-  // pageId → PageProgress
-  pages: Record<number, PageProgress>;
+  // sectionId → SectionProgress
+  sections: Record<number, SectionProgress>;
   quizResults: Record<number, QuizResult>;
-  pagesReady: boolean;
+  sectionsReady: boolean;
 
   // Actions
-  _initPages: (pages: LessonPage[]) => void;
-  completeRecord: (pageId: number, recordIndex: number) => void;
-  getCompletedCount: (pageId: number) => number;
-  getTotalRecords: (pageId: number) => number;
-  isPageCompleted: (pageId: number) => boolean;
+  _initSections: (sections: LessonContentSection[]) => void;
+  completeRecord: (sectionId: number, recordIndex: number) => void;
+  getCompletedCount: (sectionId: number) => number;
+  getTotalRecords: (sectionId: number) => number;
+  isSectionCompleted: (sectionId: number) => boolean;
   getOverallPercentage: () => number;
-  getCompletedLessons: () => number;
-  saveQuizResult: (pageId: number, result: QuizResult) => void;
-  isQuizPassed: (pageId: number) => boolean;
+  getCompletedSections: () => number;
+  saveQuizResult: (sectionId: number, result: QuizResult) => void;
+  isQuizPassed: (sectionId: number) => boolean;
 }
 
-// Module-level cache populated via _initPages action.
-let _lessonPages: LessonPage[] = [];
+// Module-level cache populated via _initSections action.
+let _lessonSections: LessonContentSection[] = [];
 
-// Kick off the load immediately; the store action will set pagesReady when done.
-contentRepository.getLessonPages().then((pages) => {
-  _lessonPages = pages;
-  useLessonProgress.getState()._initPages(pages);
+// Kick off the load immediately; the store action will set sectionsReady when done.
+contentRepository.getLessonSections().then((sections) => {
+  _lessonSections = sections;
+  useLessonProgress.getState()._initSections(sections);
 });
 
-function countRecords(pageId: number): number {
-  const page = _lessonPages.find((p) => p.id === pageId);
-  if (!page) return 0;
-  return page.blocks.filter((b) => b.type === 'record').length;
+function countRecords(sectionId: number): number {
+  const section = _lessonSections.find((item) => item.id === sectionId);
+  if (!section) return 0;
+  return section.blocks.filter((b) => b.type === 'record').length;
 }
 
 export const useLessonProgress = create<LessonProgressState>()(
   persist(
     (set, get) => ({
-      pages: {},
+      sections: {},
       quizResults: {},
-      pagesReady: false,
+      sectionsReady: false,
 
-      _initPages: (pages: LessonPage[]) => {
-        _lessonPages = pages;
-        set({ pagesReady: true });
+      _initSections: (sections: LessonContentSection[]) => {
+        _lessonSections = sections;
+        set({ sectionsReady: true });
       },
 
-      completeRecord: (pageId, recordIndex) =>
+      completeRecord: (sectionId, recordIndex) =>
         set((state) => {
-          const current = state.pages[pageId]?.completedRecords || [];
+          const current = state.sections[sectionId]?.completedRecords || [];
           if (current.includes(recordIndex)) return state;
           return {
-            pages: {
-              ...state.pages,
-              [pageId]: { completedRecords: [...current, recordIndex] },
+            sections: {
+              ...state.sections,
+              [sectionId]: { completedRecords: [...current, recordIndex] },
             },
           };
         }),
 
-      getCompletedCount: (pageId) => {
-        return get().pages[pageId]?.completedRecords.length || 0;
+      getCompletedCount: (sectionId) => {
+        return get().sections[sectionId]?.completedRecords.length || 0;
       },
 
-      getTotalRecords: (pageId) => countRecords(pageId),
+      getTotalRecords: (sectionId) => countRecords(sectionId),
 
-      isPageCompleted: (pageId) => {
-        const total = countRecords(pageId);
+      isSectionCompleted: (sectionId) => {
+        const total = countRecords(sectionId);
         if (total === 0) return true;
-        const completed = get().pages[pageId]?.completedRecords.length || 0;
+        const completed = get().sections[sectionId]?.completedRecords.length || 0;
         return completed >= total;
       },
 
@@ -83,39 +83,39 @@ export const useLessonProgress = create<LessonProgressState>()(
         const state = get();
         let totalRecords = 0;
         let completedRecords = 0;
-        for (const page of _lessonPages) {
-          const recs = page.blocks.filter((b) => b.type === 'record').length;
+        for (const section of _lessonSections) {
+          const recs = section.blocks.filter((b) => b.type === 'record').length;
           totalRecords += recs;
           completedRecords += Math.min(
-            state.pages[page.id]?.completedRecords.length || 0,
+            state.sections[section.id]?.completedRecords.length || 0,
             recs,
           );
         }
         return totalRecords > 0 ? Math.round((completedRecords / totalRecords) * 100) : 0;
       },
 
-      getCompletedLessons: () => {
+      getCompletedSections: () => {
         const state = get();
         let count = 0;
-        for (const page of _lessonPages) {
-          const total = page.blocks.filter((b) => b.type === 'record').length;
-          const completed = state.pages[page.id]?.completedRecords.length || 0;
+        for (const section of _lessonSections) {
+          const total = section.blocks.filter((b) => b.type === 'record').length;
+          const completed = state.sections[section.id]?.completedRecords.length || 0;
           if (total === 0 || completed >= total) count++;
         }
         return count;
       },
 
-      saveQuizResult: (pageId, result) => {
+      saveQuizResult: (sectionId, result) => {
         if (result.passed) {
           practiceEvents.emit('quiz');
         }
         return set((state) => ({
-          quizResults: { ...state.quizResults, [pageId]: result },
+          quizResults: { ...state.quizResults, [sectionId]: result },
         }));
       },
 
-      isQuizPassed: (pageId) => {
-        const result = get().quizResults[pageId];
+      isQuizPassed: (sectionId) => {
+        const result = get().quizResults[sectionId];
         return result?.passed ?? false;
       },
     }),

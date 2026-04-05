@@ -9,8 +9,8 @@ export interface DataAccessLayer {
   getContent(): ContentRepository;
 
   // Lesson progress
-  getPageProgress(pageId: number): { completedRecords: number[] };
-  savePageProgress(pageId: number, completedRecords: number[]): void;
+  getSectionProgress(sectionId: number): { completedRecords: number[] };
+  saveSectionProgress(sectionId: number, completedRecords: number[]): void;
 
   // Flashcards
   getFlashcardProgress(): Record<string, FlashcardProgress>;
@@ -24,7 +24,7 @@ export interface DataAccessLayer {
 
   // Quizzes
   getQuizResults(): Record<number, QuizResult>;
-  saveQuizResult(pageId: number, result: QuizResult): void;
+  saveQuizResult(sectionId: number, result: QuizResult): void;
 }
 
 class LocalDAL implements DataAccessLayer {
@@ -43,21 +43,21 @@ class LocalDAL implements DataAccessLayer {
     }
   }
 
-  getPageProgress(pageId: number): { completedRecords: number[] } {
-    const data = this.getStore<{ pages: Record<number, { completedRecords: number[] }> }>(
+  getSectionProgress(sectionId: number): { completedRecords: number[] } {
+    const data = this.getStore<{ sections: Record<number, { completedRecords: number[] }> }>(
       'sovorir-lesson-progress',
-      { pages: {} },
+      { sections: {} },
     );
-    return data.pages[pageId] || { completedRecords: [] };
+    return data.sections[sectionId] || { completedRecords: [] };
   }
 
-  savePageProgress(pageId: number, completedRecords: number[]): void {
+  saveSectionProgress(sectionId: number, completedRecords: number[]): void {
     const key = 'sovorir-lesson-progress';
-    const data = this.getStore<{ pages: Record<number, { completedRecords: number[] }> }>(
+    const data = this.getStore<{ sections: Record<number, { completedRecords: number[] }> }>(
       key,
-      { pages: {} },
+      { sections: {} },
     );
-    data.pages[pageId] = { completedRecords };
+    data.sections[sectionId] = { completedRecords };
     localStorage.setItem(key, JSON.stringify({ state: data }));
   }
 
@@ -116,12 +116,12 @@ class LocalDAL implements DataAccessLayer {
     ).quizResults || {};
   }
 
-  saveQuizResult(pageId: number, result: QuizResult): void {
+  saveQuizResult(sectionId: number, result: QuizResult): void {
     const key = 'sovorir-lesson-progress';
     const raw = localStorage.getItem(key);
     const data = raw ? JSON.parse(raw) : { state: {} };
     if (!data.state.quizResults) data.state.quizResults = {};
-    data.state.quizResults[pageId] = result;
+    data.state.quizResults[sectionId] = result;
     localStorage.setItem(key, JSON.stringify(data));
   }
 }

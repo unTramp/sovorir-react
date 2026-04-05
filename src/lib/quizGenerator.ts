@@ -1,4 +1,4 @@
-import type { LessonPage, PhraseBlock } from '../types/lessonContent';
+import type { LessonContentSection, PhraseBlock } from '../types/lessonContent';
 import type { Quiz, QuizQuestion, MultipleChoiceQuestion, MatchPairsQuestion } from '../types/quiz';
 import type { DictionaryWord } from '../types/dictionary';
 
@@ -19,8 +19,8 @@ function shuffleArray<T>(arr: T[], rng: () => number): T[] {
   return result;
 }
 
-function extractPhrases(page: LessonPage): PhraseBlock[] {
-  return page.blocks.filter((b): b is PhraseBlock => b.type === 'phrase');
+function extractPhrases(section: LessonContentSection): PhraseBlock[] {
+  return section.blocks.filter((b): b is PhraseBlock => b.type === 'phrase');
 }
 
 function makeArmenianToRussianQuestion(
@@ -78,10 +78,10 @@ function makeMatchPairs(phrases: PhraseBlock[]): MatchPairsQuestion {
 }
 
 export function generateQuizForPage(
-  page: LessonPage,
+  section: LessonContentSection,
   fallbackWords?: DictionaryWord[],
 ): Quiz | null {
-  let phrases = extractPhrases(page);
+  let phrases = extractPhrases(section);
 
   // Fallback to dictionary words if page has < 4 phrases
   if (phrases.length < 4 && fallbackWords && fallbackWords.length >= 4) {
@@ -97,7 +97,7 @@ export function generateQuizForPage(
 
   if (phrases.length < 4) return null;
 
-  const rng = seededRandom(page.id * 31337);
+  const rng = seededRandom(section.id * 31337);
   const shuffled = shuffleArray(phrases, rng);
   const questions: QuizQuestion[] = [];
 
@@ -117,8 +117,8 @@ export function generateQuizForPage(
   }
 
   return {
-    id: `quiz-page-${page.id}`,
-    pageId: page.id,
+    id: `quiz-section-${section.id}`,
+    sectionId: section.id,
     questions,
   };
 }

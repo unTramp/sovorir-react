@@ -26,8 +26,8 @@ export function MobileHeader() {
   const navigate = useNavigate();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const streak = useStreakStore((s) => s.currentStreak);
-  const currentPage = useLessonStore((s) => s.currentPage);
-  const totalPages = useLessonStore((s) => s.totalPages);
+  const currentSection = useLessonStore((s) => s.currentSection);
+  const totalSections = useLessonStore((s) => s.totalSections);
   const location = useLocation();
   const lessonMatch = useMatch('/lesson');
   const isLesson = !!lessonMatch;
@@ -56,8 +56,8 @@ export function MobileHeader() {
 
       {isLesson ? (
         <div className="lesson-header__dots">
-          {totalPages > 0 && Array.from({ length: totalPages }, (_, i) => (
-            <span key={i} className={`lesson-header__dot ${i < currentPage ? 'lesson-header__dot--done' : ''}`} />
+          {totalSections > 0 && Array.from({ length: totalSections }, (_, i) => (
+            <span key={i} className={`lesson-header__dot ${i < currentSection ? 'lesson-header__dot--done' : ''}`} />
           ))}
         </div>
       ) : (

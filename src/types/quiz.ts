@@ -15,7 +15,7 @@ export type QuizQuestion = MultipleChoiceQuestion | MatchPairsQuestion;
 
 export interface Quiz {
   id: string;
-  pageId: number;
+  sectionId: number;
   questions: QuizQuestion[];
 }
 

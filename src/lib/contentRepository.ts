@@ -1,4 +1,4 @@
-import type { LessonPage } from '../types/lessonContent';
+import type { LessonContentSection } from '../types/lessonContent';
 import type { DictionaryWord } from '../types/dictionary';
 import type { Quiz } from '../types/quiz';
 import type { LiveLesson, ConversationClubSession } from '../types/liveLesson';
@@ -12,9 +12,9 @@ import { generateQuizForPage } from './quizGenerator';
 import { todayISO } from './dateUtils';
 
 export interface ContentRepository {
-  getLessonPages(): Promise<LessonPage[]>;
+  getLessonSections(): Promise<LessonContentSection[]>;
   getDictionary(): Promise<DictionaryWord[]>;
-  getQuizForPage(pageId: number): Promise<Quiz | null>;
+  getQuizForSection(sectionId: number): Promise<Quiz | null>;
   getLiveLessons(): Promise<LiveLesson[]>;
   getConversationClubs(): Promise<ConversationClubSession[]>;
   getFlashcardWords(): Promise<DictionaryWord[]>;
@@ -22,7 +22,7 @@ export interface ContentRepository {
 }
 
 class StaticContentRepository implements ContentRepository {
-  getLessonPages(): Promise<LessonPage[]> {
+  getLessonSections(): Promise<LessonContentSection[]> {
     return Promise.resolve(lessonPages);
   }
 
@@ -30,10 +30,10 @@ class StaticContentRepository implements ContentRepository {
     return Promise.resolve(dictionary);
   }
 
-  getQuizForPage(pageId: number): Promise<Quiz | null> {
-    const page = lessonPages.find((p) => p.id === pageId);
-    if (!page) return Promise.resolve(null);
-    return Promise.resolve(generateQuizForPage(page, dictionary));
+  getQuizForSection(sectionId: number): Promise<Quiz | null> {
+    const section = lessonPages.find((p) => p.id === sectionId);
+    if (!section) return Promise.resolve(null);
+    return Promise.resolve(generateQuizForPage(section, dictionary));
   }
 
   getLiveLessons(): Promise<LiveLesson[]> {
