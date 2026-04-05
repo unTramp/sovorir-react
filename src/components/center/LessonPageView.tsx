@@ -80,6 +80,17 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     onRecordComplete();
   }, [onRecordComplete]);
 
+  // Precompute record indices — O(n) instead of O(n²) inside map
+  // Must be before early return to satisfy Rules of Hooks
+  const recordIndexMap = useMemo(() => {
+    const map = new Map<number, number>();
+    let counter = 0;
+    visibleBlocks.forEach((block, i) => {
+      if (block.type === 'record') map.set(i, counter++);
+    });
+    return map;
+  }, [visibleBlocks]);
+
   if (!page) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted">
@@ -92,16 +103,6 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     visibleBlocks.length > 0 &&
     visibleBlocks[visibleBlocks.length - 1].type === 'record';
   const showRecordCTA = hasActiveRecord && recordPromptVisible;
-
-  // Precompute record indices — O(n) instead of O(n²) inside map
-  const recordIndexMap = useMemo(() => {
-    const map = new Map<number, number>();
-    let counter = 0;
-    visibleBlocks.forEach((block, i) => {
-      if (block.type === 'record') map.set(i, counter++);
-    });
-    return map;
-  }, [visibleBlocks]);
 
   return (
     <div ref={scrollRef} className="lesson-scroll">
