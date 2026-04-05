@@ -1,7 +1,8 @@
+import { useNavigate, useMatch } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import type { SectionType } from '../../types/lesson';
 
-interface DrawerItemProps {
+export interface DrawerItemProps {
   label: string;
   icon: React.ReactNode;
   viewId?: SectionType;
@@ -9,20 +10,19 @@ interface DrawerItemProps {
   pro?: boolean;
 }
 
-export function DrawerItem({ label, icon, viewId, badge, pro }: DrawerItemProps) {
-  const activeSection = useAppStore((s) => s.activeSection);
-  const currentView = useAppStore((s) => s.currentView);
-  const setActiveSection = useAppStore((s) => s.setActiveSection);
-  const setCurrentView = useAppStore((s) => s.setCurrentView);
-  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+function viewToPath(viewId: SectionType): string {
+  return viewId === 'home' ? '/' : `/${viewId}`;
+}
 
-  const isActive = viewId ? currentView === viewId : false;
+export function DrawerItem({ label, icon, viewId, badge, pro }: DrawerItemProps) {
+  const navigate = useNavigate();
+  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
+  const path = viewId ? viewToPath(viewId) : '/';
+  const match = useMatch(path);
+  const isActive = !!match;
 
   function handleClick() {
-    if (viewId) {
-      setActiveSection(viewId);
-      setCurrentView(viewId);
-    }
+    if (viewId) navigate(path);
     toggleSidebar(false);
   }
 

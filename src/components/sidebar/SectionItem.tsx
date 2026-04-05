@@ -1,3 +1,4 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { Section } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
 
@@ -6,16 +7,18 @@ interface Props {
 }
 
 export function SectionItem({ section }: Props) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const activeSection = useAppStore((s) => s.activeSection);
   const setActiveSection = useAppStore((s) => s.setActiveSection);
-  const setCurrentView = useAppStore((s) => s.setCurrentView);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
 
   const isActive = section.id === activeSection;
+  const path = section.type === 'home' ? '/' : `/${section.type}`;
 
   function handleClick() {
     setActiveSection(section.id);
-    setCurrentView(section.type);
+    navigate(path);
     toggleSidebar(false);
   }
 
@@ -26,10 +29,13 @@ export function SectionItem({ section }: Props) {
     }
   }
 
+  // Also consider active by current route if no explicit activeSection set
+  const isRouteActive = !activeSection && location.pathname === path;
+
   return (
     <div
       className={`sidebar-tree-item flex items-center text-[13px] ${
-        isActive ? 'active' : ''
+        isActive || isRouteActive ? 'active' : ''
       }`}
       role="listitem"
       tabIndex={0}

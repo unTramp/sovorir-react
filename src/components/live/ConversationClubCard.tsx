@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { ConversationClubSession } from '../../types/liveLesson';
 
 interface Props {
@@ -34,7 +34,7 @@ function formatCountdown(date: string, time: string): string | null {
   return `Через ${diffDays} ${pluralize(diffDays, 'день', 'дня', 'дней')}`;
 }
 
-export function ConversationClubCard({ session }: Props) {
+export const ConversationClubCard = memo(function ConversationClubCard({ session }: Props) {
   const spotsLeft = session.spotsTotal - session.spotsTaken;
   const isFull = spotsLeft <= 0;
 
@@ -111,4 +111,4 @@ export function ConversationClubCard({ session }: Props) {
       </div>
     </div>
   );
-}
+});

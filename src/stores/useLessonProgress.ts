@@ -13,8 +13,10 @@ interface LessonProgressState {
   // pageId → PageProgress
   pages: Record<number, PageProgress>;
   quizResults: Record<number, QuizResult>;
+  pagesReady: boolean;
 
   // Actions
+  _initPages: (pages: LessonPage[]) => void;
   completeRecord: (pageId: number, recordIndex: number) => void;
   getCompletedCount: (pageId: number) => number;
   getTotalRecords: (pageId: number) => number;
@@ -25,10 +27,14 @@ interface LessonProgressState {
   isQuizPassed: (pageId: number) => boolean;
 }
 
-// Module-level cache — populated once from the async interface.
-// Safe to use synchronously after app initialises (Promise.resolve resolves in the next microtask).
+// Module-level cache populated via _initPages action.
 let _lessonPages: LessonPage[] = [];
-contentRepository.getLessonPages().then((pages) => { _lessonPages = pages; });
+
+// Kick off the load immediately; the store action will set pagesReady when done.
+contentRepository.getLessonPages().then((pages) => {
+  _lessonPages = pages;
+  useLessonProgress.getState()._initPages(pages);
+});
 
 function countRecords(pageId: number): number {
   const page = _lessonPages.find((p) => p.id === pageId);
@@ -41,6 +47,12 @@ export const useLessonProgress = create<LessonProgressState>()(
     (set, get) => ({
       pages: {},
       quizResults: {},
+      pagesReady: false,
+
+      _initPages: (pages: LessonPage[]) => {
+        _lessonPages = pages;
+        set({ pagesReady: true });
+      },
 
       completeRecord: (pageId, recordIndex) =>
         set((state) => {

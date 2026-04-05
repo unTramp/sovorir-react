@@ -19,11 +19,6 @@ export function LessonView() {
     });
   }, [setTotalPages]);
 
-  const pageTitles = useMemo(() => allPages.map((page) => {
-    const heading = page.blocks.find((b) => b.type === 'heading');
-    return heading?.type === 'heading' ? heading.text : `Часть ${page.id}`;
-  }), [allPages]);
-
   const completedRecords = getCompletedCount(currentPage);
 
   const nextRecordIndex = useMemo(() => {

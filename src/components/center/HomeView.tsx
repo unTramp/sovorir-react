@@ -1,7 +1,6 @@
-import { useState, useMemo } from 'react';
-import { useAppStore } from '../../stores/useAppStore';
+import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useStreakStore } from '../../stores/useStreakStore';
-import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useUserStore } from '../../stores/useUserStore';
 import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
@@ -25,30 +24,18 @@ function PlayIcon() {
   );
 }
 
-function ArrowIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M5 12h14M12 5l7 7-7 7" />
-    </svg>
-  );
-}
-
 const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: SectionType; xp: number; iconBg: string }[] = [
   { label: 'Карточки', sub: 'Повтори слова за 2 минуты', emoji: '🃏', view: 'practice', xp: 15, iconBg: '#FFDBCD' },
   { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', emoji: '🧠', view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
 ];
 
 export function HomeView() {
-  const [noteExpanded, setNoteExpanded] = useState(false);
-  const setCurrentView = useAppStore((s) => s.setCurrentView);
+  const navigate = useNavigate();
   const streak = useStreakStore((s) => s.currentStreak);
-  const longestStreak = useStreakStore((s) => s.longestStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
-  const overallPct = useLessonProgress.getState().getOverallPercentage();
   const { firstName } = useUserStore();
 
   const today = todayISO();
-  const practicedToday = practiceDates.includes(today);
   const weekDays = useMemo(() => getWeekDays(), []);
   const currentLesson = lessons.find((l) => l.status === 'current');
   const latestNote = teacherNotes[0];
@@ -57,14 +44,6 @@ export function HomeView() {
   const completedSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
   const completedPct = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
   const stepsLeft = totalSections - completedSections;
-
-  const streakTitle = streak === 0
-    ? 'Начни сегодня 🔥'
-    : streak === 1
-    ? '🔥 Начни серию'
-    : `🔥 Уже ${streak} ${streak < 5 ? 'дня' : 'дней'} подряд`;
-
-  const streakSubtitle = practicedToday ? 'Отлично! Серия продолжается' : 'Сохрани серию сегодня 🔥';
 
   return (
     <div className="home-screen">
@@ -77,7 +56,7 @@ export function HomeView() {
 
       {/* Hero Lesson Card */}
       {currentLesson && (
-        <button className="home-hero__card" onClick={() => setCurrentView('lesson')}>
+        <button className="home-hero__card" onClick={() => navigate('/lesson')}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
@@ -107,7 +86,7 @@ export function HomeView() {
         <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
           {PRACTICE_ITEMS.map((item) => (
-            <button key={item.label} className="home-daily-item" onClick={() => setCurrentView(item.view)}>
+            <button key={item.label} className="home-daily-item" onClick={() => navigate(`/${item.view}`)}>
               <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
                 <span>{item.emoji}</span>
               </div>
@@ -126,8 +105,8 @@ export function HomeView() {
         className="home-weekly-section"
         role="button"
         tabIndex={0}
-        onClick={() => setCurrentView('practice')}
-        onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('practice'); }}
+        onClick={() => navigate('/practice')}
+        onKeyDown={(e) => { if (e.key === 'Enter') navigate('/practice'); }}
       >
         <div className="home-weekly-section__header">
           <h3 className="home-weekly__title">Недельная активность</h3>
@@ -161,7 +140,7 @@ export function HomeView() {
       {/* Teacher Section */}
       {latestNote && (
         <div className="home-teacher-section">
-          <div className="home-teacher__bubble" onClick={() => setCurrentView('notes')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') setCurrentView('notes'); }}>
+          <div className="home-teacher__bubble" onClick={() => navigate('/notes')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/notes'); }}>
             <div className="home-teacher__photo-wrap">
               <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
             </div>
@@ -171,7 +150,7 @@ export function HomeView() {
             </p>
             <button
               className="home-teacher__view-tips"
-              onClick={() => setCurrentView('notes')}
+              onClick={() => navigate('/notes')}
             >
               Смотреть советы →
             </button>

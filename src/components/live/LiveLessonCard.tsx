@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { LiveLesson } from '../../types/liveLesson';
 
 interface Props {
@@ -35,7 +35,7 @@ function formatCountdown(date: string, time: string): string | null {
   return `Начало через ${diffDays} ${pluralize(diffDays, 'день', 'дня', 'дней')}`;
 }
 
-export function LiveLessonCard({ lesson, isFirstFree }: Props) {
+export const LiveLessonCard = memo(function LiveLessonCard({ lesson, isFirstFree }: Props) {
   const spotsLeft = lesson.spotsTotal - lesson.spotsTaken;
   const isFull = spotsLeft <= 0;
 
@@ -143,4 +143,4 @@ export function LiveLessonCard({ lesson, isFirstFree }: Props) {
       </div>
     </div>
   );
-}
+});

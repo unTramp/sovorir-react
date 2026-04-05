@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import type { DictionaryWord } from '../../types/dictionary';
 import { PlayIcon } from '../../icons';
 
@@ -5,7 +6,7 @@ interface Props {
   word: DictionaryWord;
 }
 
-export function DictCard({ word }: Props) {
+export const DictCard = memo(function DictCard({ word }: Props) {
   return (
     <div className="dict-bubble">
       <div className="dict-bubble__head">
@@ -31,4 +32,4 @@ export function DictCard({ word }: Props) {
       </div>
     </div>
   );
-}
+});

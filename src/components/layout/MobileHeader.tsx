@@ -1,10 +1,11 @@
+import { useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonStore } from '../../stores/useLessonStore';
-import { HamburgerIcon, FlameIcon } from '../../icons';
+import { HamburgerIcon, FlameIcon, BackArrowIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 
-const VIEW_TITLES: Record<SectionType, { title: string; subtitle?: string }> = {
+const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: string }>> & Record<string, { title: string; subtitle?: string }> = {
   home: { title: 'Главная' },
   lesson: { title: 'Урок 3' },
   video: { title: 'Видео' },
@@ -17,28 +18,31 @@ const VIEW_TITLES: Record<SectionType, { title: string; subtitle?: string }> = {
   settings: { title: 'Настройки' },
 };
 
+function pathnameToKey(pathname: string): string {
+  return pathname === '/' ? 'home' : pathname.slice(1);
+}
+
 export function MobileHeader() {
+  const navigate = useNavigate();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-  const setCurrentView = useAppStore((s) => s.setCurrentView);
-  const currentView = useAppStore((s) => s.currentView);
   const streak = useStreakStore((s) => s.currentStreak);
   const currentPage = useLessonStore((s) => s.currentPage);
   const totalPages = useLessonStore((s) => s.totalPages);
+  const location = useLocation();
+  const lessonMatch = useMatch('/lesson');
+  const isLesson = !!lessonMatch;
 
-  const isLesson = currentView === 'lesson';
-  const { title, subtitle } = VIEW_TITLES[currentView] ?? { title: 'Sovorir' };
+  const { title, subtitle } = VIEW_TITLES[pathnameToKey(location.pathname)] ?? { title: 'Sovorir' };
 
   return (
     <header className="mobile-header h-14 flex items-center px-4 gap-3 flex-shrink-0 z-30 relative">
       {isLesson ? (
         <button
           className="mobile-header__btn"
-          onClick={() => setCurrentView('home')}
+          onClick={() => navigate('/')}
           aria-label="Назад"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <BackArrowIcon />
         </button>
       ) : (
         <button
