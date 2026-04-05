@@ -106,7 +106,7 @@ export function HomeView() {
         role="button"
         tabIndex={0}
         onClick={() => navigate('/practice')}
-        onKeyDown={(e) => { if (e.key === 'Enter') navigate('/practice'); }}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate('/practice'); } }}
       >
         <div className="home-weekly-section__header">
           <h3 className="home-weekly__title">Недельная активность</h3>
@@ -140,7 +140,7 @@ export function HomeView() {
       {/* Teacher Section */}
       {latestNote && (
         <div className="home-teacher-section">
-          <div className="home-teacher__bubble" onClick={() => navigate('/notes')} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') navigate('/notes'); }}>
+          <div className="home-teacher__bubble">
             <div className="home-teacher__photo-wrap">
               <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
             </div>

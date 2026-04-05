@@ -62,7 +62,7 @@ export function QuizContainer({ quiz, onComplete }: Props) {
         <span className="quiz-container__progress">{currentIndex + 1} / {quiz.questions.length}</span>
       </div>
       {question.type === 'multiple-choice' && (
-        <MultipleChoiceCard question={question} onAnswer={handleAnswer} />
+        <MultipleChoiceCard key={question.question} question={question} onAnswer={handleAnswer} />
       )}
       {question.type === 'match-pairs' && (
         <MatchPairsCard question={question} onComplete={handleAnswer} />

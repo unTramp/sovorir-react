@@ -63,4 +63,9 @@ export const useStreakStore = create<StreakState>()(
   ),
 );
 
-practiceEvents.on(() => useStreakStore.getState().recordPractice());
+// Store unsubscribe so HMR teardown can clean up the listener
+const _unsubscribePracticeEvents = practiceEvents.on(() => useStreakStore.getState().recordPractice());
+
+if (import.meta.hot) {
+  import.meta.hot.dispose(() => _unsubscribePracticeEvents());
+}

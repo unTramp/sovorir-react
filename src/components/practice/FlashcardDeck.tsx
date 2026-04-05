@@ -18,7 +18,7 @@ export function FlashcardDeck() {
       <div className="flashcard-deck__progress">
         {session.currentIndex + 1} / {session.cards.length}
       </div>
-      <FlashcardCard word={word} />
+      <FlashcardCard key={word.id} word={word} />
       <div className="flashcard-deck__buttons">
         <button
           className="flashcard-answer flashcard-answer--again"

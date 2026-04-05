@@ -93,16 +93,23 @@ export function LessonPageView({ completedRecords, onRecordComplete }: Props) {
     visibleBlocks[visibleBlocks.length - 1].type === 'record';
   const showRecordCTA = hasActiveRecord && recordPromptVisible;
 
+  // Precompute record indices — O(n) instead of O(n²) inside map
+  const recordIndexMap = useMemo(() => {
+    const map = new Map<number, number>();
+    let counter = 0;
+    visibleBlocks.forEach((block, i) => {
+      if (block.type === 'record') map.set(i, counter++);
+    });
+    return map;
+  }, [visibleBlocks]);
+
   return (
     <div ref={scrollRef} className="lesson-scroll">
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
         {visibleBlocks.map((block, i) => {
           const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
           const isCompletedRecord = block.type === 'record' && !isLastRecord;
-          let recIdx: number | undefined;
-          if (block.type === 'record') {
-            recIdx = visibleBlocks.slice(0, i).filter((b) => b.type === 'record').length;
-          }
+          const recIdx = recordIndexMap.get(i);
           return (
             <div key={`${currentPage}-${i}`} className="lesson-block-enter">
               <BlockRenderer

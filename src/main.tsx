@@ -4,7 +4,7 @@ declare global {
     toHex(): string;
   }
   interface PromiseConstructor {
-    try<T>(fn: (...args: any[]) => T, ...args: any[]): Promise<Awaited<T>>;
+    try<T>(fn: (...args: unknown[]) => T, ...args: unknown[]): Promise<Awaited<T>>;
   }
 }
 
@@ -19,8 +19,8 @@ if (!Uint8Array.prototype.toHex) {
 }
 
 if (typeof Promise.try !== 'function') {
-  Promise.try = function (fn: (...args: any[]) => any, ...args: any[]) {
-    return new Promise((resolve) => resolve(fn(...args)));
+  Promise.try = function <T>(fn: (...args: unknown[]) => T, ...args: unknown[]) {
+    return new Promise<Awaited<T>>((resolve) => resolve(fn(...args) as Awaited<T>));
   };
 }
 

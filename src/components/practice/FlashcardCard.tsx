@@ -7,15 +7,7 @@ interface Props {
 
 export function FlashcardCard({ word }: Props) {
   const [flipped, setFlipped] = useState(false);
-
   const handleFlip = useCallback(() => setFlipped((f) => !f), []);
-
-  // Reset flip when word changes
-  const [prevId, setPrevId] = useState(word.id);
-  if (word.id !== prevId) {
-    setPrevId(word.id);
-    setFlipped(false);
-  }
 
   return (
     <div className="flashcard-scene" onClick={handleFlip}>

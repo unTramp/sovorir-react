@@ -15,13 +15,6 @@ export function MultipleChoiceCard({ question, onAnswer }: Props) {
     onAnswer(index === question.correctIndex);
   };
 
-  // Reset when question changes
-  const [prevQ, setPrevQ] = useState(question.question);
-  if (question.question !== prevQ) {
-    setPrevQ(question.question);
-    setSelected(null);
-  }
-
   return (
     <div className="quiz-mc">
       <div className="quiz-mc__question">{question.question}</div>

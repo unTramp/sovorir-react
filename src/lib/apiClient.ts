@@ -66,6 +66,8 @@ async function attemptRefresh(): Promise<string | null> {
   }
 }
 
+const REQUEST_TIMEOUT_MS = 10_000;
+
 async function request<T>(
   method: string,
   path: string,
@@ -77,15 +79,23 @@ async function request<T>(
     if (token) headers['Authorization'] = `Bearer ${token}`;
     if (!isFormData) headers['Content-Type'] = 'application/json';
 
-    return fetch(`${BASE_URL}${path}`, {
-      method,
-      headers,
-      body: body
-        ? isFormData
-          ? (body as FormData)
-          : JSON.stringify(body)
-        : undefined,
-    });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+      return await fetch(`${BASE_URL}${path}`, {
+        method,
+        headers,
+        signal: controller.signal,
+        body: body
+          ? isFormData
+            ? (body as FormData)
+            : JSON.stringify(body)
+          : undefined,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
   };
 
   let res = await doFetch(getAccessToken());

@@ -104,6 +104,9 @@ export function useMediaRecorder(): UseMediaRecorderResult {
     return () => {
       cancelAnimationFrame(rafRef.current);
       cancelAnimationFrame(durationRafRef.current);
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
       streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
