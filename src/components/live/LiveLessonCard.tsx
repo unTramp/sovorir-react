@@ -15,10 +15,9 @@ function pluralize(n: number, one: string, few: string, many: string): string {
   return many;
 }
 
-function formatCountdown(date: string, time: string): string | null {
+function formatCountdown(date: string, time: string, nowMs: number): string | null {
   const lessonDate = new Date(`${date}T${time}:00`);
-  const now = new Date();
-  const diffMs = lessonDate.getTime() - now.getTime();
+  const diffMs = lessonDate.getTime() - nowMs;
   if (diffMs <= 0) return null;
 
   const diffMin = Math.floor(diffMs / 60_000);
@@ -39,17 +38,16 @@ export const LiveLessonCard = memo(function LiveLessonCard({ lesson, isFirstFree
   const spotsLeft = lesson.spotsTotal - lesson.spotsTaken;
   const isFull = spotsLeft <= 0;
 
-  const [countdown, setCountdown] = useState(() =>
-    formatCountdown(lesson.date, lesson.time),
-  );
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    setCountdown(formatCountdown(lesson.date, lesson.time));
     const id = setInterval(() => {
-      setCountdown(formatCountdown(lesson.date, lesson.time));
+      setNowMs(Date.now());
     }, 60_000);
     return () => clearInterval(id);
-  }, [lesson.date, lesson.time]);
+  }, []);
+
+  const countdown = formatCountdown(lesson.date, lesson.time, nowMs);
 
   const formatMeta = () => {
     const parts: string[] = [];

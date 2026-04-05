@@ -29,8 +29,28 @@ import { createRoot } from 'react-dom/client';
 import './styles/globals.css';
 import App from './App.tsx';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+async function cleanupDevPwaArtifacts() {
+  if (!import.meta.env.DEV || typeof window === 'undefined') return;
+
+  try {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
+
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((key) => caches.delete(key)));
+    }
+  } catch (error) {
+    console.warn('Failed to clean up dev PWA artifacts', error);
+  }
+}
+
+void cleanupDevPwaArtifacts().finally(() => {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+});

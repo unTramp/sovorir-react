@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useMediaRecorder } from '../../hooks/useMediaRecorder';
 import { useRecordingStore } from '../../stores/useRecordingStore';
-import { RecordingPlayback } from '../audio/RecordingPlayback';
 import { AudioLevelMeter } from '../audio/AudioLevelMeter';
 
 interface Props {
@@ -13,27 +12,18 @@ interface Props {
 export function StickyRecordCTA({ onComplete, pageId, recordIndex }: Props) {
   const { start, stop, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
   const saveRecording = useRecordingStore((s) => s.saveRecording);
-  const [recordingUrl, setRecordingUrl] = useState<string | null>(null);
-  const [savedDuration, setSavedDuration] = useState(0);
 
   useEffect(() => {
     if (!audioBlob) return;
-    const url = URL.createObjectURL(audioBlob);
-    setRecordingUrl(url);
-    setSavedDuration(duration);
-
     const id = `rec-${pageId}-${recordIndex}-${Date.now()}`;
-    saveRecording(
+    void saveRecording(
       { id, pageId, recordIndex, duration, createdAt: Date.now() },
       audioBlob,
     ).then(() => onComplete());
-
-    return () => URL.revokeObjectURL(url);
-  }, [audioBlob]);
+  }, [audioBlob, duration, onComplete, pageId, recordIndex, saveRecording]);
 
   const handleStart = useCallback(() => {
-    setRecordingUrl(null);
-    start();
+    void start();
   }, [start]);
 
   const handleStop = useCallback(() => {
@@ -91,11 +81,6 @@ export function StickyRecordCTA({ onComplete, pageId, recordIndex }: Props) {
           </div>
         )}
       </div>
-      {recordingUrl && (
-        <div className="mt-2">
-          <RecordingPlayback audioUrl={recordingUrl} duration={savedDuration} />
-        </div>
-      )}
     </div>
   );
 }

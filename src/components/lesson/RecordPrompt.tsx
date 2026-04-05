@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef } from 'react';
+import { useState, useEffect, useMemo, forwardRef } from 'react';
 import type { RecordBlock } from '../../types/lessonContent';
 import { useRecordingStore } from '../../stores/useRecordingStore';
 import { RecordingPlayback } from '../audio/RecordingPlayback';
@@ -20,18 +20,31 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
     const getRecordingForPrompt = useRecordingStore((s) => s.getRecordingForPrompt);
     const getRecordingUrl = useRecordingStore((s) => s.getRecordingUrl);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
-    const [playbackDuration, setPlaybackDuration] = useState(0);
+    const recording = useMemo(() => {
+      if (!completed || pageId == null || recordIndex == null) return undefined;
+      return getRecordingForPrompt(pageId, recordIndex);
+    }, [completed, getRecordingForPrompt, pageId, recordIndex]);
 
     useEffect(() => {
-      if (!completed || pageId == null || recordIndex == null) return;
-      const rec = getRecordingForPrompt(pageId, recordIndex);
-      if (!rec) return;
-      setPlaybackDuration(rec.duration);
-      getRecordingUrl(rec.id).then((url) => {
-        if (url) setPlaybackUrl(url);
+      if (!recording) return;
+
+      let cancelled = false;
+      let currentUrl: string | null = null;
+
+      void getRecordingUrl(recording.id).then((url) => {
+        if (!url || cancelled) {
+          if (url) URL.revokeObjectURL(url);
+          return;
+        }
+        currentUrl = url;
+        setPlaybackUrl(url);
       });
-      return () => { if (playbackUrl) URL.revokeObjectURL(playbackUrl); };
-    }, [completed, pageId, recordIndex]);
+
+      return () => {
+        cancelled = true;
+        if (currentUrl) URL.revokeObjectURL(currentUrl);
+      };
+    }, [getRecordingUrl, recording]);
 
     return (
       <div ref={ref} className={`lesson-record-prompt ${completed ? 'lesson-record-prompt--done' : ''}`}>
@@ -40,7 +53,7 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
           <div className="lesson-record-prompt__phrase" lang="hy">{phrase}</div>
           {completed && playbackUrl && (
             <div className="mt-2">
-              <RecordingPlayback audioUrl={playbackUrl} duration={playbackDuration} />
+              <RecordingPlayback audioUrl={playbackUrl} duration={recording?.duration ?? 0} />
             </div>
           )}
         </div>

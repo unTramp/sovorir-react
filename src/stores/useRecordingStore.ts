@@ -35,7 +35,8 @@ export const useRecordingStore = create<RecordingState>()(
       deleteRecording: async (id) => {
         await deleteBlob(id);
         set((state) => {
-          const { [id]: _, ...rest } = state.recordings;
+          const rest = { ...state.recordings };
+          delete rest[id];
           return { recordings: rest };
         });
       },

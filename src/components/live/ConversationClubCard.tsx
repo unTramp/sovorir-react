@@ -14,10 +14,9 @@ function pluralize(n: number, one: string, few: string, many: string): string {
   return many;
 }
 
-function formatCountdown(date: string, time: string): string | null {
+function formatCountdown(date: string, time: string, nowMs: number): string | null {
   const sessionDate = new Date(`${date}T${time}:00`);
-  const now = new Date();
-  const diffMs = sessionDate.getTime() - now.getTime();
+  const diffMs = sessionDate.getTime() - nowMs;
   if (diffMs <= 0) return null;
 
   const diffMin = Math.floor(diffMs / 60_000);
@@ -38,17 +37,16 @@ export const ConversationClubCard = memo(function ConversationClubCard({ session
   const spotsLeft = session.spotsTotal - session.spotsTaken;
   const isFull = spotsLeft <= 0;
 
-  const [countdown, setCountdown] = useState(() =>
-    formatCountdown(session.date, session.time),
-  );
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    setCountdown(formatCountdown(session.date, session.time));
     const id = setInterval(() => {
-      setCountdown(formatCountdown(session.date, session.time));
+      setNowMs(Date.now());
     }, 60_000);
     return () => clearInterval(id);
-  }, [session.date, session.time]);
+  }, []);
+
+  const countdown = formatCountdown(session.date, session.time, nowMs);
 
   return (
     <div className="club-card">

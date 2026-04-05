@@ -2,7 +2,9 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { LoginView } from './components/auth/LoginView';
 import { useAppStore } from './stores/useAppStore';
+import { useAuthStore } from './stores/useAuthStore';
 
 // Lazy-loaded views — each gets its own chunk
 const HomeView         = lazy(() => import('./components/center/HomeView').then(m => ({ default: m.HomeView })));
@@ -25,20 +27,35 @@ function ViewFallback() {
 
 function RouteChangeTracker() {
   const location = useLocation();
-  const incrementPagesViewed = useAppStore((s) => s.incrementPagesViewed);
 
   useEffect(() => {
-    incrementPagesViewed();
+    useAppStore.getState().incrementPagesViewed();
   }, [location.pathname]);
 
   return null;
 }
 
 function AppContent() {
+  const profile = useAuthStore((s) => s.profile);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  const authReady = useAuthStore((s) => s.authReady);
+
   useEffect(() => {
     document.body.classList.remove('loading');
     document.body.classList.add('loaded');
   }, []);
+
+  useEffect(() => {
+    void useAuthStore.getState().initialize();
+  }, []);
+
+  if (!authReady || (isLoading && !profile)) {
+    return <ViewFallback />;
+  }
+
+  if (!profile) {
+    return <LoginView />;
+  }
 
   return (
     <ErrorBoundary>

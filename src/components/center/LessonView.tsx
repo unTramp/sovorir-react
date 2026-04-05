@@ -5,12 +5,15 @@ import { contentRepository } from '../../lib/contentRepository';
 import { LessonPageView } from './LessonPageView';
 import type { LessonPage } from '../../types/lessonContent';
 
+const EMPTY_COMPLETED_RECORDS: number[] = [];
+
 export function LessonView() {
   const [allPages, setAllPages] = useState<LessonPage[]>([]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentPage = useLessonStore((s) => s.currentPage);
   const setTotalPages = useLessonStore((s) => s.setTotalPages);
-  const { completeRecord, getCompletedCount } = useLessonProgress();
+  const completeRecord = useLessonProgress((s) => s.completeRecord);
+  const pageProgress = useLessonProgress((s) => s.pages[currentPage]);
 
   useEffect(() => {
     contentRepository.getLessonPages().then((pages) => {
@@ -19,12 +22,12 @@ export function LessonView() {
     });
   }, [setTotalPages]);
 
-  const completedRecords = getCompletedCount(currentPage);
+  const completedSet = pageProgress?.completedRecords ?? EMPTY_COMPLETED_RECORDS;
+  const completedRecords = completedSet.length;
 
   const nextRecordIndex = useMemo(() => {
     const page = allPages.find((p) => p.id === currentPage);
     if (!page) return 0;
-    const completedSet = useLessonProgress.getState().pages[currentPage]?.completedRecords || [];
     let recordCounter = 0;
     for (let i = 0; i < page.blocks.length; i++) {
       if (page.blocks[i].type === 'record') {
@@ -33,7 +36,7 @@ export function LessonView() {
       }
     }
     return recordCounter;
-  }, [currentPage, completedRecords, allPages]);
+  }, [allPages, completedSet, currentPage]);
 
   const handleRecordComplete = useCallback(() => {
     completeRecord(currentPage, nextRecordIndex);

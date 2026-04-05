@@ -26,7 +26,7 @@ export function RecordingPlayback({ audioUrl, duration }: Props) {
     };
   }, [audioUrl]);
 
-  const updateProgress = useCallback(() => {
+  const updateProgress = useCallback(function updateProgress() {
     const audio = audioRef.current;
     if (audio && audio.duration) {
       setProgress(audio.currentTime / audio.duration);

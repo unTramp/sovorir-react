@@ -33,7 +33,7 @@ export function HomeView() {
   const navigate = useNavigate();
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
-  const { firstName } = useAuthStore();
+  const firstName = useAuthStore((s) => s.firstName);
 
   const today = todayISO();
   const weekDays = useMemo(() => getWeekDays(), []);

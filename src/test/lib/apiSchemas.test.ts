@@ -33,7 +33,9 @@ describe('ProfileSchema', () => {
   });
 
   it('rejects missing required fields', () => {
-    const { id: _id, ...withoutId } = validProfile;
+    const withoutId = Object.fromEntries(
+      Object.entries(validProfile).filter(([key]) => key !== 'id'),
+    );
     expect(() => ProfileSchema.parse(withoutId)).toThrow();
   });
 });

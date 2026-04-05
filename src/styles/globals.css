@@ -151,12 +151,43 @@ body.loaded {
 
 #root {
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+}
+
+html {
+  box-sizing: border-box;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
 }
 
 html, body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+body.drawer-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.drawer-lock {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* ==================== Placeholder / Stub views ==================== */
@@ -329,6 +360,7 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   padding-top: env(safe-area-inset-top);
+  touch-action: pan-y;
 }
 
 .floating-drawer.open {
@@ -339,6 +371,8 @@ html, body {
   overflow-y: auto;
   scrollbar-width: none;
   padding-top: 8px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .floating-drawer__scroll::-webkit-scrollbar {
@@ -802,11 +836,17 @@ html, body {
   opacity: 0;
   pointer-events: none;
   transition: opacity 300ms ease;
+  overscroll-behavior: none;
 }
 
 .drawer-backdrop.visible {
   opacity: 1;
   pointer-events: auto;
+  touch-action: none;
+}
+
+.main-content-area.drawer-open {
+  pointer-events: none;
 }
 
 /* ==================== Drawer Close Button ==================== */
@@ -3601,8 +3641,15 @@ html, body {
 .home-teacher__view-tips { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--color-primary-warm); background: none; border: none; cursor: pointer; padding: 0; display: block; }
 
 /* ==================== Mobile Header ==================== */
+.app-shell {
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 .mobile-header {
   background: var(--color-bg-app);
+  padding-top: env(safe-area-inset-top, 0px);
+  min-height: calc(56px + env(safe-area-inset-top, 0px));
 }
 
 .mobile-header__btn {

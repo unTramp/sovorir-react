@@ -20,12 +20,13 @@ export function useMediaRecorder(): UseMediaRecorderResult {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const rafRef = useRef(0);
   const startTimeRef = useRef(0);
   const durationRafRef = useRef(0);
 
-  const updateLevel = useCallback(() => {
+  const updateLevel = useCallback(function updateLevel() {
     const analyser = analyserRef.current;
     if (!analyser) return;
     const data = new Uint8Array(analyser.fftSize);
@@ -40,7 +41,7 @@ export function useMediaRecorder(): UseMediaRecorderResult {
     rafRef.current = requestAnimationFrame(updateLevel);
   }, []);
 
-  const updateDuration = useCallback(() => {
+  const updateDuration = useCallback(function updateDuration() {
     if (startTimeRef.current) {
       setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
     }
@@ -57,6 +58,7 @@ export function useMediaRecorder(): UseMediaRecorderResult {
       streamRef.current = stream;
 
       const audioCtx = new AudioContext();
+      audioContextRef.current = audioCtx;
       const source = audioCtx.createMediaStreamSource(stream);
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 256;
@@ -95,6 +97,8 @@ export function useMediaRecorder(): UseMediaRecorderResult {
     }
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    void audioContextRef.current?.close();
+    audioContextRef.current = null;
     analyserRef.current = null;
     setIsRecording(false);
     setAudioLevel(0);
@@ -108,6 +112,7 @@ export function useMediaRecorder(): UseMediaRecorderResult {
         mediaRecorderRef.current.stop();
       }
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      void audioContextRef.current?.close();
     };
   }, []);
 

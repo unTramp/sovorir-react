@@ -5,8 +5,12 @@ interface Props {
 }
 
 export function LessonControls({ pageTitles }: Props) {
-  const { currentPage, totalPages, prevPage, nextPage, toggleFullscreen, isFullscreen } =
-    useLessonStore();
+  const currentPage = useLessonStore((s) => s.currentPage);
+  const totalPages = useLessonStore((s) => s.totalPages);
+  const prevPage = useLessonStore((s) => s.prevPage);
+  const nextPage = useLessonStore((s) => s.nextPage);
+  const toggleFullscreen = useLessonStore((s) => s.toggleFullscreen);
+  const isFullscreen = useLessonStore((s) => s.isFullscreen);
 
   return (
     <div className="lesson-controls">

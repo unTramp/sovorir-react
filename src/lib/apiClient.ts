@@ -1,9 +1,25 @@
 import { RefreshResponseSchema } from './apiSchemas';
+import { mockApiRequest } from './mockApi';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
+const isLocalApiUrl =
+  BASE_URL.includes('localhost') || BASE_URL.includes('127.0.0.1');
+
+export const isMockApiEnabled =
+  import.meta.env.VITE_USE_MOCK_API === 'true' ||
+  (import.meta.env.VITE_USE_MOCK_API !== 'false' && isLocalApiUrl);
 
 const ACCESS_KEY = 'sovorir-access-token';
 const REFRESH_KEY = 'sovorir-refresh-token';
+const REQUEST_TIMEOUT_MS = 10_000;
+
+interface TransportResponse {
+  ok: boolean;
+  status: number;
+  statusText?: string;
+  json(): Promise<unknown>;
+  text(): Promise<string>;
+}
 
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_KEY);
@@ -38,10 +54,8 @@ async function attemptRefresh(): Promise<string | null> {
 
   isRefreshing = true;
   try {
-    const res = await fetch(`${BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
+    const res = await transportRequest('POST', '/auth/refresh', refreshToken, {
+      refreshToken,
     });
 
     if (!res.ok) {
@@ -66,37 +80,14 @@ async function attemptRefresh(): Promise<string | null> {
   }
 }
 
-const REQUEST_TIMEOUT_MS = 10_000;
-
 async function request<T>(
   method: string,
   path: string,
   body?: unknown,
   isFormData?: boolean,
 ): Promise<T> {
-  const doFetch = async (token: string | null) => {
-    const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    if (!isFormData) headers['Content-Type'] = 'application/json';
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-    try {
-      return await fetch(`${BASE_URL}${path}`, {
-        method,
-        headers,
-        signal: controller.signal,
-        body: body
-          ? isFormData
-            ? (body as FormData)
-            : JSON.stringify(body)
-          : undefined,
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-  };
+  const doFetch = (token: string | null) =>
+    transportRequest(method, path, token, body, isFormData);
 
   let res = await doFetch(getAccessToken());
 
@@ -114,6 +105,40 @@ async function request<T>(
   }
 
   return res.json() as Promise<T>;
+}
+
+async function transportRequest(
+  method: string,
+  path: string,
+  token: string | null,
+  body?: unknown,
+  isFormData?: boolean,
+): Promise<TransportResponse> {
+  if (isMockApiEnabled) {
+    return mockApiRequest(method, path, body, token);
+  }
+
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (!isFormData) headers['Content-Type'] = 'application/json';
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      signal: controller.signal,
+      body: body
+        ? isFormData
+          ? (body as FormData)
+          : JSON.stringify(body)
+        : undefined,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export const apiClient = {
