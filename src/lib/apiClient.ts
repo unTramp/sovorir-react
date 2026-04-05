@@ -1,4 +1,4 @@
-import type { RefreshResponse } from '../types/api';
+import { RefreshResponseSchema } from './apiSchemas';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
 
@@ -51,7 +51,7 @@ async function attemptRefresh(): Promise<string | null> {
       return null;
     }
 
-    const data: RefreshResponse = await res.json();
+    const data = RefreshResponseSchema.parse(await res.json());
     saveTokens(data.accessToken, data.refreshToken);
     refreshQueue.forEach((cb) => cb(data.accessToken));
     refreshQueue = [];

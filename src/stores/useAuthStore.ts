@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { Profile, LoginResponse } from '../types/api';
+import type { Profile } from '../types/api';
 import { apiClient, saveTokens, clearTokens, getRefreshToken } from '../lib/apiClient';
+import { LoginResponseSchema, ProfileSchema } from '../lib/apiSchemas';
 import { useUserStore } from './useUserStore';
 
 interface AuthState {
@@ -22,7 +23,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.post<LoginResponse>('/auth/login', { email, password });
+      const raw = await apiClient.post<unknown>('/auth/login', { email, password });
+      const data = LoginResponseSchema.parse(raw);
       saveTokens(data.accessToken, data.refreshToken);
       useUserStore.getState().setFromProfile(data.profile);
       set({ profile: data.profile, isLoading: false });
@@ -46,7 +48,8 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     set({ isLoading: true });
     try {
       // Re-use apiClient.get which will auto-refresh via the refresh token logic in apiClient
-      const profile = await apiClient.get<Profile>('/auth/me');
+      const raw = await apiClient.get<unknown>('/auth/me');
+      const profile = ProfileSchema.parse(raw);
       useUserStore.getState().setFromProfile(profile);
       set({ profile, isLoading: false });
     } catch {

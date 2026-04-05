@@ -1,17 +1,27 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { HomeView } from './components/center/HomeView';
-import { LessonView } from './components/center/LessonView';
-import { AudioMobileView } from './components/center/AudioMobileView';
-import { DictionaryView } from './components/center/DictionaryView';
-import { NotesView } from './components/center/NotesView';
-import { PracticeView } from './components/center/PracticeView';
-import { LiveLessonsView } from './components/center/LiveLessonsView';
-import { StatisticsView } from './components/center/StatisticsView';
-import { SettingsView } from './components/center/SettingsView';
 import { useAppStore } from './stores/useAppStore';
+
+// Lazy-loaded views — each gets its own chunk
+const HomeView         = lazy(() => import('./components/center/HomeView').then(m => ({ default: m.HomeView })));
+const LessonView       = lazy(() => import('./components/center/LessonView').then(m => ({ default: m.LessonView })));
+const PracticeView     = lazy(() => import('./components/center/PracticeView').then(m => ({ default: m.PracticeView })));
+const DictionaryView   = lazy(() => import('./components/center/DictionaryView').then(m => ({ default: m.DictionaryView })));
+const NotesView        = lazy(() => import('./components/center/NotesView').then(m => ({ default: m.NotesView })));
+const LiveLessonsView  = lazy(() => import('./components/center/LiveLessonsView').then(m => ({ default: m.LiveLessonsView })));
+const StatisticsView   = lazy(() => import('./components/center/StatisticsView').then(m => ({ default: m.StatisticsView })));
+const SettingsView     = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
+const AudioMobileView  = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
+
+function ViewFallback() {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+    </div>
+  );
+}
 
 function RouteChangeTracker() {
   const location = useLocation();
@@ -35,16 +45,16 @@ function AppContent() {
       <RouteChangeTracker />
       <Routes>
         <Route path="/" element={<AppShell />}>
-          <Route index element={<HomeView />} />
-          <Route path="lesson" element={<LessonView />} />
-          <Route path="practice" element={<PracticeView />} />
-          <Route path="dictionary" element={<DictionaryView />} />
-          <Route path="notes" element={<NotesView />} />
-          <Route path="live-lessons" element={<LiveLessonsView />} />
-          <Route path="statistics" element={<StatisticsView />} />
-          <Route path="settings" element={<SettingsView />} />
-          <Route path="audio" element={<AudioMobileView />} />
-          <Route path="video" element={<HomeView />} />
+          <Route index element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
+          <Route path="lesson"      element={<Suspense fallback={<ViewFallback />}><LessonView /></Suspense>} />
+          <Route path="practice"    element={<Suspense fallback={<ViewFallback />}><PracticeView /></Suspense>} />
+          <Route path="dictionary"  element={<Suspense fallback={<ViewFallback />}><DictionaryView /></Suspense>} />
+          <Route path="notes"       element={<Suspense fallback={<ViewFallback />}><NotesView /></Suspense>} />
+          <Route path="live-lessons"element={<Suspense fallback={<ViewFallback />}><LiveLessonsView /></Suspense>} />
+          <Route path="statistics"  element={<Suspense fallback={<ViewFallback />}><StatisticsView /></Suspense>} />
+          <Route path="settings"    element={<Suspense fallback={<ViewFallback />}><SettingsView /></Suspense>} />
+          <Route path="audio"       element={<Suspense fallback={<ViewFallback />}><AudioMobileView /></Suspense>} />
+          <Route path="video"       element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
         </Route>
       </Routes>
     </ErrorBoundary>
