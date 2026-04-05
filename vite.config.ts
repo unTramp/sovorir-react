@@ -20,6 +20,7 @@ export default defineConfig({
         theme_color: '#7A3E34',
         background_color: '#F6F2EF',
         display: 'standalone',
+        scope: '/',
         start_url: '/',
         icons: [
           {
@@ -43,6 +44,9 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB
+        // SPA fallback: serve index.html for all navigation requests within scope
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/api/, /^\/assets\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
