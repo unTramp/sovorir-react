@@ -16,6 +16,7 @@ const LiveLessonsView  = lazy(() => import('./components/center/LiveLessonsView'
 const StatisticsView   = lazy(() => import('./components/center/StatisticsView').then(m => ({ default: m.StatisticsView })));
 const SettingsView     = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
 const AudioMobileView  = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
+const AdminLessonBuilderView = lazy(() => import('./components/center/AdminLessonBuilderView').then(m => ({ default: m.AdminLessonBuilderView })));
 
 function ViewFallback() {
   return (
@@ -70,6 +71,7 @@ function AppContent() {
           <Route path="live-lessons"element={<Suspense fallback={<ViewFallback />}><LiveLessonsView /></Suspense>} />
           <Route path="statistics"  element={<Suspense fallback={<ViewFallback />}><StatisticsView /></Suspense>} />
           <Route path="settings"    element={<Suspense fallback={<ViewFallback />}><SettingsView /></Suspense>} />
+          <Route path="admin"       element={<Suspense fallback={<ViewFallback />}><AdminLessonBuilderView /></Suspense>} />
           <Route path="audio"       element={<Suspense fallback={<ViewFallback />}><AudioMobileView /></Suspense>} />
           <Route path="video"       element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
         </Route>

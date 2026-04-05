@@ -1,4 +1,4 @@
-export type SectionType = 'home' | 'video' | 'lesson' | 'audio' | 'dictionary' | 'notes' | 'practice' | 'live-lessons' | 'statistics' | 'settings';
+export type SectionType = 'home' | 'video' | 'lesson' | 'audio' | 'dictionary' | 'notes' | 'practice' | 'live-lessons' | 'statistics' | 'settings' | 'admin';
 export type SectionStatus = 'completed' | 'current' | 'in-progress' | 'pending' | 'locked';
 export type LessonStatus = 'completed' | 'current' | 'locked';
 

@@ -36,6 +36,16 @@ const MOCK_USERS: MockUser[] = [
     className: null,
     password: 'teacher123',
   },
+  {
+    id: 'mock-admin-1',
+    schoolId: 'sovorir-dev',
+    role: 'admin',
+    fullName: 'Анна Минасян',
+    avatarUrl: '/assets/teacher-avatar.png',
+    email: 'admin@sovorir.dev',
+    className: null,
+    password: 'admin123',
+  },
 ];
 
 export const mockAuthCredentials = {
@@ -46,6 +56,10 @@ export const mockAuthCredentials = {
   teacher: {
     email: MOCK_USERS[1].email,
     password: MOCK_USERS[1].password,
+  },
+  admin: {
+    email: MOCK_USERS[2].email,
+    password: MOCK_USERS[2].password,
   },
 };
 

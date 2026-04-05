@@ -2,6 +2,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { DrawerItem } from './DrawerItem';
 import { lessons } from '../../data/lessons';
 import { useAppStore } from '../../stores/useAppStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 import { HouseIcon, BookOpenIcon, ZapIcon, FilmIcon, BarChartIcon, SettingsGearIcon } from '../../icons';
 
 export function DrawerNav() {
@@ -9,6 +10,7 @@ export function DrawerNav() {
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const lessonMatch = useMatch('/lesson');
+  const role = useAuthStore((s) => s.profile?.role);
 
   const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
   const totalLessons = lessons.length;
@@ -46,6 +48,9 @@ export function DrawerNav() {
         <div className="drawer-nav-group__label">ЕЩЁ</div>
         <DrawerItem label="Живые уроки" icon={<FilmIcon />} viewId="live-lessons" pro />
         <DrawerItem label="Статистика" icon={<BarChartIcon />} viewId="statistics" />
+        {(role === 'teacher' || role === 'admin') && (
+          <DrawerItem label="Админка" icon={<BookOpenIcon />} viewId="admin" />
+        )}
         <DrawerItem label="Настройки" icon={<SettingsGearIcon />} viewId="settings" />
       </div>
     </div>

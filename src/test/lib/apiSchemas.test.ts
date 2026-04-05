@@ -24,8 +24,9 @@ describe('ProfileSchema', () => {
     expect(result.className).toBeNull();
   });
 
-  it('rejects invalid role', () => {
-    expect(() => ProfileSchema.parse({ ...validProfile, role: 'admin' })).toThrow();
+  it('accepts admin role and rejects unknown role', () => {
+    expect(ProfileSchema.parse({ ...validProfile, role: 'admin' }).role).toBe('admin');
+    expect(() => ProfileSchema.parse({ ...validProfile, role: 'owner' })).toThrow();
   });
 
   it('rejects invalid email', () => {

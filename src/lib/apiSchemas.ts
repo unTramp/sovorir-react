@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const ProfileSchema = z.object({
   id: z.string(),
   schoolId: z.string(),
-  role: z.enum(['teacher', 'student']),
+  role: z.enum(['teacher', 'student', 'admin']),
   fullName: z.string(),
   avatarUrl: z.string().nullable(),
   email: z.string().email(),

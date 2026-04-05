@@ -1,7 +1,7 @@
 export interface Profile {
   id: string;
   schoolId: string;
-  role: 'teacher' | 'student';
+  role: 'teacher' | 'student' | 'admin';
   fullName: string;
   avatarUrl: string | null;
   email: string;

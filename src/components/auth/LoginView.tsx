@@ -20,6 +20,16 @@ export function LoginView() {
     setPassword(mockAuthCredentials.student.password);
   };
 
+  const fillMockTeacher = () => {
+    setEmail(mockAuthCredentials.teacher.email);
+    setPassword(mockAuthCredentials.teacher.password);
+  };
+
+  const fillMockAdmin = () => {
+    setEmail(mockAuthCredentials.admin.email);
+    setPassword(mockAuthCredentials.admin.password);
+  };
+
   return (
     <div className="login-screen">
       <div className="login-card">
@@ -31,16 +41,34 @@ export function LoginView() {
           {isMockApiEnabled && (
             <div className="login-form__field">
               <p className="login-form__error">
-                Dev mock API включён. Тестовый пользователь: `student@sovorir.dev` / `demo12345`
+                Dev mock API включён. Доступны student / teacher / admin демо-аккаунты.
               </p>
-              <button
-                className="login-form__submit"
-                type="button"
-                onClick={fillMockStudent}
-                disabled={isLoading}
-              >
-                Подставить тестовые креды
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  className="login-form__submit"
+                  type="button"
+                  onClick={fillMockStudent}
+                  disabled={isLoading}
+                >
+                  Student: student@sovorir.dev
+                </button>
+                <button
+                  className="login-form__submit"
+                  type="button"
+                  onClick={fillMockTeacher}
+                  disabled={isLoading}
+                >
+                  Teacher: teacher@sovorir.dev
+                </button>
+                <button
+                  className="login-form__submit"
+                  type="button"
+                  onClick={fillMockAdmin}
+                  disabled={isLoading}
+                >
+                  Admin: admin@sovorir.dev
+                </button>
+              </div>
             </div>
           )}
 
