@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "ai:analyze": "node scripts/ai/analyze.js",
+    "ai:review-diff": "node scripts/ai/review-diff.js",
+    "ai:generate-quiz": "node scripts/ai/generate-quiz.js"
   },
   "dependencies": {
     "howler": "^2.2.4",
