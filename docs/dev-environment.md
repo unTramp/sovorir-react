@@ -64,6 +64,21 @@ VITE_USE_MOCK_API=false
 VITE_API_URL=https://api.65-109-135-215.sslip.io
 ```
 
+## Live scripts
+
+For quick integration checks against the deployed backend, you can use dedicated scripts without editing `.env.local`:
+
+```bash
+npm run dev:live
+npm run build:live
+npm run preview:live
+```
+
+These scripts force:
+
+- `VITE_USE_MOCK_API=false`
+- `VITE_API_URL=https://api.65-109-135-215.sslip.io`
+
 ## What is mocked right now
 
 Implemented mock endpoints:
