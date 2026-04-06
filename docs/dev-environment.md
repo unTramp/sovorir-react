@@ -36,6 +36,11 @@ Teacher:
 - email: `teacher@sovorir.dev`
 - password: `teacher123`
 
+Admin:
+
+- email: `admin@sovorir.dev`
+- password: `admin123`
+
 ## Environment variables
 
 Example `.env.local` for mock mode:
@@ -50,6 +55,13 @@ Example `.env.local` for real backend:
 ```env
 VITE_USE_MOCK_API=false
 VITE_API_URL=http://localhost:3000
+```
+
+Example `.env.local` for the deployed backend:
+
+```env
+VITE_USE_MOCK_API=false
+VITE_API_URL=https://api.65-109-135-215.sslip.io
 ```
 
 ## What is mocked right now
@@ -73,3 +85,31 @@ Recommended next backend endpoints after auth:
 - recordings upload and retrieval
 - quiz results sync
 - live lesson booking
+
+## Current live backend
+
+The backend is currently available at:
+
+- `https://api.65-109-135-215.sslip.io`
+
+Seeded backend credentials:
+
+Admin:
+
+- email: `admin@sovorir.com`
+- password: `admin1234`
+
+Teacher:
+
+- email: `lusine@sovorir.com`
+- password: `test1234`
+
+Student:
+
+- email: `student@sovorir.com`
+- password: `test1234`
+
+Notes:
+
+- the live backend is running with working auth and seeded course data
+- `admin/ai/*` endpoints exist, but server-side OpenAI/Anthropic keys are still empty, so AI generation currently falls back to deterministic mock responses
