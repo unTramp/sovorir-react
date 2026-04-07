@@ -1,22 +1,21 @@
 import { useNavigate, useMatch } from 'react-router-dom';
 import { DrawerItem } from './DrawerItem';
-import { lessons } from '../../data/lessons';
 import { useAppStore } from '../../stores/useAppStore';
-import { useAuthStore } from '../../stores/useAuthStore';
 import { HouseIcon, BookOpenIcon, ZapIcon, FilmIcon, BarChartIcon, SettingsGearIcon } from '../../icons';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 export function DrawerNav() {
   const navigate = useNavigate();
   const setActiveSection = useAppStore((s) => s.setActiveSection);
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const lessonMatch = useMatch('/lesson');
-  const role = useAuthStore((s) => s.profile?.role);
+  const { lessons, currentLesson } = useLessonCatalog();
 
-  const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
   const totalLessons = lessons.length;
-  const lessonBadge = `${currentLesson.id} / ${totalLessons}`;
+  const lessonBadge = currentLesson ? `${currentLesson.id} / ${totalLessons}` : '—';
 
   function handleLessonsClick() {
+    if (!currentLesson) return;
     const firstLessonSection = currentLesson.sections.find((s) => s.type === 'lesson');
     setActiveSection(firstLessonSection?.id ?? 'lesson');
     navigate('/lesson');
@@ -29,7 +28,7 @@ export function DrawerNav() {
         <div className="drawer-nav-group__label">УЧЁБА</div>
         <DrawerItem label="Главная" icon={<HouseIcon />} viewId="home" />
         <div
-          className={`drawer-item${lessonMatch ? ' active' : ''}`}
+          className={`drawer-item${lessonMatch ? ' active' : ''}${currentLesson ? '' : ' opacity-60'}`}
           role="listitem"
           tabIndex={0}
           onClick={handleLessonsClick}
@@ -48,9 +47,6 @@ export function DrawerNav() {
         <div className="drawer-nav-group__label">ЕЩЁ</div>
         <DrawerItem label="Живые уроки" icon={<FilmIcon />} viewId="live-lessons" pro />
         <DrawerItem label="Статистика" icon={<BarChartIcon />} viewId="statistics" />
-        {(role === 'teacher' || role === 'admin') && (
-          <DrawerItem label="Админка" icon={<BookOpenIcon />} viewId="admin" />
-        )}
         <DrawerItem label="Настройки" icon={<SettingsGearIcon />} viewId="settings" />
       </div>
     </div>

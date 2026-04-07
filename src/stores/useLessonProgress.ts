@@ -6,7 +6,8 @@ import type { QuizResult } from '../types/quiz';
 import { practiceEvents } from '../lib/practiceEvents';
 
 interface SectionProgress {
-  completedRecords: number[];  // indices of completed record blocks
+  completedRecords: number[];
+  completed: boolean;
 }
 
 interface LessonProgressState {
@@ -18,6 +19,7 @@ interface LessonProgressState {
   // Actions
   _initSections: (sections: LessonContentSection[]) => void;
   completeRecord: (sectionId: number, recordIndex: number) => void;
+  completeSection: (sectionId: number) => void;
   getCompletedCount: (sectionId: number) => number;
   getTotalRecords: (sectionId: number) => number;
   isSectionCompleted: (sectionId: number) => boolean;
@@ -42,6 +44,11 @@ function countRecords(sectionId: number): number {
   return section.blocks.filter((b) => b.type === 'record').length;
 }
 
+function hasQuiz(sectionId: number): boolean {
+  const section = _lessonSections.find((item) => item.id === sectionId);
+  return Boolean(section?.quizId);
+}
+
 export const useLessonProgress = create<LessonProgressState>()(
   persist(
     (set, get) => ({
@@ -61,10 +68,24 @@ export const useLessonProgress = create<LessonProgressState>()(
           return {
             sections: {
               ...state.sections,
-              [sectionId]: { completedRecords: [...current, recordIndex] },
+              [sectionId]: {
+                completed: state.sections[sectionId]?.completed ?? false,
+                completedRecords: [...current, recordIndex],
+              },
             },
           };
         }),
+
+      completeSection: (sectionId) =>
+        set((state) => ({
+          sections: {
+            ...state.sections,
+            [sectionId]: {
+              completed: true,
+              completedRecords: state.sections[sectionId]?.completedRecords ?? [],
+            },
+          },
+        })),
 
       getCompletedCount: (sectionId) => {
         return get().sections[sectionId]?.completedRecords.length || 0;
@@ -74,35 +95,26 @@ export const useLessonProgress = create<LessonProgressState>()(
 
       isSectionCompleted: (sectionId) => {
         const total = countRecords(sectionId);
-        if (total === 0) return true;
-        const completed = get().sections[sectionId]?.completedRecords.length || 0;
-        return completed >= total;
+        const sectionProgress = get().sections[sectionId];
+        const recordsCompleted = (sectionProgress?.completedRecords.length || 0) >= total;
+        const quizCompleted = !hasQuiz(sectionId) || get().isQuizPassed(sectionId);
+
+        if (total > 0) {
+          return recordsCompleted && quizCompleted;
+        }
+
+        return Boolean(sectionProgress?.completed) && quizCompleted;
       },
 
       getOverallPercentage: () => {
-        const state = get();
-        let totalRecords = 0;
-        let completedRecords = 0;
-        for (const section of _lessonSections) {
-          const recs = section.blocks.filter((b) => b.type === 'record').length;
-          totalRecords += recs;
-          completedRecords += Math.min(
-            state.sections[section.id]?.completedRecords.length || 0,
-            recs,
-          );
-        }
-        return totalRecords > 0 ? Math.round((completedRecords / totalRecords) * 100) : 0;
+        const totalSections = _lessonSections.length;
+        if (totalSections === 0) return 0;
+        const completedSections = _lessonSections.filter((section) => get().isSectionCompleted(section.id)).length;
+        return Math.round((completedSections / totalSections) * 100);
       },
 
       getCompletedSections: () => {
-        const state = get();
-        let count = 0;
-        for (const section of _lessonSections) {
-          const total = section.blocks.filter((b) => b.type === 'record').length;
-          const completed = state.sections[section.id]?.completedRecords.length || 0;
-          if (total === 0 || completed >= total) count++;
-        }
-        return count;
+        return _lessonSections.filter((section) => get().isSectionCompleted(section.id)).length;
       },
 
       saveQuizResult: (sectionId, result) => {

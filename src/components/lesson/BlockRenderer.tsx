@@ -16,7 +16,37 @@ interface Props {
   recordIndex?: number;
 }
 
-function toAudioMessage(block: Extract<ContentBlock, { type: 'audio' }>, index: number): AudioMessage {
+function toAudioMessage(
+  block:
+    | Extract<ContentBlock, { type: 'audio' }>
+    | Extract<ContentBlock, { type: 'teacherBubble' }>
+    | Extract<ContentBlock, { type: 'studentBubble' }>,
+  index: number,
+): AudioMessage {
+  if (block.type === 'teacherBubble') {
+    return {
+      id: `lesson-audio-${index}`,
+      sender: 'teacher',
+      senderName: block.teacherName,
+      text: block.text,
+      duration: block.duration,
+      src: block.audioSrc,
+      time: '',
+    };
+  }
+
+  if (block.type === 'studentBubble') {
+    return {
+      id: `lesson-audio-${index}`,
+      sender: 'student',
+      senderName: block.studentName,
+      text: block.text,
+      duration: block.duration,
+      src: block.audioSrc,
+      time: '',
+    };
+  }
+
   return {
     id: `lesson-audio-${index}`,
     sender: block.sender,
@@ -33,12 +63,16 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
     case 'heading':
       return <h2 className="lesson-heading">{block.text}</h2>;
     case 'text':
+    case 'readingText':
       return <p className="lesson-text">{block.content}</p>;
     case 'phrase':
+    case 'phraseCard':
       return <PhraseCard block={block} />;
     case 'rule':
       return <RuleCard block={block} />;
     case 'audio':
+    case 'teacherBubble':
+    case 'studentBubble':
       return (
         <div className="my-5">
           <VoiceBubble message={toAudioMessage(block, index)} />
@@ -47,10 +81,11 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
     case 'video':
       return <LessonVideoBubble block={block} />;
     case 'record':
+    case 'pronunciationPrompt':
       return (
         <RecordPrompt
           ref={recordRef}
-          block={block}
+          block={block.type === 'pronunciationPrompt' ? { type: 'record', prompt: block.prompt } : block}
           onSkip={onSkipRecord}
           completed={recordCompleted}
           sectionId={sectionId}

@@ -6,7 +6,7 @@ export interface AudioMessage {
   sender: Sender;
   senderName: string;
   text: string;
-  duration: number;
+  duration?: number;
   src: string;
   time: string;
   type?: MessageType;

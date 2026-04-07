@@ -5,11 +5,16 @@ import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
 import type { LessonContentSection } from '../../types/lessonContent';
 import type { Quiz, QuizResult } from '../../types/quiz';
+import {
+  subscribeAdminLessonBuilderSync,
+} from '../../lib/adminLessonBuilderStorage';
 
 export function LessonCompleteCard() {
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
   const nextSection = useLessonStore((s) => s.nextSection);
+  const completeSection = useLessonProgress((s) => s.completeSection);
+  const isSectionCompleted = useLessonProgress((s) => s.isSectionCompleted(currentSection));
   const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
 
@@ -21,6 +26,36 @@ export function LessonCompleteCard() {
   }, []);
 
   useEffect(() => {
+    const loadSections = () => {
+      contentRepository.getLessonSections().then(setAllSections);
+    };
+
+    function handleSync() {
+      loadSections();
+    }
+
+    function handleFocus() {
+      loadSections();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        loadSections();
+      }
+    }
+
+    const unsubscribeSync = subscribeAdminLessonBuilderSync(handleSync);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      unsubscribeSync();
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
     contentRepository.getQuizForSection(currentSection).then(setQuiz);
   }, [currentSection]);
 
@@ -28,25 +63,41 @@ export function LessonCompleteCard() {
   const nextSectionData = allSections.find((item) => item.id === currentSection + 1);
 
   const currentHeading = section?.blocks.find((b) => b.type === 'heading');
-  const summaryText = section?.title ?? (currentHeading?.type === 'heading' ? currentHeading.text : 'эту секцию');
 
   const nextHeading = nextSectionData?.blocks.find((b) => b.type === 'heading');
   const nextSectionTitle = nextSectionData?.title ?? (nextHeading?.type === 'heading' ? nextHeading.text : '');
 
   const isLastSection = currentSection >= totalSections;
   const needsQuiz = !!quiz && !isQuizPassed;
+  const isCurrentSectionDone = isSectionCompleted;
 
   const handleQuizComplete = useCallback((result: QuizResult) => {
     saveQuizResult(currentSection, result);
   }, [currentSection, saveQuizResult]);
 
+  const handleContinue = useCallback(() => {
+    completeSection(currentSection);
+    if (!isLastSection) {
+      nextSection();
+    }
+  }, [completeSection, currentSection, isLastSection, nextSection]);
+
+  const actionLabel = isLastSection
+    ? (isCurrentSectionDone ? 'Урок завершён' : 'Завершить урок')
+    : needsQuiz
+      ? 'Пройдите тест'
+      : 'Следующая секция';
+
   return (
     <>
       <div className="lesson-complete">
-        <div className="lesson-complete__emoji">🎉</div>
-        <div className="lesson-complete__title">Отлично!</div>
+        <div className="lesson-complete__title">
+          {section?.title ?? (currentHeading?.type === 'heading' ? currentHeading.text : 'Секция завершена')}
+        </div>
         <div className="lesson-complete__summary">
-          Вы изучили: {summaryText.toLowerCase()}.
+          {isLastSection
+            ? 'Это последняя секция урока.'
+            : `Дальше: ${nextSectionTitle.toLowerCase() || 'следующая секция'}.`}
         </div>
         {!isLastSection && nextSectionTitle && (
           <div className="lesson-complete__next-hint">
@@ -55,15 +106,15 @@ export function LessonCompleteCard() {
               className="lesson-complete__avatar"
               alt="Лусине"
             />
-            <span>Готовы перейти к: {nextSectionTitle.toLowerCase()}?</span>
+            <span>Продолжить к: {nextSectionTitle.toLowerCase()}?</span>
           </div>
         )}
         <button
           className="lesson-complete__btn"
-          onClick={isLastSection ? undefined : nextSection}
-          disabled={isLastSection || needsQuiz}
+          onClick={needsQuiz ? undefined : handleContinue}
+          disabled={needsQuiz || (isLastSection && isCurrentSectionDone)}
         >
-          {isLastSection ? 'Урок завершён ✓' : needsQuiz ? 'Пройдите тест ↓' : 'Следующая секция →'}
+          {actionLabel}
         </button>
       </div>
       {quiz && (

@@ -1,5 +1,5 @@
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
-import type { PhraseBlock } from '../../types/lessonContent';
+import type { PhraseBlock, PhraseCardBlock } from '../../types/lessonContent';
 
 const WORD_STATUS_LABELS: Record<NonNullable<PhraseBlock['status']>, string> = {
   new: 'Новое',
@@ -23,7 +23,7 @@ function SpeakerIcon() {
 }
 
 interface Props {
-  block: PhraseBlock;
+  block: PhraseBlock | PhraseCardBlock;
 }
 
 export function PhraseCard({ block }: Props) {

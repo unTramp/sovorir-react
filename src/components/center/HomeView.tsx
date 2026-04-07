@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { lessons } from '../../data/lessons';
 import { teacherNotes } from '../../data/teacherNotes';
 import { todayISO, getWeekDays } from '../../lib/dateUtils';
 import { FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 function CheckIcon() {
   return (
@@ -34,10 +34,10 @@ export function HomeView() {
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
   const firstName = useAuthStore((s) => s.firstName);
+  const { currentLesson } = useLessonCatalog();
 
   const today = todayISO();
   const weekDays = useMemo(() => getWeekDays(), []);
-  const currentLesson = lessons.find((l) => l.status === 'current');
   const latestNote = teacherNotes[0];
 
   const totalSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;

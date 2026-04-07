@@ -1,8 +1,9 @@
-import { lessons } from '../../data/lessons';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { FlameIcon } from '../../icons';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 export function StudentProfile() {
+  const { lessons } = useLessonCatalog();
   const completedLessons = lessons.filter((l) => l.status === 'completed').length;
   const totalStars = lessons.length;
   const allDone = completedLessons >= totalStars;

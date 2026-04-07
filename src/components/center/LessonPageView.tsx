@@ -6,6 +6,9 @@ import type { LessonContentSection } from '../../types/lessonContent';
 import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
+import {
+  subscribeAdminLessonBuilderSync,
+} from '../../lib/adminLessonBuilderStorage';
 
 interface Props {
   completedRecords: number;
@@ -16,9 +19,38 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
   const currentSection = useLessonStore((s) => s.currentSection);
   const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
 
-  useEffect(() => {
+  const loadSections = useCallback(() => {
     contentRepository.getLessonSections().then(setAllSections);
   }, []);
+
+  useEffect(() => {
+    loadSections();
+  }, [loadSections]);
+
+  useEffect(() => {
+    function handleSync() {
+      loadSections();
+    }
+
+    function handleFocus() {
+      loadSections();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        loadSections();
+      }
+    }
+
+    const unsubscribeSync = subscribeAdminLessonBuilderSync(handleSync);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      unsubscribeSync();
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loadSections]);
 
   const section = allSections.find((item) => item.id === currentSection);
   const bottomRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,7 @@
-import { lessons } from '../../data/lessons';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 export function ProgressCircle() {
+  const { lessons } = useLessonCatalog();
   const completedCount = lessons.filter((l) => l.status === 'completed').length;
   const totalCount = lessons.length;
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;

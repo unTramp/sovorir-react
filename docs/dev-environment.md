@@ -6,6 +6,9 @@ The frontend can now run in two modes:
 
 - `mock API` for local development without a backend
 - `real API` for integration with a live backend
+- `separate admin app` for lesson builder and teacher workflows
+
+The current lesson content structure is documented in [content-model.md](./content-model.md).
 
 Important:
 
@@ -79,6 +82,28 @@ These scripts force:
 - `VITE_USE_MOCK_API=false`
 - `VITE_API_URL=https://api.65-109-135-215.sslip.io`
 
+## Separate admin app
+
+The lesson builder is no longer embedded into the learner SPA.
+
+Use the dedicated admin application instead:
+
+```bash
+npm run admin:dev
+npm run admin:build
+npm run admin:preview
+```
+
+For the live backend:
+
+```bash
+npm run admin:dev:live
+npm run admin:build:live
+npm run admin:preview:live
+```
+
+Admin app source lives in `admin-app/`, but it reuses the shared auth, API client, styles, and builder component from `src/`.
+
 ## What is mocked right now
 
 Implemented mock endpoints:
@@ -127,4 +152,5 @@ Student:
 Notes:
 
 - the live backend is running with working auth and seeded course data
-- `admin/ai/*` endpoints exist, but server-side OpenAI/Anthropic keys are still empty, so AI generation currently falls back to deterministic mock responses
+- `admin/ai/*` endpoints are deployed and use the configured server-side OpenAI/Anthropic keys
+- the separate admin application can be pointed at the same live backend with `npm run admin:dev:live` or `npm run admin:preview:live`

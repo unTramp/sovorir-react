@@ -8,6 +8,16 @@ export interface PhraseBlock {
   status?: 'new' | 'learned' | 'review';
 }
 
+export interface PhraseCardBlock {
+  type: 'phraseCard';
+  russian: string;
+  armenian: string;
+  transcription: string;
+  translation: string;
+  audioSrc?: string;
+  status?: 'new' | 'learned' | 'review';
+}
+
 export interface HeadingBlock {
   type: 'heading';
   text: string;
@@ -15,6 +25,11 @@ export interface HeadingBlock {
 
 export interface TextBlock {
   type: 'text';
+  content: string;
+}
+
+export interface ReadingTextBlock {
+  type: 'readingText';
   content: string;
 }
 
@@ -29,8 +44,25 @@ export interface AudioBubbleBlock {
   sender: 'teacher' | 'student';
   senderName: string;
   text: string;
-  duration: number;
+  duration?: number;
   src: string;
+}
+
+export interface TeacherBubbleBlock {
+  type: 'teacherBubble';
+  teacherName: string;
+  teacherAvatarUrl?: string;
+  text: string;
+  audioSrc: string;
+  duration?: number;
+}
+
+export interface StudentBubbleBlock {
+  type: 'studentBubble';
+  studentName: string;
+  text: string;
+  audioSrc: string;
+  duration?: number;
 }
 
 export interface VideoBubbleBlock {
@@ -46,7 +78,24 @@ export interface RecordBlock {
   prompt: string;
 }
 
-export type ContentBlock = PhraseBlock | HeadingBlock | TextBlock | RuleBlock | AudioBubbleBlock | VideoBubbleBlock | RecordBlock;
+export interface PronunciationPromptBlock {
+  type: 'pronunciationPrompt';
+  prompt: string;
+}
+
+export type ContentBlock =
+  | PhraseBlock
+  | PhraseCardBlock
+  | HeadingBlock
+  | TextBlock
+  | ReadingTextBlock
+  | RuleBlock
+  | AudioBubbleBlock
+  | TeacherBubbleBlock
+  | StudentBubbleBlock
+  | VideoBubbleBlock
+  | RecordBlock
+  | PronunciationPromptBlock;
 
 export interface LessonContentSection {
   id: number;

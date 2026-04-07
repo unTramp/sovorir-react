@@ -1,8 +1,16 @@
-import { lessons } from '../../data/lessons';
 import { SectionItem } from './SectionItem';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 export function LessonSections() {
-  const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
+  const { currentLesson } = useLessonCatalog();
+
+  if (!currentLesson) {
+    return (
+      <div className="flex-1 overflow-y-auto py-2 px-2 min-h-0">
+        <div className="px-4 py-6 text-sm text-muted">Уроки загружаются...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto py-2 px-2 min-h-0" role="tree" aria-label="Навигация по урокам">

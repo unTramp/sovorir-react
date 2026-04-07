@@ -1,7 +1,7 @@
-import { lessons } from '../../data/lessons';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { FlameIcon } from '../../icons';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 const LEVELS = [
   { label: 'A1', min: 0,   next: 200,  nextLabel: 'A2'  },
@@ -15,6 +15,7 @@ export function DrawerProfile() {
   const firstName = useAuthStore((s) => s.firstName);
   const lastName = useAuthStore((s) => s.lastName);
   const avatarUrl = useAuthStore((s) => s.avatarUrl);
+  const { lessons } = useLessonCatalog();
 
   const xp = lessons
     .flatMap((l) => l.sections)

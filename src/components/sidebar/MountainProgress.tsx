@@ -1,5 +1,5 @@
-import { lessons } from '../../data/lessons';
 import type { SectionStatus } from '../../types/lesson';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 type CheckpointState = 'completed' | 'in-progress' | 'pending' | 'locked';
 
@@ -12,7 +12,12 @@ function getCheckpointState(status?: SectionStatus): CheckpointState {
 }
 
 export function MountainProgress() {
-  const currentLesson = lessons.find((l) => l.status === 'current') || lessons[0];
+  const { currentLesson } = useLessonCatalog();
+
+  if (!currentLesson) {
+    return null;
+  }
+
   const sections = currentLesson.sections.filter((s) => s.type !== 'video');
 
   const checkpointStates: CheckpointState[] = sections.map((s) =>

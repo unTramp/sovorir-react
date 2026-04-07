@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { lessons } from '../data/lessons';
 
 interface AppState {
   currentLesson: number;
@@ -16,10 +15,8 @@ interface AppState {
   incrementPagesViewed: () => void;
 }
 
-const currentLessonData = lessons.find((l) => l.status === 'current');
-
 export const useAppStore = create<AppState>((set) => ({
-  currentLesson: currentLessonData?.id ?? 1,
+  currentLesson: 1,
   activeSection: '',
   sidebarOpen: false,
   sidebarCollapsed: false,
