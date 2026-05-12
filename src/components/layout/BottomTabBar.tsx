@@ -13,10 +13,10 @@ import {
 type TabConfig = { label: string; path: string; icon: React.ComponentType<{ size?: number }> };
 
 const STUDENT_TABS: TabConfig[] = [
-  { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Уроки',    path: '/lesson',     icon: BookOpenIcon },
-  { label: 'Тренажёр', path: '/practice',   icon: ZapIcon },
-  { label: 'Профиль',  path: '/settings',   icon: SettingsGearIcon },
+  { label: 'Главная',   path: '/',             icon: HouseIcon },
+  { label: 'Уроки',    path: '/lesson',        icon: BookOpenIcon },
+  { label: 'Задания',  path: '/assignments',   icon: ClipboardIcon },
+  { label: 'Профиль',  path: '/settings',      icon: SettingsGearIcon },
 ];
 
 const TEACHER_TABS: TabConfig[] = [

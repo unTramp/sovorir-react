@@ -3958,6 +3958,298 @@ html.drawer-lock {
 .home-teacher__note--clamped { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .home-teacher__view-tips { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--color-primary-warm); background: none; border: none; cursor: pointer; padding: 0; display: block; }
 
+/* ==================== Assignments ==================== */
+.assignments__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-text-strong);
+}
+
+.assignments__loading,
+.assignments__empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.assignments__empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.assignments__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.assignment-card {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.assignment-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.assignment-card__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  flex: 1;
+}
+
+.assignment-card__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.assignment-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.assignment-card__due {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.assignment-card__submit-btn {
+  padding: 8px 16px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Status badges */
+.badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge--draft     { background: var(--color-bg-app); color: var(--color-text-secondary); }
+.badge--submitted { background: #E8F4FD; color: #1A6FA8; }
+.badge--review    { background: #FFF3CD; color: #8A6000; }
+.badge--revision  { background: var(--color-error-bg); color: var(--color-error-dark); }
+.badge--accepted  { background: var(--color-success-bg); color: var(--color-success-dark); }
+
+/* Submit Modal */
+.submit-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--color-backdrop);
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+}
+
+.submit-modal {
+  background: var(--color-bg-white);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  width: 100%;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+.submit-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.submit-modal__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  flex: 1;
+}
+
+.submit-modal__close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.submit-modal__desc {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.submit-modal__label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.submit-modal__textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 15px;
+  resize: none;
+  background: var(--color-bg-app);
+  color: var(--color-text);
+  font-family: inherit;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.submit-modal__textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.submit-modal__record-section {
+  margin-bottom: 16px;
+}
+
+.submit-modal__record-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.submit-modal__rec-btn {
+  padding: 10px 16px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-app);
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.submit-modal__rec-btn--active {
+  background: var(--color-error-bg);
+  border-color: var(--color-error-dark);
+  color: var(--color-error-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.submit-modal__pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-error-dark);
+  animation: trainer-pulse 1s ease infinite;
+  display: inline-block;
+}
+
+.submit-modal__rec-done {
+  font-size: 13px;
+  color: var(--color-success-dark);
+  font-weight: 600;
+}
+
+.submit-modal__error {
+  font-size: 13px;
+  color: var(--color-error-dark);
+  margin-bottom: 12px;
+}
+
+.submit-modal__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.submit-modal__btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.submit-modal__btn--primary {
+  background: var(--color-primary);
+  color: white;
+}
+
+.submit-modal__btn--primary:disabled {
+  opacity: 0.4;
+}
+
+.submit-modal__btn--ghost {
+  background: var(--color-bg-app);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.submit-modal__success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 16px;
+  gap: 8px;
+  text-align: center;
+}
+
+.submit-modal__success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-success-bg);
+  color: var(--color-success-dark);
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.submit-modal__success-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+.submit-modal__success-hint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
 /* ==================== Teacher Dashboard ==================== */
 .teacher-dash__section {
   background: var(--color-bg-white);

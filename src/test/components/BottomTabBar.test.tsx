@@ -34,9 +34,9 @@ describe('BottomTabBar', () => {
     renderTabBar('student');
     expect(screen.getByLabelText('Главная')).toBeInTheDocument();
     expect(screen.getByLabelText('Уроки')).toBeInTheDocument();
-    expect(screen.getByLabelText('Тренажёр')).toBeInTheDocument();
+    expect(screen.getByLabelText('Задания')).toBeInTheDocument();
     expect(screen.getByLabelText('Профиль')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Задания')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Студенты')).not.toBeInTheDocument();
   });
 
   it('shows teacher tabs for teacher role', () => {

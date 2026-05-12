@@ -18,6 +18,7 @@ const StatisticsView        = lazy(() => import('./components/center/StatisticsV
 const SettingsView          = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
 const AudioMobileView       = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
 const TeacherDashboardView  = lazy(() => import('./components/center/TeacherDashboardView').then(m => ({ default: m.TeacherDashboardView })));
+const AssignmentsView       = lazy(() => import('./components/center/AssignmentsView').then(m => ({ default: m.AssignmentsView })));
 
 function ViewFallback() {
   return (
@@ -74,8 +75,9 @@ function AppContent() {
           <Route path="settings"    element={<Suspense fallback={<ViewFallback />}><SettingsView /></Suspense>} />
           <Route path="audio"       element={<Suspense fallback={<ViewFallback />}><AudioMobileView /></Suspense>} />
           <Route path="video"       element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
-          <Route path="teacher"     element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
-          <Route path="students"    element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
+          <Route path="teacher"      element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
+          <Route path="students"     element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
+          <Route path="assignments"  element={<Suspense fallback={<ViewFallback />}><AssignmentsView /></Suspense>} />
         </Route>
       </Routes>
     </ErrorBoundary>

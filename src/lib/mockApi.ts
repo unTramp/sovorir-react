@@ -1,4 +1,5 @@
 import type { LoginResponse, Profile, RefreshResponse } from '../types/api';
+import type { Assignment, Submission, SubmissionStatus } from '../types/assignment';
 
 export interface MockTransportResponse {
   ok: boolean;
@@ -62,6 +63,45 @@ export const mockAuthCredentials = {
     password: MOCK_USERS[2].password,
   },
 };
+
+// ── Mock data ────────────────────────────────────────────
+const MOCK_ASSIGNMENTS: Assignment[] = [
+  {
+    id: 'asgn-1',
+    sectionId: 'section-1',
+    title: 'Запишите приветствие',
+    description: 'Произнесите «Բarев» и «Bарев Ձes» — запишите голос или напишите транскрипцию.',
+    dueAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'asgn-2',
+    sectionId: 'section-1',
+    title: 'Переведите фразы',
+    description: 'Напишите перевод 5 фраз из урока «Приветствия».',
+    dueAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'asgn-3',
+    sectionId: 'section-2',
+    title: 'Составьте диалог',
+    description: 'Напишите короткий диалог знакомства на армянском (4–6 реплик).',
+    dueAt: null,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+// Mutable in-memory store for submissions during the session
+const MOCK_SUBMISSIONS: Submission[] = [];
+
+// ── Status mutation helper (for teacher review mock) ─────
+export function mockUpdateSubmissionStatus(submissionId: string, status: SubmissionStatus): boolean {
+  const idx = MOCK_SUBMISSIONS.findIndex((s) => s.id === submissionId);
+  if (idx < 0) return false;
+  MOCK_SUBMISSIONS[idx] = { ...MOCK_SUBMISSIONS[idx], status };
+  return true;
+}
 
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -193,6 +233,46 @@ export async function mockApiRequest(
       email: user.email,
       className: user.className,
     } satisfies Profile);
+  }
+
+  // ── Assignments ──────────────────────────────────────────
+  if (method === 'GET' && path.startsWith('/assignments')) {
+    return createResponse(200, MOCK_ASSIGNMENTS);
+  }
+
+  if (method === 'POST' && /^\/assignments\/[\w-]+\/submit$/.test(path)) {
+    const assignmentId = path.split('/')[2];
+    const payload = body as { textContent?: string; audioUrl?: string } | undefined;
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+
+    const existing = MOCK_SUBMISSIONS.findIndex(
+      (s) => s.assignmentId === assignmentId && s.studentId === user.id,
+    );
+    const submission: Submission = {
+      id: existing >= 0 ? MOCK_SUBMISSIONS[existing].id : `sub-${Date.now()}`,
+      assignmentId,
+      studentId: user.id,
+      status: 'submitted',
+      audioUrl: payload?.audioUrl ?? null,
+      textContent: payload?.textContent ?? null,
+      submittedAt: new Date().toISOString(),
+      createdAt: existing >= 0 ? MOCK_SUBMISSIONS[existing].createdAt : new Date().toISOString(),
+    };
+    if (existing >= 0) MOCK_SUBMISSIONS[existing] = submission;
+    else MOCK_SUBMISSIONS.push(submission);
+    return createResponse(200, submission);
+  }
+
+  if (method === 'GET' && path === '/my-submissions') {
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+    return createResponse(200, MOCK_SUBMISSIONS.filter((s) => s.studentId === user.id));
+  }
+
+  if (method === 'GET' && /^\/assignments\/[\w-]+\/submissions$/.test(path)) {
+    const assignmentId = path.split('/')[2];
+    return createResponse(200, MOCK_SUBMISSIONS.filter((s) => s.assignmentId === assignmentId));
   }
 
   return createResponse(501, {
