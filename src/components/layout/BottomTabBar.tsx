@@ -1,14 +1,39 @@
 import { useNavigate, useMatch } from 'react-router-dom';
-import { HouseIcon, BookOpenIcon, ZapIcon, SettingsGearIcon } from '../../icons';
+import { useAuthStore } from '../../stores/useAuthStore';
+import {
+  HouseIcon,
+  BookOpenIcon,
+  ZapIcon,
+  SettingsGearIcon,
+  ClipboardIcon,
+  UsersIcon,
+  BarChartIcon,
+} from '../../icons';
 
-const TABS = [
-  { label: 'Главная',  path: '/',         icon: HouseIcon },
-  { label: 'Уроки',   path: '/lesson',    icon: BookOpenIcon },
-  { label: 'Тренажёр', path: '/practice', icon: ZapIcon },
-  { label: 'Профиль', path: '/settings',  icon: SettingsGearIcon },
-] as const;
+type TabConfig = { label: string; path: string; icon: React.ComponentType<{ size?: number }> };
 
-function Tab({ label, path, icon: Icon }: (typeof TABS)[number]) {
+const STUDENT_TABS: TabConfig[] = [
+  { label: 'Главная',   path: '/',          icon: HouseIcon },
+  { label: 'Уроки',    path: '/lesson',     icon: BookOpenIcon },
+  { label: 'Тренажёр', path: '/practice',   icon: ZapIcon },
+  { label: 'Профиль',  path: '/settings',   icon: SettingsGearIcon },
+];
+
+const TEACHER_TABS: TabConfig[] = [
+  { label: 'Главная',   path: '/',          icon: HouseIcon },
+  { label: 'Задания',   path: '/teacher',   icon: ClipboardIcon },
+  { label: 'Студенты',  path: '/students',  icon: UsersIcon },
+  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+];
+
+const ADMIN_TABS: TabConfig[] = [
+  { label: 'Главная',   path: '/',          icon: HouseIcon },
+  { label: 'Уроки',     path: '/lesson',    icon: BookOpenIcon },
+  { label: 'Аналитика', path: '/statistics',icon: BarChartIcon },
+  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+];
+
+function Tab({ label, path, icon: Icon }: TabConfig) {
   const navigate = useNavigate();
   const match = useMatch(path === '/' ? { path: '/', end: true } : path);
   const isActive = !!match;
@@ -26,9 +51,12 @@ function Tab({ label, path, icon: Icon }: (typeof TABS)[number]) {
 }
 
 export function BottomTabBar() {
+  const role = useAuthStore((s) => s.profile?.role);
+  const tabs = role === 'teacher' ? TEACHER_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+
   return (
     <nav className="bottom-tab-bar">
-      {TABS.map((tab) => (
+      {tabs.map((tab) => (
         <Tab key={tab.path} {...tab} />
       ))}
     </nav>

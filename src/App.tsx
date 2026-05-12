@@ -3,19 +3,21 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoginView } from './components/auth/LoginView';
+import { RoleRoute } from './components/auth/RoleRoute';
 import { useAppStore } from './stores/useAppStore';
 import { useAuthStore } from './stores/useAuthStore';
 
 // Lazy-loaded views — each gets its own chunk
-const HomeView         = lazy(() => import('./components/center/HomeView').then(m => ({ default: m.HomeView })));
-const LessonView       = lazy(() => import('./components/center/LessonView').then(m => ({ default: m.LessonView })));
-const PracticeView     = lazy(() => import('./components/center/PracticeView').then(m => ({ default: m.PracticeView })));
-const DictionaryView   = lazy(() => import('./components/center/DictionaryView').then(m => ({ default: m.DictionaryView })));
-const NotesView        = lazy(() => import('./components/center/NotesView').then(m => ({ default: m.NotesView })));
-const LiveLessonsView  = lazy(() => import('./components/center/LiveLessonsView').then(m => ({ default: m.LiveLessonsView })));
-const StatisticsView   = lazy(() => import('./components/center/StatisticsView').then(m => ({ default: m.StatisticsView })));
-const SettingsView     = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
-const AudioMobileView  = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
+const HomeView              = lazy(() => import('./components/center/HomeView').then(m => ({ default: m.HomeView })));
+const LessonView            = lazy(() => import('./components/center/LessonView').then(m => ({ default: m.LessonView })));
+const PracticeView          = lazy(() => import('./components/center/PracticeView').then(m => ({ default: m.PracticeView })));
+const DictionaryView        = lazy(() => import('./components/center/DictionaryView').then(m => ({ default: m.DictionaryView })));
+const NotesView             = lazy(() => import('./components/center/NotesView').then(m => ({ default: m.NotesView })));
+const LiveLessonsView       = lazy(() => import('./components/center/LiveLessonsView').then(m => ({ default: m.LiveLessonsView })));
+const StatisticsView        = lazy(() => import('./components/center/StatisticsView').then(m => ({ default: m.StatisticsView })));
+const SettingsView          = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
+const AudioMobileView       = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
+const TeacherDashboardView  = lazy(() => import('./components/center/TeacherDashboardView').then(m => ({ default: m.TeacherDashboardView })));
 
 function ViewFallback() {
   return (
@@ -72,6 +74,8 @@ function AppContent() {
           <Route path="settings"    element={<Suspense fallback={<ViewFallback />}><SettingsView /></Suspense>} />
           <Route path="audio"       element={<Suspense fallback={<ViewFallback />}><AudioMobileView /></Suspense>} />
           <Route path="video"       element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
+          <Route path="teacher"     element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
+          <Route path="students"    element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
         </Route>
       </Routes>
     </ErrorBoundary>

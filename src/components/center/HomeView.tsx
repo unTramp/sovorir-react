@@ -7,6 +7,7 @@ import { todayISO, getWeekDays } from '../../lib/dateUtils';
 import { FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
+import { TeacherDashboardView } from './TeacherDashboardView';
 
 function CheckIcon() {
   return (
@@ -30,6 +31,9 @@ const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: Section
 ];
 
 export function HomeView() {
+  const role = useAuthStore((s) => s.profile?.role);
+  if (role === 'teacher' || role === 'admin') return <TeacherDashboardView />;
+
   const navigate = useNavigate();
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
