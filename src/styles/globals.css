@@ -4899,3 +4899,194 @@ button:focus-visible {
   outline: none;
   border-color: var(--color-primary);
 }
+
+/* ==================== Notification Bell ==================== */
+.mobile-header__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notif-bell {
+  position: relative;
+}
+.notif-bell__btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text);
+  -webkit-tap-highlight-color: transparent;
+}
+.notif-bell__badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--color-primary, #B46A58);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+.notif-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--color-bg-card, #fff);
+  border-radius: 14px;
+  border: 1px solid var(--color-border, #eee);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  z-index: 200;
+}
+.notif-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--color-border, #eee);
+}
+.notif-panel__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.notif-panel__read-all {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.notif-panel__empty {
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+.notif-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 150ms ease;
+  border-bottom: 1px solid var(--color-border, #f0f0f0);
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--color-bg-subtle, #f8f8f8); }
+.notif-item--unread { background: var(--color-primary-light, #fdf4f2); }
+.notif-item__icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.notif-item__body { flex: 1; min-width: 0; }
+.notif-item__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+.notif-item__text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+.notif-item__time {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+/* ==================== Statistics ==================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-card {
+  background: var(--color-bg-card, #fff);
+  border-radius: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border, #eee);
+  text-align: center;
+}
+.stat-card__value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.stat-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.stat-card__hint {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.stats-section {
+  margin-bottom: 16px;
+}
+.stats-section__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+.stats-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-border, #eee);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.stats-progress-bar__fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-primary);
+  transition: width 600ms ease;
+}
+.stats-progress-bar__label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.stats-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #856404;
+  margin-bottom: 12px;
+}
+.stats-alert__icon { font-size: 16px; flex-shrink: 0; }

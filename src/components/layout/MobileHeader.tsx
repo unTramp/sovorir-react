@@ -3,20 +3,26 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { HamburgerIcon, FlameIcon, BackArrowIcon } from '../../icons';
+import { NotificationBell } from '../ui/NotificationBell';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: string }>> & Record<string, { title: string; subtitle?: string }> = {
-  home: { title: 'Главная' },
-  lesson: { title: 'Урок 3' },
-  video: { title: 'Видео' },
-  audio: { title: 'Аудио' },
-  practice: { title: 'Тренировка' },
-  dictionary: { title: 'Словарь' },
-  notes: { title: 'Заметки' },
-  'live-lessons': { title: 'Живые уроки' },
-  statistics: { title: 'Статистика' },
-  settings: { title: 'Настройки' },
+  home:                  { title: 'Главная' },
+  lesson:                { title: 'Урок 3' },
+  video:                 { title: 'Видео' },
+  audio:                 { title: 'Аудио' },
+  practice:              { title: 'Тренировка' },
+  dictionary:            { title: 'Словарь' },
+  notes:                 { title: 'Заметки' },
+  'live-lessons':        { title: 'Живые уроки' },
+  statistics:            { title: 'Статистика' },
+  settings:              { title: 'Настройки' },
+  assignments:           { title: 'Задания' },
+  teacher:               { title: 'Преподаватель' },
+  students:              { title: 'Студенты' },
+  'review-queue':        { title: 'Очередь проверки' },
+  consultations:         { title: 'Консультации' },
 };
 
 function pathnameToKey(pathname: string): string {
@@ -79,9 +85,12 @@ export function MobileHeader() {
         </>
       )}
 
-      <div className="mobile-header__streak">
-        <FlameIcon size={16} />
-        <span>{streak}</span>
+      <div className="mobile-header__right">
+        <div className="mobile-header__streak">
+          <FlameIcon size={16} />
+          <span>{streak}</span>
+        </div>
+        <NotificationBell />
       </div>
     </header>
   );

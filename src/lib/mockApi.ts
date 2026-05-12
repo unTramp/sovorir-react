@@ -2,6 +2,7 @@ import type { LoginResponse, Profile, RefreshResponse } from '../types/api';
 import type { Assignment, Submission, SubmissionStatus } from '../types/assignment';
 import type { QueueItem, Review } from '../types/review';
 import type { ConsultationSlot, Booking } from '../types/consultation';
+import type { AppNotification } from '../types/notification';
 
 const MOCK_REVIEWS: Review[] = [];
 
@@ -30,6 +31,37 @@ const MOCK_SLOTS: ConsultationSlot[] = [
 ];
 
 const MOCK_BOOKINGS: Booking[] = [];
+
+// ── Notification mock data ────────────────────────────────
+const MOCK_NOTIFICATIONS: AppNotification[] = [
+  {
+    id: 'notif-1',
+    type: 'needs_revision',
+    title: 'Задание на доработку',
+    body: '«Запишите приветствие» — преподаватель оставил комментарий',
+    isRead: false,
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    route: '/assignments',
+  },
+  {
+    id: 'notif-2',
+    type: 'deadline',
+    title: 'Дедлайн через 24 часа',
+    body: '«Переведите фразы» — успейте отправить задание',
+    isRead: false,
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    route: '/assignments',
+  },
+  {
+    id: 'notif-3',
+    type: 'consultation_reminder',
+    title: 'Консультация завтра',
+    body: 'Индивидуальная консультация с Лусине в 18:00',
+    isRead: true,
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    route: '/consultations',
+  },
+];
 
 export interface MockTransportResponse {
   ok: boolean;
@@ -411,6 +443,40 @@ export async function mockApiRequest(
     const slot = MOCK_SLOTS.find((s) => s.id === slotId);
     if (slot) slot.bookedCount = Math.max(0, slot.bookedCount - 1);
     return createResponse(200, MOCK_BOOKINGS[idx]);
+  }
+
+  // ── Notifications ─────────────────────────────────────────
+  if (method === 'GET' && path === '/notifications') {
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+    // Teacher gets review_ready notifications based on queue
+    if (user.role === 'teacher' || user.role === 'admin') {
+      const reviewNotifs: AppNotification[] = MOCK_SUBMISSIONS
+        .filter((s) => s.status === 'submitted')
+        .map((s) => ({
+          id: `notif-review-${s.id}`,
+          type: 'review_ready' as const,
+          title: 'Новая работа на проверку',
+          body: `Студент отправил задание — требует проверки`,
+          isRead: false,
+          createdAt: s.submittedAt ?? s.createdAt,
+          route: '/review-queue',
+        }));
+      return createResponse(200, reviewNotifs);
+    }
+    return createResponse(200, MOCK_NOTIFICATIONS);
+  }
+
+  if (method === 'POST' && /^\/notifications\/[\w-]+\/read$/.test(path)) {
+    const notifId = path.split('/')[2];
+    const idx = MOCK_NOTIFICATIONS.findIndex((n) => n.id === notifId);
+    if (idx >= 0) MOCK_NOTIFICATIONS[idx] = { ...MOCK_NOTIFICATIONS[idx], isRead: true };
+    return createResponse(200, {});
+  }
+
+  if (method === 'POST' && path === '/notifications/read-all') {
+    MOCK_NOTIFICATIONS.forEach((_, i) => { MOCK_NOTIFICATIONS[i] = { ...MOCK_NOTIFICATIONS[i], isRead: true }; });
+    return createResponse(200, {});
   }
 
   if (method === 'POST' && path === '/consultation-slots') {
