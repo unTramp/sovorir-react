@@ -4641,3 +4641,143 @@ button:focus-visible {
 }
 .lesson-scroll::-webkit-scrollbar { display: none; }
 .lesson-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ==================== Review Form ==================== */
+.review-form {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.review-form__student {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.review-form__student-label {
+  color: var(--color-text-secondary);
+}
+.review-form__student-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.review-form__answer {
+  background: var(--color-bg-subtle, #f5f5f5);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+.review-form__answer-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+.review-form__answer-text {
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin: 0;
+}
+.review-form__scores {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.review-form__score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.review-form__score-label {
+  font-size: 13px;
+  color: var(--color-text);
+  min-width: 130px;
+}
+.review-form__score-dots {
+  display: flex;
+  gap: 6px;
+}
+.review-form__dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border, #ddd);
+  background: transparent;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+  padding: 0;
+}
+.review-form__dot.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.review-form__score-val {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 18px;
+  color: var(--color-text-secondary);
+}
+
+/* ==================== Review Queue ==================== */
+.review-queue__student {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 6px;
+}
+.review-queue__student-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.review-queue__date {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.review-queue__preview {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  margin: 0 0 8px;
+  white-space: pre-wrap;
+}
+
+/* ==================== Teacher Dashboard (Sprint 3) ==================== */
+.teacher-dash__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.teacher-dash__see-all {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.teacher-dash__queue-item {
+  background: var(--color-bg-card, #fff);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid var(--color-border, #eee);
+  transition: opacity 150ms ease;
+}
+.teacher-dash__queue-item:active { opacity: 0.7; }
+.teacher-dash__queue-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 2px;
+}
+.teacher-dash__queue-student {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

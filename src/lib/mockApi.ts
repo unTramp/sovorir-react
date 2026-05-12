@@ -1,5 +1,8 @@
 import type { LoginResponse, Profile, RefreshResponse } from '../types/api';
 import type { Assignment, Submission, SubmissionStatus } from '../types/assignment';
+import type { QueueItem, Review } from '../types/review';
+
+const MOCK_REVIEWS: Review[] = [];
 
 export interface MockTransportResponse {
   ok: boolean;
@@ -273,6 +276,64 @@ export async function mockApiRequest(
   if (method === 'GET' && /^\/assignments\/[\w-]+\/submissions$/.test(path)) {
     const assignmentId = path.split('/')[2];
     return createResponse(200, MOCK_SUBMISSIONS.filter((s) => s.assignmentId === assignmentId));
+  }
+
+  // ── Review queue ─────────────────────────────────────────
+  if (method === 'GET' && path === '/review-queue') {
+    const queueItems: QueueItem[] = MOCK_SUBMISSIONS
+      .filter((s) => s.status === 'submitted' || s.status === 'in_review')
+      .map((s) => {
+        const assignment = MOCK_ASSIGNMENTS.find((a) => a.id === s.assignmentId);
+        const student = MOCK_USERS.find((u) => u.id === s.studentId);
+        return {
+          submission: s,
+          assignmentTitle: assignment?.title ?? 'Задание',
+          studentName: student?.fullName ?? 'Студент',
+        };
+      });
+    return createResponse(200, queueItems);
+  }
+
+  if (method === 'POST' && /^\/submissions\/[\w-]+\/review$/.test(path)) {
+    const submissionId = path.split('/')[2];
+    const payload = body as {
+      grammarScore: number; vocabularyScore: number;
+      pronunciationScore: number; fluencyScore: number;
+      comment?: string; status?: SubmissionStatus;
+    } | undefined;
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+
+    const idx = MOCK_SUBMISSIONS.findIndex((s) => s.id === submissionId);
+    if (idx < 0) return createResponse(404, { message: 'Submission not found' });
+    if (payload?.status) {
+      MOCK_SUBMISSIONS[idx] = { ...MOCK_SUBMISSIONS[idx], status: payload.status };
+    }
+    const review: Review = {
+      id: `rev-${Date.now()}`,
+      submissionId,
+      teacherId: user.id,
+      grammarScore: payload?.grammarScore ?? 0,
+      vocabularyScore: payload?.vocabularyScore ?? 0,
+      pronunciationScore: payload?.pronunciationScore ?? 0,
+      fluencyScore: payload?.fluencyScore ?? 0,
+      comment: payload?.comment ?? null,
+      audioCommentUrl: null,
+      createdAt: new Date().toISOString(),
+    };
+    MOCK_REVIEWS.push(review);
+    return createResponse(200, review);
+  }
+
+  if (method === 'POST' && /^\/submissions\/[\w-]+\/status$/.test(path)) {
+    const submissionId = path.split('/')[2];
+    const payload = body as { status?: SubmissionStatus } | undefined;
+    const idx = MOCK_SUBMISSIONS.findIndex((s) => s.id === submissionId);
+    if (idx < 0) return createResponse(404, { message: 'Submission not found' });
+    if (payload?.status) {
+      MOCK_SUBMISSIONS[idx] = { ...MOCK_SUBMISSIONS[idx], status: payload.status };
+    }
+    return createResponse(200, MOCK_SUBMISSIONS[idx]);
   }
 
   return createResponse(501, {
