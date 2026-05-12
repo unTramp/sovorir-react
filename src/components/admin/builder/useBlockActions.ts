@@ -14,7 +14,6 @@ interface UseBlockActionsParams {
   selectedLesson: AdminLessonBuilder | null;
   selectedSection: AdminLessonSection | null;
   orderedBlocks: AdminLessonSection['blocks'];
-  newBlockType: SemanticBlockType;
   updateDraftLesson: (
     updater: (draft: AdminLessonBuilder) => AdminLessonBuilder | void,
     options?: { markDirty?: boolean },
@@ -27,12 +26,11 @@ export function useBlockActions({
   selectedLesson,
   selectedSection,
   orderedBlocks,
-  newBlockType,
   updateDraftLesson,
   setNotice,
   setHighlightedBlockId,
 }: UseBlockActionsParams) {
-  const handleCreateBlock = useCallback(async () => {
+  const handleCreateBlock = useCallback(async (type: SemanticBlockType = 'heading') => {
     if (!selectedLesson || !selectedSection) return;
     const nextOrder = selectedSection.blocks.length > 0
       ? Math.max(...selectedSection.blocks.map((block) => block.orderIndex)) + 1
@@ -46,16 +44,20 @@ export function useBlockActions({
         id: blockId,
         sectionId: section.id,
         orderIndex: nextOrder,
-        type: semanticToLegacyBlockType(newBlockType),
-        content: makeDefaultSemanticBlockContent(newBlockType),
+        type: semanticToLegacyBlockType(type),
+        content: makeDefaultSemanticBlockContent(type),
         createdAt: new Date().toISOString(),
       });
     });
     setHighlightedBlockId(blockId);
     setNotice('Блок добавлен в черновик');
-  }, [newBlockType, selectedLesson, selectedSection, setHighlightedBlockId, setNotice, updateDraftLesson]);
+  }, [selectedLesson, selectedSection, setHighlightedBlockId, setNotice, updateDraftLesson]);
 
-  const handleInsertBlockAfter = useCallback(async (sectionId: string, afterBlockId: string, type: AdminBlockType) => {
+  const handleInsertBlockAfter = useCallback(async (
+    sectionId: string,
+    afterBlockId: string,
+    semanticType: SemanticBlockType,
+  ) => {
     if (!selectedLesson || !selectedSection) return;
     const blockId = makeClientId('block');
     updateDraftLesson((draft) => {
@@ -69,10 +71,8 @@ export function useBlockActions({
         id: blockId,
         sectionId,
         orderIndex: ordered.length + 1,
-        type,
-        content: makeDefaultSemanticBlockContent(
-          semanticToLegacyBlockType(newBlockType) === type ? newBlockType : 'heading',
-        ),
+        type: semanticToLegacyBlockType(semanticType),
+        content: makeDefaultSemanticBlockContent(semanticType),
         createdAt: new Date().toISOString(),
       });
 
@@ -83,7 +83,7 @@ export function useBlockActions({
     });
     setHighlightedBlockId(blockId);
     setNotice('Блок вставлен в черновик');
-  }, [newBlockType, selectedLesson, selectedSection, setHighlightedBlockId, setNotice, updateDraftLesson]);
+  }, [selectedLesson, selectedSection, setHighlightedBlockId, setNotice, updateDraftLesson]);
 
   const handleSaveBlock = useCallback(async (
     blockId: string,
@@ -119,14 +119,15 @@ export function useBlockActions({
     setNotice('Блок удалён из черновика');
   }, [selectedLesson, setNotice, updateDraftLesson]);
 
-  const handleMoveBlock = useCallback(async (sectionId: string, blockId: string, direction: 'up' | 'down') => {
-    if (!selectedLesson || !selectedSection) return;
-    const currentIndex = orderedBlocks.findIndex((block) => block.id === blockId);
-    const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= orderedBlocks.length) return;
+  const handleReorderBlock = useCallback(async (sectionId: string, draggedBlockId: string, overBlockId: string) => {
+    if (!selectedLesson || !selectedSection || draggedBlockId === overBlockId) return;
+    const currentIndex = orderedBlocks.findIndex((block) => block.id === draggedBlockId);
+    const nextIndex = orderedBlocks.findIndex((block) => block.id === overBlockId);
+    if (currentIndex < 0 || nextIndex < 0 || currentIndex === nextIndex) return;
 
     const reordered = orderedBlocks.map((block) => block.id);
-    [reordered[currentIndex], reordered[nextIndex]] = [reordered[nextIndex], reordered[currentIndex]];
+    const [movedId] = reordered.splice(currentIndex, 1);
+    reordered.splice(nextIndex, 0, movedId);
 
     updateDraftLesson((draft) => {
       const section = draft.sections.find((item) => item.id === sectionId);
@@ -151,6 +152,6 @@ export function useBlockActions({
     handleInsertBlockAfter,
     handleSaveBlock,
     handleDeleteBlock,
-    handleMoveBlock,
+    handleReorderBlock,
   };
 }

@@ -10,12 +10,22 @@ import {
   subscribeAdminLessonBuilderSync,
 } from '../../lib/adminLessonBuilderStorage';
 
+function isRecordLikeBlock(block: ContentBlock) {
+  return block.type === 'record' || block.type === 'pronunciationPrompt';
+}
+
+type LessonTab = 'materials' | 'dictionary' | 'audio' | 'video';
+
+const AUDIO_BLOCK_TYPES = new Set(['audio', 'audioExample', 'teacherBubble', 'studentBubble']);
+const DICTIONARY_BLOCK_TYPES = new Set(['phrase', 'phraseCard']);
+
 interface Props {
   completedRecords: number;
   onRecordComplete: () => void;
+  activeTab?: LessonTab;
 }
 
-export function LessonSectionView({ completedRecords, onRecordComplete }: Props) {
+export function LessonSectionView({ completedRecords, onRecordComplete, activeTab = 'materials' }: Props) {
   const currentSection = useLessonStore((s) => s.currentSection);
   const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
 
@@ -65,23 +75,36 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
   }, [currentSection]);
 
   // Compute record indices and visible blocks
+  const tabFilteredBlocks = useMemo(() => {
+    if (!section) return [] as ContentBlock[];
+    if (activeTab === 'dictionary') return section.blocks.filter((b) => DICTIONARY_BLOCK_TYPES.has(b.type));
+    if (activeTab === 'audio') return section.blocks.filter((b) => AUDIO_BLOCK_TYPES.has(b.type));
+    if (activeTab === 'video') return section.blocks.filter((b) => b.type === 'video');
+    return section.blocks;
+  }, [section, activeTab]);
+
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
     if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
+    // Non-materials tabs show all filtered blocks without record gating
+    if (activeTab !== 'materials') {
+      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: false };
+    }
+
     const recIndices: number[] = [];
-    section.blocks.forEach((b, i) => {
-      if (b.type === 'record') recIndices.push(i);
+    tabFilteredBlocks.forEach((b, i) => {
+      if (isRecordLikeBlock(b)) recIndices.push(i);
     });
 
     const allDone = completedRecords >= recIndices.length;
 
     if (allDone) {
-      return { visibleBlocks: section.blocks, allRecordsCompleted: true };
+      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: true };
     }
 
     const cutoffIndex = recIndices[completedRecords];
-    return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords]);
+    return { visibleBlocks: tabFilteredBlocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
+  }, [section, completedRecords, activeTab, tabFilteredBlocks]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
@@ -118,7 +141,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
     const map = new Map<number, number>();
     let counter = 0;
     visibleBlocks.forEach((block, i) => {
-      if (block.type === 'record') map.set(i, counter++);
+      if (isRecordLikeBlock(block)) map.set(i, counter++);
     });
     return map;
   }, [visibleBlocks]);
@@ -131,9 +154,18 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
     );
   }
 
+  if (visibleBlocks.length === 0 && activeTab !== 'materials') {
+    const labels: Record<string, string> = { dictionary: 'слов', audio: 'аудио', video: 'видео' };
+    return (
+      <div className="flex-1 flex items-center justify-center text-muted text-sm">
+        В этом разделе нет {labels[activeTab] ?? 'контента'}
+      </div>
+    );
+  }
+
   const hasActiveRecord = !allRecordsCompleted &&
     visibleBlocks.length > 0 &&
-    visibleBlocks[visibleBlocks.length - 1].type === 'record';
+    isRecordLikeBlock(visibleBlocks[visibleBlocks.length - 1]);
   const showRecordCTA = hasActiveRecord && recordPromptVisible;
 
   return (
@@ -141,7 +173,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
       <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
         {visibleBlocks.map((block, i) => {
           const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
-          const isCompletedRecord = block.type === 'record' && !isLastRecord;
+          const isCompletedRecord = isRecordLikeBlock(block) && !isLastRecord;
           const recIdx = recordIndexMap.get(i);
           return (
             <div key={`${currentSection}-${i}`} className="lesson-block-enter">

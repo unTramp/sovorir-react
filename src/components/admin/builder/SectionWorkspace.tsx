@@ -1,14 +1,14 @@
+import { useRef, useState } from 'react';
+import { AddBlockMenu } from './AddBlockMenu';
 import { BlockEditor } from './BlockEditor';
 import { PickerMenu } from './PickerMenu';
 import {
   SECTION_TYPE_OPTIONS,
+  getSectionDisplayTitle,
   sectionTypeDescription,
   sectionTypeLabel,
 } from './utils';
-import {
-  semanticToLegacyBlockType,
-  type SemanticBlockType,
-} from '../../../lib/semanticContent';
+import { type SemanticBlockType } from '../../../lib/semanticContent';
 import { PlusIcon, SettingsGearIcon } from '../../../icons';
 import type {
   AdminBlockType,
@@ -22,13 +22,12 @@ interface SectionWorkspaceProps {
   selectedSection: AdminLessonSection | null;
   sectionDraft: SectionDraftState | null;
   orderedBlocks: AdminLessonSection['blocks'];
-  newBlockType: SemanticBlockType;
   highlightedBlockId: string | null;
   saving: boolean;
   onSectionDraftChange: (patch: Partial<SectionDraftState>) => void;
-  onCreateBlock: () => void;
-  onMoveBlock: (sectionId: string, blockId: string, direction: 'up' | 'down') => Promise<void>;
-  onInsertBelow: (sectionId: string, blockId: string, type: AdminBlockType) => Promise<void>;
+  onCreateBlock: (type: SemanticBlockType) => Promise<void>;
+  onReorderBlock: (sectionId: string, draggedBlockId: string, overBlockId: string) => Promise<void>;
+  onInsertBelow: (sectionId: string, blockId: string, type: SemanticBlockType) => Promise<void>;
   onSaveBlock: (blockId: string, patch: { orderIndex: number; type: AdminBlockType; content: ContentBlock }) => Promise<void>;
   onDeleteBlock: (blockId: string) => Promise<void>;
 }
@@ -37,16 +36,20 @@ export function SectionWorkspace({
   selectedSection,
   sectionDraft,
   orderedBlocks,
-  newBlockType,
   highlightedBlockId,
   saving,
   onSectionDraftChange,
   onCreateBlock,
-  onMoveBlock,
+  onReorderBlock,
   onInsertBelow,
   onSaveBlock,
   onDeleteBlock,
 }: SectionWorkspaceProps) {
+  const [draggedBlockId, setDraggedBlockId] = useState<string | null>(null);
+  const [dragOverBlockId, setDragOverBlockId] = useState<string | null>(null);
+  const [armedDragBlockId, setArmedDragBlockId] = useState<string | null>(null);
+  const armedDragBlockIdRef = useRef<string | null>(null);
+
   if (!selectedSection || !sectionDraft) {
     return (
       <div className="admin-builder__workspace-empty">
@@ -56,9 +59,7 @@ export function SectionWorkspace({
     );
   }
 
-  const sectionDisplayTitle = sectionDraft.title.trim() && !/^section\s+\d+$/i.test(sectionDraft.title.trim())
-    ? sectionDraft.title.trim()
-    : 'Новая секция';
+  const sectionDisplayTitle = getSectionDisplayTitle(sectionDraft.title);
 
   return (
     <section className="admin-builder__blocks-section">
@@ -100,40 +101,82 @@ export function SectionWorkspace({
         {orderedBlocks.length === 0 && (
           <div className="admin-builder__blocks-empty-state">
             <div className="admin-builder__blocks-empty">В этой секции пока нет блоков.</div>
-            <button
-              className="ab-btn ab-btn--ghost ab-btn--sm admin-builder__empty-add-btn"
-              type="button"
-              onClick={onCreateBlock}
+            <AddBlockMenu
               disabled={saving}
+              align="right"
+              onSelect={(type) => void onCreateBlock(type)}
             >
-              <PlusIcon /> Добавить первый блок
-            </button>
+              <>
+                <PlusIcon /> Добавить первый блок
+              </>
+            </AddBlockMenu>
           </div>
         )}
 
         {orderedBlocks.map((block, index) => (
-          <div key={block.id}>
+          <div
+            key={block.id}
+            className={`admin-builder__block-item${dragOverBlockId === block.id && draggedBlockId && draggedBlockId !== block.id ? ' admin-builder__block-item--drag-over' : ''}`}
+            draggable={!saving}
+            onDragStart={(event) => {
+              if (armedDragBlockIdRef.current !== block.id) {
+                event.preventDefault();
+                return;
+              }
+              setDraggedBlockId(block.id);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              if (dragOverBlockId !== block.id) {
+                setDragOverBlockId(block.id);
+              }
+            }}
+            onDragLeave={() => {
+              if (dragOverBlockId === block.id) {
+                setDragOverBlockId(null);
+              }
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              if (draggedBlockId) {
+                void onReorderBlock(selectedSection.id, draggedBlockId, block.id);
+              }
+              setDraggedBlockId(null);
+              setDragOverBlockId(null);
+            }}
+            onDragEnd={() => {
+              armedDragBlockIdRef.current = null;
+              setArmedDragBlockId(null);
+              setDraggedBlockId(null);
+              setDragOverBlockId(null);
+            }}
+          >
             <BlockEditor
               block={block}
               isHighlighted={block.id === highlightedBlockId}
-              canMoveUp={index > 0}
-              canMoveDown={index < orderedBlocks.length - 1}
               busy={saving}
-              onMove={(blockId, direction) => onMoveBlock(selectedSection.id, blockId, direction)}
               onSave={onSaveBlock}
               onDelete={onDeleteBlock}
+              isDragArmed={armedDragBlockId === block.id || draggedBlockId === block.id}
+              onGripPointerDown={() => {
+                armedDragBlockIdRef.current = block.id;
+                setArmedDragBlockId(block.id);
+              }}
+              onGripPointerUp={() => {
+                armedDragBlockIdRef.current = null;
+                setArmedDragBlockId(null);
+              }}
             />
 
             <div className="admin-builder__insert-divider-row">
-              <button
-                className="admin-builder__insert-divider-btn"
-                type="button"
-                onClick={() => void onInsertBelow(selectedSection.id, block.id, semanticToLegacyBlockType(newBlockType))}
+              <AddBlockMenu
+                compact
                 disabled={saving}
-                aria-label="Добавить блок ниже"
+                onSelect={(type) => void onInsertBelow(selectedSection.id, block.id, type)}
+                triggerLabel={`Добавить блок после ${index + 1} блока`}
               >
                 <PlusIcon />
-              </button>
+              </AddBlockMenu>
             </div>
           </div>
         ))}

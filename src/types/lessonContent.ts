@@ -39,6 +39,14 @@ export interface RuleBlock {
   items: string[];
 }
 
+export interface MultipleChoiceBlock {
+  type: 'multipleChoice';
+  question: string;
+  options: [string, string, string, string];
+  correctIndex: number;
+  explanation?: string;
+}
+
 export interface AudioBubbleBlock {
   type: 'audio';
   sender: 'teacher' | 'student';
@@ -46,6 +54,14 @@ export interface AudioBubbleBlock {
   text: string;
   duration?: number;
   src: string;
+}
+
+export interface AudioExampleBlock {
+  type: 'audioExample';
+  title: string;
+  description?: string;
+  audioSrc: string;
+  duration?: number;
 }
 
 export interface TeacherBubbleBlock {
@@ -90,7 +106,9 @@ export type ContentBlock =
   | TextBlock
   | ReadingTextBlock
   | RuleBlock
+  | MultipleChoiceBlock
   | AudioBubbleBlock
+  | AudioExampleBlock
   | TeacherBubbleBlock
   | StudentBubbleBlock
   | VideoBubbleBlock

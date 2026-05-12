@@ -26,27 +26,70 @@ function GripIcon() {
   );
 }
 
+function isDefaultSemanticContent(semanticType: typeof ACTIVE_SEMANTIC_BLOCK_TYPES[number], content: ContentBlock) {
+  return JSON.stringify(content) === JSON.stringify(makeDefaultSemanticBlockContent(semanticType));
+}
+
+function normalizePreviewText(value: string | undefined) {
+  return (value ?? '').replace(/\s+/g, ' ').trim();
+}
+
+function getBlockPreview(content: ContentBlock) {
+  switch (content.type) {
+    case 'heading':
+      return normalizePreviewText(content.text);
+    case 'text':
+    case 'readingText':
+      return normalizePreviewText(content.content);
+    case 'audioExample':
+      return normalizePreviewText([content.title, content.description].filter(Boolean).join(' — '));
+    case 'multipleChoice':
+      return normalizePreviewText(content.question);
+    case 'audio':
+      return normalizePreviewText(content.text);
+    case 'teacherBubble':
+      return normalizePreviewText(`${content.teacherName}: ${content.text}`);
+    case 'studentBubble':
+      return normalizePreviewText(`${content.studentName}: ${content.text}`);
+    case 'phrase':
+    case 'phraseCard':
+      return normalizePreviewText(`${content.armenian} — ${content.translation}`);
+    case 'rule':
+      return normalizePreviewText([content.title, content.items[0]].filter(Boolean).join(' — '));
+    case 'video':
+      return normalizePreviewText([content.senderName, content.text].filter(Boolean).join(' — '));
+    case 'record':
+    case 'pronunciationPrompt':
+      return normalizePreviewText(content.prompt);
+    default:
+      return '';
+  }
+}
+
 export function BlockEditor({
   block,
   isHighlighted,
-  canMoveUp,
-  canMoveDown,
   busy,
-  onMove,
   onSave,
   onDelete,
+  onGripPointerDown,
+  onGripPointerUp,
+  isDragArmed,
 }: {
   block: AdminLessonBlock;
   isHighlighted?: boolean;
-  canMoveUp: boolean;
-  canMoveDown: boolean;
   busy: boolean;
-  onMove: (blockId: string, direction: 'up' | 'down') => Promise<void>;
   onSave: (blockId: string, patch: { orderIndex: number; type: AdminBlockType; content: ContentBlock }) => Promise<void>;
   onDelete: (blockId: string) => Promise<void>;
+  onGripPointerDown?: () => void;
+  onGripPointerUp?: () => void;
+  isDragArmed?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const semanticType = legacyToSemanticBlockType(block.type, block.content);
+  const previewText = getBlockPreview(block.content);
+  const collapsed = isCollapsed && !isHighlighted;
 
   const persistBlockDraft = (nextType: AdminBlockType, nextContent: ContentBlock) => {
     setError(null);
@@ -61,6 +104,16 @@ export function BlockEditor({
 
   const handleTypeSelect = (nextTypeValue: string) => {
     const nextSemanticType = nextTypeValue as typeof semanticType;
+    if (nextSemanticType === semanticType) return;
+
+    const shouldConfirmReplace = !isDefaultSemanticContent(semanticType, block.content);
+    if (shouldConfirmReplace && typeof window !== 'undefined') {
+      const confirmed = window.confirm(
+        `Сменить тип блока на «${semanticBlockLabel(nextSemanticType)}»?\n\nТекущее содержимое блока будет заменено.`,
+      );
+      if (!confirmed) return;
+    }
+
     const nextLegacyType = semanticToLegacyBlockType(nextSemanticType);
     const nextContent = makeDefaultSemanticBlockContent(nextSemanticType);
     persistBlockDraft(nextLegacyType, nextContent);
@@ -71,10 +124,18 @@ export function BlockEditor({
   };
 
   return (
-    <div className={`ab-block-card${isHighlighted ? ' ab-block-card--highlighted' : ''}`}>
+    <div className={`ab-block-card${isHighlighted ? ' ab-block-card--highlighted' : ''}${collapsed ? ' ab-block-card--collapsed' : ''}`}>
       <div className="ab-block-card__header">
         <div className="ab-block-card__header-left">
-          <span className="ab-block-card__grip"><GripIcon /></span>
+          <span
+            className={`ab-block-card__grip${isDragArmed ? ' ab-block-card__grip--active' : ''}`}
+            onMouseDown={onGripPointerDown}
+            onMouseUp={onGripPointerUp}
+            onTouchStart={onGripPointerDown}
+            onTouchEnd={onGripPointerUp}
+          >
+            <GripIcon />
+          </span>
           <PickerMenu
             compact
             value={semanticType}
@@ -89,26 +150,15 @@ export function BlockEditor({
           />
         </div>
         <div className="ab-block-card__header-actions">
-          <div className="ab-block-card__move-btns ab-block-card__move-btns--header">
-            <button
-              className="ab-icon-btn"
-              type="button"
-              onClick={() => void onMove(block.id, 'up')}
-              disabled={busy || !canMoveUp}
-              aria-label="Переместить вверх"
-            >
-              <ChevronUpIcon />
-            </button>
-            <button
-              className="ab-icon-btn"
-              type="button"
-              onClick={() => void onMove(block.id, 'down')}
-              disabled={busy || !canMoveDown}
-              aria-label="Переместить вниз"
-            >
-              <ChevronDownIcon />
-            </button>
-          </div>
+          <button
+            className="ab-icon-btn"
+            type="button"
+            onClick={() => setIsCollapsed((current) => !current)}
+            disabled={busy}
+            aria-label={collapsed ? 'Развернуть блок' : 'Свернуть блок'}
+          >
+            {collapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
+          </button>
           <span className="ab-block-card__header-action-divider" aria-hidden="true" />
           <button
             className="ab-delete-action ab-delete-action--danger ab-block-card__delete-btn"
@@ -122,13 +172,22 @@ export function BlockEditor({
         </div>
       </div>
 
-      <BlockTypedFields
-        blockId={block.id}
-        semanticType={semanticType}
-        content={block.content}
-        busy={busy}
-        onChange={handleTypedContentChange}
-      />
+      {collapsed ? (
+        <div className="ab-block-card__preview">
+          <div className="ab-block-card__preview-label">Содержимое блока</div>
+          <div className="ab-block-card__preview-text">
+            {previewText || 'Пока нет заполненного содержимого.'}
+          </div>
+        </div>
+      ) : (
+        <BlockTypedFields
+          blockId={block.id}
+          semanticType={semanticType}
+          content={block.content}
+          busy={busy}
+          onChange={handleTypedContentChange}
+        />
+      )}
 
       {error && <div className="ab-block-card__error">{error}</div>}
     </div>

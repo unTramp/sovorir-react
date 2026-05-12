@@ -41,7 +41,7 @@ contentRepository.getLessonSections().then((sections) => {
 function countRecords(sectionId: number): number {
   const section = _lessonSections.find((item) => item.id === sectionId);
   if (!section) return 0;
-  return section.blocks.filter((b) => b.type === 'record').length;
+  return section.blocks.filter((b) => b.type === 'record' || b.type === 'pronunciationPrompt').length;
 }
 
 function hasQuiz(sectionId: number): boolean {

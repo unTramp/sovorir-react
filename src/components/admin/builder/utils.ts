@@ -92,10 +92,21 @@ export function sectionTypeDescription(type: AdminSectionType): string {
   return map[type] ?? 'Содержимое секции';
 }
 
+export function getSectionDisplayTitle(title: string) {
+  const trimmed = title.trim();
+  if (!trimmed) return 'Новая секция';
+  if (/^section\s+\d+$/i.test(trimmed)) return 'Новая секция';
+  if (/^секция\s+\d+$/i.test(trimmed)) return 'Новая секция';
+  return trimmed;
+}
+
 export function semanticBlockDescription(type: string): string {
   const map: Record<string, string> = {
     heading: 'Внутренний заголовок внутри секции',
     text: 'Короткое объяснение или инструкция',
+    audioExample: 'Отдельный аудио-пример для прослушивания',
+    pronunciationPrompt: 'Задание для записи и устной практики',
+    multipleChoice: 'Короткий тест с одним правильным ответом',
     phraseCard: 'Фраза с переводом и транскрипцией',
     teacherBubble: 'Сообщение преподавателя с текстом и аудио',
     rule: 'Правило произношения или грамматики',

@@ -10,7 +10,6 @@ import {
   parseObjectJson,
   slugifyLessonTitle,
 } from './utils';
-import { type SemanticBlockType } from '../../../lib/semanticContent';
 import type {
   AdminLessonBuilder,
   AdminLessonStatus,
@@ -21,6 +20,7 @@ import { useSectionDraftSync } from './useSectionDraftSync';
 import { useSectionActions } from './useSectionActions';
 import { useBlockActions } from './useBlockActions';
 import type { SectionDraftState } from './state';
+import { validateLessonForPublish } from './validation';
 
 export function useAdminLessonBuilder(enabled: boolean) {
   const [lessons, setLessons] = useState<AdminLessonSummary[]>([]);
@@ -40,7 +40,7 @@ export function useAdminLessonBuilder(enabled: boolean) {
   const [dragOverSectionId, setDragOverSectionId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [newBlockType, setNewBlockType] = useState<SemanticBlockType>('heading');
+  const [publishValidationErrors, setPublishValidationErrors] = useState<string[]>([]);
   const [sectionDraft, setSectionDraft] = useState<SectionDraftState | null>(null);
   const [highlightedBlockId, setHighlightedBlockId] = useState<string | null>(null);
 
@@ -62,6 +62,7 @@ export function useAdminLessonBuilder(enabled: boolean) {
     setHasUnsavedChanges(true);
     setNotice(null);
     setError(null);
+    setPublishValidationErrors([]);
   }, []);
 
   const updateDraftLesson = useCallback((
@@ -199,6 +200,7 @@ export function useAdminLessonBuilder(enabled: boolean) {
       await task();
       setNotice(successMessage);
       setError(null);
+      setPublishValidationErrors([]);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Action failed');
     } finally {
@@ -209,8 +211,19 @@ export function useAdminLessonBuilder(enabled: boolean) {
   const handleSaveLessonMeta = useCallback(async (overrideStatus?: AdminLessonStatus) => {
     if (!selectedLesson) return;
     const status = overrideStatus ?? metaDraft.status;
+    const lessonToSave = buildPersistableLesson(status);
+
+    if (status === 'published') {
+      const validationErrors = validateLessonForPublish(lessonToSave);
+      if (validationErrors.length > 0) {
+        setNotice(null);
+        setError(null);
+        setPublishValidationErrors(validationErrors);
+        return;
+      }
+    }
+
     await runAction(async () => {
-      const lessonToSave = buildPersistableLesson(status);
       const lesson = await adminLessonBuilderRepository.saveLessonBuilder(lessonToSave);
       setSelectedLesson(lesson);
       setMetaDraft({
@@ -247,12 +260,11 @@ export function useAdminLessonBuilder(enabled: boolean) {
     handleInsertBlockAfter,
     handleSaveBlock,
     handleDeleteBlock,
-    handleMoveBlock,
+    handleReorderBlock,
   } = useBlockActions({
     selectedLesson,
     selectedSection,
     orderedBlocks,
-    newBlockType,
     updateDraftLesson,
     setNotice,
     setHighlightedBlockId,
@@ -277,8 +289,7 @@ export function useAdminLessonBuilder(enabled: boolean) {
     setDragOverSectionId,
     error,
     notice,
-    newBlockType,
-    setNewBlockType,
+    publishValidationErrors,
     highlightedBlockId,
     sectionDraft,
     setSectionDraft,
@@ -297,6 +308,6 @@ export function useAdminLessonBuilder(enabled: boolean) {
     handleInsertBlockAfter,
     handleSaveBlock,
     handleDeleteBlock,
-    handleMoveBlock,
+    handleReorderBlock,
   };
 }

@@ -29,8 +29,7 @@ export function AdminLessonBuilderView() {
     dragOverSectionId,
     setDragOverSectionId,
     error,
-    notice,
-    newBlockType,
+    publishValidationErrors,
     highlightedBlockId,
     sectionDraft,
     orderedSections,
@@ -42,13 +41,12 @@ export function AdminLessonBuilderView() {
     handleCreateSection,
     handleUpdateSectionDraft,
     handleDeleteSection,
-    handleMoveSection,
     handleDropSection,
     handleCreateBlock,
     handleInsertBlockAfter,
     handleSaveBlock,
     handleDeleteBlock,
-    handleMoveBlock,
+    handleReorderBlock,
   } = useAdminLessonBuilder(canManageLessons);
 
   if (!canManageLessons) {
@@ -72,6 +70,17 @@ export function AdminLessonBuilderView() {
 
   const firstName = profile?.fullName?.split(' ')[0] ?? 'П';
   const roleLabel = profile?.role === 'admin' ? 'Администратор' : 'Преподаватель';
+  const selectedSectionOrder = selectedSection
+    ? orderedSections.findIndex((section) => section.id === selectedSection.id) + 1
+    : 1;
+  const handleOpenPreview = () => {
+    if (typeof window === 'undefined') return;
+    const previewUrl = new URL('/lesson', window.location.origin);
+    if (selectedSectionOrder > 0) {
+      previewUrl.searchParams.set('section', String(selectedSectionOrder));
+    }
+    window.open(previewUrl.toString(), '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className={`admin-builder${isNavCollapsed ? ' admin-builder--nav-collapsed' : ''}`}>
@@ -90,7 +99,7 @@ export function AdminLessonBuilderView() {
         displayedLessonTitle={displayedLessonTitle}
         sections={orderedSections}
         selectedSectionId={selectedSectionId}
-        lessonStatus={selectedLesson?.status ?? 'draft'}
+        hasUnsavedChanges={hasUnsavedChanges}
         saving={saving || !selectedLesson}
         dragSectionId={dragSectionId}
         dragOverSectionId={dragOverSectionId}
@@ -99,7 +108,6 @@ export function AdminLessonBuilderView() {
         onSelectSection={setSelectedSectionId}
         onAddSection={() => void handleCreateSection()}
         onDeleteSection={(sectionId) => void handleDeleteSection(sectionId)}
-        onMoveSection={(sectionId, direction) => void handleMoveSection(sectionId, direction)}
         onDropSection={(dragId, overId) => void handleDropSection(dragId, overId)}
       />
 
@@ -107,14 +115,17 @@ export function AdminLessonBuilderView() {
         <header className="admin-builder__topbar">
           <div className="admin-builder__topbar-left">
             <div className="admin-builder__topbar-title">Конструктор урока</div>
-            <div className="admin-builder__topbar-subtitle">Редактирование структуры, секций и блоков урока</div>
           </div>
           <div className="admin-builder__topbar-right">
-            {hasUnsavedChanges && (
-              <span className="admin-builder__dirty-indicator">Есть несохранённые изменения</span>
-            )}
-            {notice && <span className="admin-builder__notice">{notice}</span>}
             {error && <span className="admin-builder__topbar-error">{error}</span>}
+            <button
+              className="ab-btn ab-btn--ghost"
+              type="button"
+              onClick={handleOpenPreview}
+              disabled={!selectedLesson}
+            >
+              Предпросмотр
+            </button>
             <button
               className="ab-btn ab-btn--primary"
               type="button"
@@ -125,6 +136,24 @@ export function AdminLessonBuilderView() {
             </button>
           </div>
         </header>
+
+        {publishValidationErrors.length > 0 && (
+          <div className="admin-builder__validation-panel" role="alert" aria-live="polite">
+            <div className="admin-builder__validation-panel-header">
+              <div className="admin-builder__validation-panel-title">Перед публикацией нужно исправить:</div>
+              <div className="admin-builder__validation-panel-subtitle">
+                Заполни обязательные поля и попробуй опубликовать снова.
+              </div>
+            </div>
+            <ul className="admin-builder__validation-list">
+              {publishValidationErrors.map((validationError, index) => (
+                <li key={`${validationError}-${index}`} className="admin-builder__validation-item">
+                  {validationError}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="admin-builder__workspace-scroll">
           {!selectedLesson ? (
@@ -159,12 +188,11 @@ export function AdminLessonBuilderView() {
                 selectedSection={selectedSection}
                 sectionDraft={sectionDraft}
                 orderedBlocks={orderedBlocks}
-                newBlockType={newBlockType}
                 highlightedBlockId={highlightedBlockId}
                 saving={saving}
                 onSectionDraftChange={handleUpdateSectionDraft}
-                onCreateBlock={() => void handleCreateBlock()}
-                onMoveBlock={handleMoveBlock}
+                onCreateBlock={handleCreateBlock}
+                onReorderBlock={handleReorderBlock}
                 onInsertBelow={handleInsertBlockAfter}
                 onSaveBlock={handleSaveBlock}
                 onDeleteBlock={handleDeleteBlock}

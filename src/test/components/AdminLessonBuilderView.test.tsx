@@ -51,7 +51,7 @@ describe('AdminLessonBuilderView', () => {
     await user.clear(titleInput);
     await user.type(titleInput, 'Приветствия для друзей');
 
-    expect(screen.getByText('Есть несохранённые изменения')).toBeInTheDocument();
+    expect(screen.getAllByText('Есть несохранённые изменения').length).toBeGreaterThan(0);
     expect(getSyncedAdminLesson()?.title).toBe('Приветствия и прощания');
 
     await user.click(screen.getByRole('button', { name: 'Сохранить изменения' }));

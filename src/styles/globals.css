@@ -1392,6 +1392,105 @@ html.drawer-lock {
   margin-bottom: 1.5rem;
 }
 
+.lesson-audio-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgb(var(--color-primary-rgb) / 0.10);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(252, 248, 245, 0.92) 100%);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.lesson-audio-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 128, 90, 0.12);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.lesson-audio-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.lesson-audio-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-text);
+}
+
+.lesson-audio-card__description {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.lesson-audio-card__player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lesson-audio-card__play {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  color: white;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(139, 74, 42, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.lesson-audio-card__play:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(139, 74, 42, 0.22);
+}
+
+.lesson-audio-card__play:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+.lesson-audio-card .waveform-bars {
+  flex: 1;
+  min-width: 0;
+}
+
+.lesson-audio-card .waveform-bar.played {
+  background: rgba(var(--color-primary-rgb) / 0.6);
+}
+
+.lesson-audio-card .waveform-bar.unplayed {
+  background: rgba(var(--color-primary-rgb) / 0.18);
+}
+
+.lesson-audio-card__duration {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
 /* ==================== Word Card ==================== */
 :root {
   --word-color-learned: var(--color-done);
@@ -1575,6 +1674,25 @@ html.drawer-lock {
 
 
 @media (max-width: 480px) {
+  .lesson-audio-card {
+    padding: 16px;
+    gap: 12px;
+    border-radius: 20px;
+  }
+
+  .lesson-audio-card__icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .lesson-audio-card__title {
+    font-size: 15px;
+  }
+
+  .lesson-audio-card__description {
+    font-size: 13px;
+  }
+
   .word-card {
     padding: 16px;
     border-left-width: 3px;
@@ -2395,6 +2513,206 @@ html.drawer-lock {
   transform: translateY(-1px);
 }
 
+/* ==================== Pronunciation Trainer ==================== */
+.trainer {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trainer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trainer__header-center {
+  flex: 1;
+  text-align: center;
+}
+
+.trainer__teacher {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.trainer__nav-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: var(--color-bg-white);
+  border-radius: 10px;
+  color: var(--color-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.trainer__nav-btn:disabled {
+  opacity: 0.3;
+}
+
+.trainer__word-card {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.trainer__word-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
+
+.trainer__word-armenian {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--color-primary-warm);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.trainer__word-transcription {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.trainer__word-translation {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.trainer__syllables {
+  background: var(--color-bg-app);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.trainer__syllables-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.trainer__syllables-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: 0.02em;
+}
+
+.trainer__playback {
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.trainer__playback-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.trainer__record {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.trainer__error {
+  font-size: 13px;
+  color: var(--color-error-dark);
+}
+
+.trainer__mic-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.trainer__mic-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s, background 0.12s;
+  box-shadow: 0 4px 16px rgb(var(--color-primary-rgb) / 0.35);
+}
+
+.trainer__mic-btn:active,
+.trainer__mic-btn--recording {
+  transform: scale(0.95);
+  background: var(--color-primary-dark);
+}
+
+.trainer__mic-btn--recording {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  border-radius: 24px;
+  padding: 0 20px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.trainer__pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: white;
+  animation: trainer-pulse 1s ease infinite;
+  display: inline-block;
+}
+
+@keyframes trainer-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.trainer__mic-hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.trainer__next-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==================== Flashcard Results ==================== */
 .flashcard-result {
   text-align: center;
   padding: 32px 24px;
@@ -3640,10 +3958,51 @@ html.drawer-lock {
 .home-teacher__note--clamped { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .home-teacher__view-tips { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--color-primary-warm); background: none; border: none; cursor: pointer; padding: 0; display: block; }
 
+/* ==================== Bottom Tab Bar ==================== */
+.bottom-tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(56px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: var(--color-bg-app);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: stretch;
+  z-index: 40;
+}
+
+.bottom-tab-bar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9E8880;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 150ms ease;
+}
+
+.bottom-tab-bar__item.active {
+  color: var(--color-primary);
+}
+
+.bottom-tab-bar__label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+}
+
 /* ==================== Mobile Header ==================== */
 .app-shell {
   min-height: 100dvh;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
 .mobile-header {
@@ -3906,6 +4265,40 @@ button:focus-visible {
   font-weight: 500;
   white-space: nowrap;
   color: var(--color-text-muted);
+}
+
+/* ── Lesson Tabs ── */
+.lesson-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-app);
+  overflow-x: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  flex-shrink: 0;
+}
+.lesson-tabs::-webkit-scrollbar { display: none; }
+
+.lesson-tabs__item {
+  flex-shrink: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 150ms ease, border-color 150ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.lesson-tabs__item.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
 }
 
 /* ── LessonPageView scroll container ── */

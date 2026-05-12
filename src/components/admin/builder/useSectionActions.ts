@@ -53,7 +53,7 @@ export function useSectionActions({
       draft.sections.push({
         id: sectionId,
         lessonId: draft.id,
-        title: `Section ${nextOrder}`,
+        title: '',
         orderIndex: nextOrder,
         type: 'intro',
         content: null,
@@ -64,7 +64,7 @@ export function useSectionActions({
 
     setSelectedSectionId(sectionId);
     setSectionDraft({
-      title: `Section ${nextOrder}`,
+      title: '',
       type: 'intro',
       contentJson: 'null',
     });

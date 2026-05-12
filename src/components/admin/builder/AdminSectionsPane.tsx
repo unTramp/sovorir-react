@@ -1,12 +1,25 @@
-import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from '../../../icons';
-import { sectionTypeLabel, statusLabel } from './utils';
-import type { AdminLessonSection, AdminLessonStatus } from '../../../types/admin';
+import { PlusIcon, TrashIcon } from '../../../icons';
+import { getSectionDisplayTitle, sectionTypeLabel } from './utils';
+import type { AdminLessonSection } from '../../../types/admin';
+
+function SectionGripIcon() {
+  return (
+    <svg width="10" height="14" viewBox="0 0 10 14" fill="none" aria-hidden="true">
+      <circle cx="3" cy="2.25" r="1.25" fill="currentColor" />
+      <circle cx="7" cy="2.25" r="1.25" fill="currentColor" />
+      <circle cx="3" cy="7" r="1.25" fill="currentColor" />
+      <circle cx="7" cy="7" r="1.25" fill="currentColor" />
+      <circle cx="3" cy="11.75" r="1.25" fill="currentColor" />
+      <circle cx="7" cy="11.75" r="1.25" fill="currentColor" />
+    </svg>
+  );
+}
 
 interface AdminSectionsPaneProps {
   displayedLessonTitle: string;
   sections: AdminLessonSection[];
   selectedSectionId: string | null;
-  lessonStatus: AdminLessonStatus;
+  hasUnsavedChanges: boolean;
   saving: boolean;
   dragSectionId: string | null;
   dragOverSectionId: string | null;
@@ -15,7 +28,6 @@ interface AdminSectionsPaneProps {
   onSelectSection: (sectionId: string) => void;
   onAddSection: () => void;
   onDeleteSection: (sectionId: string) => void;
-  onMoveSection: (sectionId: string, direction: 'up' | 'down') => void;
   onDropSection: (dragId: string, overId: string) => void;
 }
 
@@ -23,7 +35,7 @@ export function AdminSectionsPane({
   displayedLessonTitle,
   sections,
   selectedSectionId,
-  lessonStatus,
+  hasUnsavedChanges,
   saving,
   dragSectionId,
   dragOverSectionId,
@@ -32,16 +44,15 @@ export function AdminSectionsPane({
   onSelectSection,
   onAddSection,
   onDeleteSection,
-  onMoveSection,
   onDropSection,
 }: AdminSectionsPaneProps) {
   return (
     <aside className="admin-builder__sections-pane">
       <div className="admin-builder__sections-header">
         <div className="admin-builder__sections-lesson-title">{displayedLessonTitle}</div>
-        <div className="admin-builder__sections-sync">
+        <div className={`admin-builder__sections-sync${hasUnsavedChanges ? ' admin-builder__sections-sync--dirty' : ''}`}>
           <span className="admin-builder__sync-dot" />
-          Локальная синхронизация активна
+          {hasUnsavedChanges ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}
         </div>
         <button
           className="admin-builder__add-section-btn"
@@ -65,7 +76,9 @@ export function AdminSectionsPane({
           >
             <div className="admin-builder__section-rail-marker" aria-hidden="true">
               {index < sections.length - 1 && <span className="admin-builder__section-rail-line" />}
-              <span className="admin-builder__section-rail-dot" />
+              <span className="admin-builder__section-rail-dot">
+                <span className="admin-builder__section-rail-step">{index + 1}</span>
+              </span>
             </div>
 
             <div
@@ -107,35 +120,19 @@ export function AdminSectionsPane({
               }}
             >
               <div className="admin-builder__section-card-top">
-                <span className="admin-builder__section-type-label">{sectionTypeLabel(section.type)}</span>
+                <div className="admin-builder__section-card-context">
+                  <span className="admin-builder__section-step-label">Шаг {index + 1}</span>
+                  <span className="admin-builder__section-card-context-divider" aria-hidden="true">·</span>
+                  <span className="admin-builder__section-type-label">{sectionTypeLabel(section.type)}</span>
+                </div>
                 <div className="admin-builder__section-card-top-right admin-builder__section-card-top-right--actions">
-                  <div className="admin-builder__section-card-move admin-builder__section-card-move--top">
-                    <button
-                      className="ab-icon-btn ab-icon-btn--tiny"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onMoveSection(section.id, 'up');
-                      }}
-                      disabled={saving || index === 0}
-                      aria-label="Переместить секцию вверх"
-                    >
-                      <ChevronUpIcon />
-                    </button>
-                    <button
-                      className="ab-icon-btn ab-icon-btn--tiny"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onMoveSection(section.id, 'down');
-                      }}
-                      disabled={saving || index === sections.length - 1}
-                      aria-label="Переместить секцию вниз"
-                    >
-                      <ChevronDownIcon />
-                    </button>
-                  </div>
-                  <span className="admin-builder__section-card-action-divider" aria-hidden="true" />
+                  <span
+                    className="admin-builder__section-card-drag"
+                    aria-label="Перетащите, чтобы изменить порядок секций"
+                    title="Перетащите, чтобы изменить порядок секций"
+                  >
+                    <SectionGripIcon />
+                  </span>
                   <button
                     className="ab-delete-action ab-delete-action--danger admin-builder__section-card-delete-btn"
                     type="button"
@@ -152,16 +149,13 @@ export function AdminSectionsPane({
               </div>
 
               <div className="admin-builder__section-card-main">
-                <div className="admin-builder__section-card-title">{section.title}</div>
+                <div className="admin-builder__section-card-title">{getSectionDisplayTitle(section.title)}</div>
               </div>
 
               <div className="admin-builder__section-card-bottom">
                 <div className="admin-builder__section-card-meta">
                   {section.blocks.length} {section.blocks.length === 1 ? 'блок' : 'блоков'}
                 </div>
-                <span className={`ab-status-badge ab-status-badge--${lessonStatus}`}>
-                  {statusLabel(lessonStatus)}
-                </span>
               </div>
 
               {dragOverSectionId === section.id && dragSectionId && dragSectionId !== section.id && (

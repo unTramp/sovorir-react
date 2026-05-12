@@ -26,10 +26,7 @@ describe('BlockEditor', () => {
     render(
       <BlockEditor
         block={phraseBlock}
-        canMoveUp={false}
-        canMoveDown={false}
         busy={false}
-        onMove={vi.fn().mockResolvedValue(undefined)}
         onSave={onSave}
         onDelete={vi.fn().mockResolvedValue(undefined)}
       />,
@@ -51,5 +48,72 @@ describe('BlockEditor', () => {
     );
 
     expect(screen.queryByRole('button', { name: 'Применить блок' })).not.toBeInTheDocument();
+  });
+
+  it('asks for confirmation before replacing a filled block with another type', async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(
+      <BlockEditor
+        block={phraseBlock}
+        busy={false}
+        onSave={onSave}
+        onDelete={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Карточка фразы/i }));
+    fireEvent.click(screen.getByRole('option', { name: /Внутренний заголовок/i }));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      'block-1',
+      expect.objectContaining({
+        type: 'heading',
+        content: expect.objectContaining({
+          type: 'heading',
+          text: 'Новый заголовок',
+        }),
+      }),
+    );
+  });
+
+  it('keeps the current block when type change confirmation is cancelled', async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+
+    render(
+      <BlockEditor
+        block={phraseBlock}
+        busy={false}
+        onSave={onSave}
+        onDelete={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Карточка фразы/i }));
+    fireEvent.click(screen.getByRole('option', { name: /Внутренний заголовок/i }));
+
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onSave).not.toHaveBeenCalled());
+  });
+
+  it('shows a content preview when the block is collapsed', async () => {
+    render(
+      <BlockEditor
+        block={phraseBlock}
+        busy={false}
+        onSave={vi.fn().mockResolvedValue(undefined)}
+        onDelete={vi.fn().mockResolvedValue(undefined)}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть блок' }));
+
+    expect(screen.getByText('Содержимое блока')).toBeInTheDocument();
+    expect(screen.getByText('Բարև — Привет')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Перевод')).not.toBeInTheDocument();
   });
 });

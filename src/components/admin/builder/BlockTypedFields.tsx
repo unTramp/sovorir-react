@@ -53,6 +53,135 @@ export function BlockTypedFields({
     );
   }
 
+  if (semanticType === 'audioExample' && content.type === 'audioExample') {
+    return (
+      <div className="ab-block-card__editor">
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-audio-title-${blockId}`}>Заголовок</label>
+          <input
+            id={`block-audio-title-${blockId}`}
+            className="ab-block-card__input"
+            value={content.title}
+            onChange={(event) => onChange({ ...content, title: event.target.value })}
+            disabled={busy}
+          />
+        </div>
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-audio-description-${blockId}`}>Описание</label>
+          <textarea
+            id={`block-audio-description-${blockId}`}
+            className="ab-block-card__input ab-block-card__input--textarea"
+            rows={3}
+            value={content.description ?? ''}
+            onChange={(event) => onChange({ ...content, description: event.target.value || undefined })}
+            disabled={busy}
+          />
+        </div>
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-audio-src-${blockId}`}>Ссылка на аудио</label>
+          <input
+            id={`block-audio-src-${blockId}`}
+            className="ab-block-card__input"
+            value={content.audioSrc}
+            onChange={(event) => onChange({ ...content, audioSrc: event.target.value })}
+            disabled={busy}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    semanticType === 'pronunciationPrompt'
+    && (content.type === 'pronunciationPrompt' || content.type === 'record')
+  ) {
+    return (
+      <div className="ab-block-card__editor">
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-pronunciation-prompt-${blockId}`}>
+            Текст задания
+          </label>
+          <textarea
+            id={`block-pronunciation-prompt-${blockId}`}
+            className="ab-block-card__input ab-block-card__input--textarea"
+            rows={3}
+            value={content.prompt}
+            onChange={(event) => onChange({ ...content, prompt: event.target.value })}
+            disabled={busy}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (semanticType === 'multipleChoice' && content.type === 'multipleChoice') {
+    return (
+      <div className="ab-block-card__editor">
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-mc-question-${blockId}`}>Вопрос</label>
+          <textarea
+            id={`block-mc-question-${blockId}`}
+            className="ab-block-card__input ab-block-card__input--textarea"
+            rows={3}
+            value={content.question}
+            onChange={(event) => onChange({ ...content, question: event.target.value })}
+            disabled={busy}
+          />
+        </div>
+
+        <div className="ab-block-card__editor ab-block-card__editor--grid">
+          {content.options.map((option, index) => (
+            <div className="ab-block-card__field" key={index}>
+              <label className="ab-block-card__label" htmlFor={`block-mc-option-${blockId}-${index}`}>
+                Вариант {index + 1}
+              </label>
+              <input
+                id={`block-mc-option-${blockId}-${index}`}
+                className="ab-block-card__input"
+                value={option}
+                onChange={(event) => {
+                  const nextOptions = [...content.options] as typeof content.options;
+                  nextOptions[index] = event.target.value;
+                  onChange({ ...content, options: nextOptions });
+                }}
+                disabled={busy}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-mc-correct-${blockId}`}>Правильный ответ</label>
+          <select
+            id={`block-mc-correct-${blockId}`}
+            className="ab-block-card__input"
+            value={String(content.correctIndex)}
+            onChange={(event) => onChange({ ...content, correctIndex: Number(event.target.value) })}
+            disabled={busy}
+          >
+            {content.options.map((_, index) => (
+              <option key={index} value={index}>
+                Вариант {index + 1}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="ab-block-card__field">
+          <label className="ab-block-card__label" htmlFor={`block-mc-explanation-${blockId}`}>Пояснение после ответа</label>
+          <textarea
+            id={`block-mc-explanation-${blockId}`}
+            className="ab-block-card__input ab-block-card__input--textarea"
+            rows={3}
+            value={content.explanation ?? ''}
+            onChange={(event) => onChange({ ...content, explanation: event.target.value || undefined })}
+            disabled={busy}
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (semanticType === 'rule' && content.type === 'rule') {
     return (
       <div className="ab-block-card__editor">

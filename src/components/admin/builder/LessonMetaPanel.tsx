@@ -26,8 +26,8 @@ export function LessonMetaPanel({
       <div className="admin-builder__meta-card-top">
         <div className="admin-builder__meta-card-heading">
           <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
-            <circle cx="8.5" cy="8.5" r="7.5" stroke="#8D4A2A" strokeWidth="1.5" />
-            <path d="M8.5 7.5v5M8.5 5v1" stroke="#8D4A2A" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="8.5" cy="8.5" r="7.5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M8.5 7.5v5M8.5 5v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <span>Параметры урока</span>
         </div>

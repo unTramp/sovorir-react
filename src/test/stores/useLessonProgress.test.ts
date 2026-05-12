@@ -39,6 +39,14 @@ const sectionsFixture: LessonContentSection[] = [
       { type: 'text', content: 'Проверьте себя' },
     ],
   },
+  {
+    id: 4,
+    title: 'Произношение',
+    blocks: [
+      { type: 'heading', text: 'Произношение' },
+      { type: 'pronunciationPrompt', prompt: 'Повторите: Բարև' },
+    ],
+  },
 ];
 
 beforeEach(() => {
@@ -67,6 +75,14 @@ describe('useLessonProgress', () => {
     expect(useLessonProgress.getState().isSectionCompleted(2)).toBe(true);
   });
 
+  it('treats pronunciation prompts as record-like completion gates', () => {
+    expect(useLessonProgress.getState().isSectionCompleted(4)).toBe(false);
+
+    useLessonProgress.getState().completeRecord(4, 0);
+
+    expect(useLessonProgress.getState().isSectionCompleted(4)).toBe(true);
+  });
+
   it('requires a passed quiz for quiz sections even when there are no record prompts', () => {
     useLessonProgress.getState().completeSection(3);
     expect(useLessonProgress.getState().isSectionCompleted(3)).toBe(false);
@@ -86,7 +102,7 @@ describe('useLessonProgress', () => {
     useLessonProgress.getState().completeSection(1);
     useLessonProgress.getState().completeRecord(2, 0);
 
-    expect(useLessonProgress.getState().getOverallPercentage()).toBe(67);
+    expect(useLessonProgress.getState().getOverallPercentage()).toBe(50);
     expect(useLessonProgress.getState().getCompletedSections()).toBe(2);
   });
 });

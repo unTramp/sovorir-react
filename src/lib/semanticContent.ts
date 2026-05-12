@@ -4,6 +4,9 @@ import type { AdminBlockType } from '../types/admin';
 export type SemanticBlockType =
   | 'heading'
   | 'text'
+  | 'audioExample'
+  | 'pronunciationPrompt'
+  | 'multipleChoice'
   | 'teacherBubble'
   | 'phraseCard'
   | 'rule'
@@ -13,6 +16,9 @@ export type SemanticBlockType =
 export const ACTIVE_SEMANTIC_BLOCK_TYPES: SemanticBlockType[] = [
   'heading',
   'text',
+  'audioExample',
+  'pronunciationPrompt',
+  'multipleChoice',
   'teacherBubble',
   'phraseCard',
   'rule',
@@ -20,7 +26,7 @@ export const ACTIVE_SEMANTIC_BLOCK_TYPES: SemanticBlockType[] = [
   'video',
 ];
 
-export const RESERVED_SEMANTIC_BLOCK_TYPES = ['studentBubble', 'pronunciationPrompt'] as const;
+export const RESERVED_SEMANTIC_BLOCK_TYPES = ['studentBubble'] as const;
 
 export function semanticBlockLabel(type: SemanticBlockType) {
   switch (type) {
@@ -28,6 +34,12 @@ export function semanticBlockLabel(type: SemanticBlockType) {
       return 'Внутренний заголовок';
     case 'text':
       return 'Поясняющий текст';
+    case 'audioExample':
+      return 'Аудио-пример';
+    case 'pronunciationPrompt':
+      return 'Запись ответа';
+    case 'multipleChoice':
+      return 'Тест с выбором';
     case 'teacherBubble':
       return 'Бабл преподавателя';
     case 'phraseCard':
@@ -51,6 +63,12 @@ export function legacyBlockTypeLabel(type: AdminBlockType) {
       return semanticBlockLabel('phraseCard');
     case 'audio':
       return 'Legacy audio';
+    case 'audioExample':
+      return semanticBlockLabel('audioExample');
+    case 'pronunciationPrompt':
+      return semanticBlockLabel('pronunciationPrompt');
+    case 'multipleChoice':
+      return semanticBlockLabel('multipleChoice');
     case 'record':
       return 'Legacy record';
     case 'rule':
@@ -68,6 +86,12 @@ export function semanticToLegacyBlockType(type: SemanticBlockType): AdminBlockTy
       return 'phrase';
     case 'readingText':
       return 'text';
+    case 'audioExample':
+      return 'audioExample';
+    case 'pronunciationPrompt':
+      return 'pronunciationPrompt';
+    case 'multipleChoice':
+      return 'multipleChoice';
     default:
       return type;
   }
@@ -80,6 +104,13 @@ export function legacyToSemanticBlockType(type: AdminBlockType, content?: Conten
         return 'teacherBubble';
       }
       return 'teacherBubble';
+    case 'audioExample':
+      return 'audioExample';
+    case 'pronunciationPrompt':
+    case 'record':
+      return 'pronunciationPrompt';
+    case 'multipleChoice':
+      return 'multipleChoice';
     case 'phrase':
       return 'phraseCard';
     case 'text':
@@ -101,6 +132,26 @@ export function makeDefaultSemanticBlockContent(type: SemanticBlockType): Conten
       return { type: 'heading', text: 'Новый заголовок' };
     case 'text':
       return { type: 'text', content: 'Короткий поясняющий текст для секции.' };
+    case 'audioExample':
+      return {
+        type: 'audioExample',
+        title: 'Новый аудио-пример',
+        description: 'Короткое описание того, что нужно прослушать.',
+        audioSrc: 'https://example.com/audio-example.opus',
+      };
+    case 'pronunciationPrompt':
+      return {
+        type: 'pronunciationPrompt',
+        prompt: 'Повторите фразу: Բարև',
+      };
+    case 'multipleChoice':
+      return {
+        type: 'multipleChoice',
+        question: 'Выберите правильный вариант',
+        options: ['Вариант 1', 'Вариант 2', 'Вариант 3', 'Вариант 4'],
+        correctIndex: 0,
+        explanation: 'Короткое пояснение, почему этот ответ правильный.',
+      };
     case 'teacherBubble':
       return {
         type: 'audio',

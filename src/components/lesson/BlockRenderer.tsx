@@ -5,6 +5,8 @@ import { PhraseCard } from './PhraseCard';
 import { RuleCard } from './RuleCard';
 import { LessonVideoBubble } from './LessonVideoBubble';
 import { RecordPrompt } from './RecordPrompt';
+import { LessonAudioCard } from './LessonAudioCard';
+import { MultipleChoiceCard } from '../quiz/MultipleChoiceCard';
 
 interface Props {
   block: ContentBlock;
@@ -68,6 +70,20 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
     case 'phrase':
     case 'phraseCard':
       return <PhraseCard block={block} />;
+    case 'audioExample':
+      return <LessonAudioCard block={block} index={index} />;
+    case 'multipleChoice':
+      return (
+        <div className="my-5">
+          <MultipleChoiceCard question={{
+            type: 'multiple-choice',
+            question: block.question,
+            options: block.options,
+            correctIndex: block.correctIndex,
+            explanation: block.explanation,
+          }} onAnswer={() => {}} />
+        </div>
+      );
     case 'rule':
       return <RuleCard block={block} />;
     case 'audio':

@@ -7,6 +7,7 @@ import { CenterPanel } from '../center/CenterPanel';
 import { PWAInstallBanner } from './PWAInstallBanner';
 import { DrawerBackdrop } from '../drawer/DrawerBackdrop';
 import { FloatingDrawer } from '../drawer/FloatingDrawer';
+import { BottomTabBar } from './BottomTabBar';
 
 export function AppShell() {
   useKeyboard();
@@ -81,6 +82,7 @@ export function AppShell() {
         <CenterPanel />
       </div>
       <PWAInstallBanner />
+      <BottomTabBar />
     </div>
   );
 }
