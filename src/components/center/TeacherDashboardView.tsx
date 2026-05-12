@@ -57,10 +57,18 @@ export function TeacherDashboardView() {
       </div>
 
       <div className="teacher-dash__section">
-        <div className="teacher-dash__section-title">Ближайшие консультации</div>
+        <div className="teacher-dash__section-header">
+          <div className="teacher-dash__section-title">Консультации</div>
+          <button
+            className="teacher-dash__see-all"
+            onClick={() => navigate('/consultations')}
+          >
+            Управление
+          </button>
+        </div>
         <div className="teacher-dash__empty">
           <span className="teacher-dash__empty-icon">📅</span>
-          <p className="teacher-dash__empty-text">Нет запланированных консультаций</p>
+          <p className="teacher-dash__empty-text">Откройте расписание консультаций</p>
         </div>
       </div>
     </div>

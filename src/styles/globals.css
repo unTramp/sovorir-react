@@ -4781,3 +4781,121 @@ button:focus-visible {
   font-size: 12px;
   color: var(--color-text-secondary);
 }
+
+/* ==================== Consultations ==================== */
+.consultations__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.consultations__day-group {
+  margin-bottom: 16px;
+}
+.assignments__empty-hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* ── SlotCard ── */
+.slot-card {
+  background: var(--color-bg-card, #fff);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--color-border, #eee);
+  transition: border-color 150ms ease;
+}
+.slot-card--booked {
+  border-color: var(--color-primary);
+}
+.slot-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.slot-card__type {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-secondary);
+}
+.slot-card__time {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+.slot-card__meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.slot-card__teacher {
+  font-size: 13px;
+  color: var(--color-text);
+  font-weight: 500;
+}
+.slot-card__spots,
+.slot-card__duration {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+.slot-card__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.slot-card__btn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+}
+.slot-card__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.slot-card__btn--book {
+  background: var(--color-primary);
+  color: #fff;
+}
+.slot-card__btn--cancel {
+  background: transparent;
+  color: var(--color-error-dark, #c0392b);
+  border: 1.5px solid var(--color-error-dark, #c0392b);
+}
+
+/* ── SlotForm (teacher create slot) ── */
+.slot-form {
+  background: var(--color-bg-card, #fff);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--color-border, #eee);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.slot-form__input {
+  width: 100%;
+  border: 1.5px solid var(--color-border, #ddd);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-bg, #fafafa);
+  box-sizing: border-box;
+}
+.slot-form__input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}

@@ -1,8 +1,35 @@
 import type { LoginResponse, Profile, RefreshResponse } from '../types/api';
 import type { Assignment, Submission, SubmissionStatus } from '../types/assignment';
 import type { QueueItem, Review } from '../types/review';
+import type { ConsultationSlot, Booking } from '../types/consultation';
 
 const MOCK_REVIEWS: Review[] = [];
+
+// ── Consultation mock data ────────────────────────────────
+const MOCK_SLOTS: ConsultationSlot[] = [
+  {
+    id: 'slot-1',
+    teacherId: 'mock-teacher-1',
+    teacherName: 'Лусине Тамамян',
+    startsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    durationMin: 60,
+    maxParticipants: 1,
+    bookedCount: 0,
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'slot-2',
+    teacherId: 'mock-teacher-1',
+    teacherName: 'Лусине Тамамян',
+    startsAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+    durationMin: 60,
+    maxParticipants: 5,
+    bookedCount: 2,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+const MOCK_BOOKINGS: Booking[] = [];
 
 export interface MockTransportResponse {
   ok: boolean;
@@ -334,6 +361,76 @@ export async function mockApiRequest(
       MOCK_SUBMISSIONS[idx] = { ...MOCK_SUBMISSIONS[idx], status: payload.status };
     }
     return createResponse(200, MOCK_SUBMISSIONS[idx]);
+  }
+
+  // ── Consultations ─────────────────────────────────────────
+  if (method === 'GET' && path === '/consultation-slots') {
+    return createResponse(200, MOCK_SLOTS);
+  }
+
+  if (method === 'GET' && path === '/my-bookings') {
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+    return createResponse(200, MOCK_BOOKINGS.filter((b) => b.studentId === user.id && b.status !== 'cancelled'));
+  }
+
+  if (method === 'POST' && /^\/consultation-slots\/[\w-]+\/book$/.test(path)) {
+    const slotId = path.split('/')[2];
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+
+    const slot = MOCK_SLOTS.find((s) => s.id === slotId);
+    if (!slot) return createResponse(404, { message: 'Slot not found' });
+    if (slot.bookedCount >= slot.maxParticipants) {
+      return createResponse(409, { message: 'Slot is full' });
+    }
+    const existing = MOCK_BOOKINGS.find((b) => b.slotId === slotId && b.studentId === user.id && b.status !== 'cancelled');
+    if (existing) return createResponse(409, { message: 'Already booked' });
+
+    slot.bookedCount += 1;
+    const booking: Booking = {
+      id: `bkg-${Date.now()}`,
+      slotId,
+      studentId: user.id,
+      status: 'confirmed',
+      createdAt: new Date().toISOString(),
+    };
+    MOCK_BOOKINGS.push(booking);
+    return createResponse(200, booking);
+  }
+
+  if (method === 'POST' && /^\/consultation-slots\/[\w-]+\/cancel$/.test(path)) {
+    const slotId = path.split('/')[2];
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+
+    const idx = MOCK_BOOKINGS.findIndex((b) => b.slotId === slotId && b.studentId === user.id);
+    if (idx < 0) return createResponse(404, { message: 'Booking not found' });
+    MOCK_BOOKINGS[idx] = { ...MOCK_BOOKINGS[idx], status: 'cancelled' };
+
+    const slot = MOCK_SLOTS.find((s) => s.id === slotId);
+    if (slot) slot.bookedCount = Math.max(0, slot.bookedCount - 1);
+    return createResponse(200, MOCK_BOOKINGS[idx]);
+  }
+
+  if (method === 'POST' && path === '/consultation-slots') {
+    const user = extractUserFromToken(accessToken ?? null);
+    if (!user) return createResponse(401, { message: 'Unauthorized' });
+    const payload = body as { startsAt?: string; durationMin?: number; maxParticipants?: number } | undefined;
+    if (!payload?.startsAt) return createResponse(400, { message: 'startsAt required' });
+
+    const slot: ConsultationSlot = {
+      id: `slot-${Date.now()}`,
+      teacherId: user.id,
+      teacherName: user.fullName,
+      startsAt: payload.startsAt,
+      durationMin: payload.durationMin ?? 60,
+      maxParticipants: payload.maxParticipants ?? 1,
+      bookedCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    MOCK_SLOTS.push(slot);
+    return createResponse(200, slot);
   }
 
   return createResponse(501, {
