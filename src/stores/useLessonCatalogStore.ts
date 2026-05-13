@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { contentRepository } from '../lib/contentRepository';
+import { contentRepository, apiContentRepository } from '../lib/contentRepository';
 import type { Lesson } from '../types/lesson';
 
 interface LessonCatalogState {
@@ -52,6 +52,7 @@ export const useLessonCatalogStore = create<LessonCatalogState>((set) => ({
   },
 
   reloadLessons: async () => {
+    apiContentRepository.invalidate();
     set({ isLoading: true, error: null });
     try {
       const lessons = await contentRepository.getLessons();

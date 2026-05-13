@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
 import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
 import type { Quiz, QuizResult } from '../../types/quiz';
@@ -77,7 +78,12 @@ export function LessonCompleteCard() {
         {isLastSection && isCurrentSectionDone ? (
           <button
             className="lesson-complete__btn"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              // Invalidate catalog + sections cache so HomeView shows next lesson
+              void useLessonCatalogStore.getState().reloadLessons();
+              useLessonSectionsStore.getState().reload(true);
+              navigate('/');
+            }}
           >
             На главную
           </button>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { contentRepository } from '../lib/contentRepository';
+import { contentRepository, apiContentRepository } from '../lib/contentRepository';
 import { subscribeAdminLessonBuilderSync } from '../lib/adminLessonBuilderStorage';
 import type { LessonContentSection } from '../types/lessonContent';
 
@@ -11,7 +11,8 @@ interface LessonSectionsState {
 export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
   sections: [],
 
-  reload: () => {
+  reload: (invalidate = false) => {
+    if (invalidate) apiContentRepository.invalidate();
     void contentRepository.getLessonSections().then((sections) => {
       set({ sections });
     });

@@ -300,6 +300,11 @@ export class ApiContentRepository implements ContentRepository {
   private catalogCache: CatalogSnapshot | null = null;
   private currentSectionsCache: LessonContentSection[] | null = null;
 
+  invalidate(): void {
+    this.catalogCache = null;
+    this.currentSectionsCache = null;
+  }
+
   private async loadCatalog(): Promise<CatalogSnapshot> {
     if (this.catalogCache) {
       return this.catalogCache;
