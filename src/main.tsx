@@ -30,8 +30,27 @@ import './styles/globals.css';
 import App from './App.tsx';
 import { setLogoutCallback } from './lib/apiClient';
 import { useAuthStore } from './stores/useAuthStore';
+import { syncCompletedSectionsToServer } from './stores/useLessonProgress';
+import { useLessonCatalogStore } from './stores/useLessonCatalogStore';
 
 setLogoutCallback(() => useAuthStore.getState().logout());
+
+// On load: if localStorage has completed sections, sync to server so HomeView
+// shows the correct next lesson without requiring a manual lesson replay.
+void (async () => {
+  // Wait for auth to be available (tokens may be in localStorage already)
+  await new Promise<void>((resolve) => {
+    const unsub = useAuthStore.subscribe((s) => {
+      if (s.accessToken) { unsub(); resolve(); }
+    });
+    // Also resolve immediately if already authenticated
+    if (useAuthStore.getState().accessToken) { unsub(); resolve(); }
+    // Timeout safety — give up after 10s
+    setTimeout(resolve, 10_000);
+  });
+  await syncCompletedSectionsToServer();
+  await useLessonCatalogStore.getState().reloadLessons();
+})();
 
 async function cleanupDevPwaArtifacts() {
   if (!import.meta.env.DEV || typeof window === 'undefined') return;
