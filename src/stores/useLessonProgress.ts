@@ -33,6 +33,9 @@ interface LessonProgressState {
 
 // Module-level cache populated via _initSections action.
 let _lessonSections: LessonContentSection[] = [];
+// Tracks the last in-flight server sync so callers can await it.
+let _pendingSectionSync: Promise<void> = Promise.resolve();
+export function awaitPendingSectionSync(): Promise<void> { return _pendingSectionSync; }
 
 // Kick off the load immediately; the store action will set sectionsReady when done.
 contentRepository.getLessonSections().then((sections) => {
@@ -92,7 +95,9 @@ export const useLessonProgress = create<LessonProgressState>()(
         if (!isMockApiEnabled) {
           const section = _lessonSections.find((s) => s.id === sectionId);
           if (section?.apiId) {
-            void apiClient.post(`/sections/${section.apiId}/complete`, {}).catch(() => {});
+            _pendingSectionSync = apiClient.post(`/sections/${section.apiId}/complete`, {})
+              .then(() => {})
+              .catch(() => {});
           }
         }
       },
