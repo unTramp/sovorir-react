@@ -331,6 +331,7 @@ export class ApiContentRepository implements ContentRepository {
     const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${catalog.currentLessonApiId}`);
     this.currentSectionsCache = sortSections(detail.sections).map((section, index) => ({
       id: index + 1,
+      apiId: section.id,
       title: section.title,
       quizId:
         typeof section.content?.quizId === 'string'

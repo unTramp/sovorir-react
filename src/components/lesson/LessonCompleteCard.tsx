@@ -1,4 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
@@ -7,6 +8,7 @@ import { QuizContainer } from '../quiz/QuizContainer';
 import type { Quiz, QuizResult } from '../../types/quiz';
 
 export function LessonCompleteCard() {
+  const navigate = useNavigate();
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
   const nextSection = useLessonStore((s) => s.nextSection);
@@ -72,13 +74,22 @@ export function LessonCompleteCard() {
             <span>Продолжить к: {nextSectionTitle.toLowerCase()}?</span>
           </div>
         )}
-        <button
-          className="lesson-complete__btn"
-          onClick={needsQuiz ? undefined : handleContinue}
-          disabled={needsQuiz || (isLastSection && isCurrentSectionDone)}
-        >
-          {actionLabel}
-        </button>
+        {isLastSection && isCurrentSectionDone ? (
+          <button
+            className="lesson-complete__btn"
+            onClick={() => navigate('/')}
+          >
+            На главную
+          </button>
+        ) : (
+          <button
+            className="lesson-complete__btn"
+            onClick={needsQuiz ? undefined : handleContinue}
+            disabled={needsQuiz}
+          >
+            {actionLabel}
+          </button>
+        )}
       </div>
       {quiz && (
         <div className="mt-4">

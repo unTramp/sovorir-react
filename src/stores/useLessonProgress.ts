@@ -1,9 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { contentRepository } from '../lib/contentRepository';
+import { isMockApiEnabled } from '../lib/apiClient';
 import type { LessonContentSection } from '../types/lessonContent';
 import type { QuizResult } from '../types/quiz';
 import { practiceEvents } from '../lib/practiceEvents';
+import { apiClient } from '../lib/apiClient';
 
 interface SectionProgress {
   completedRecords: number[];
@@ -76,7 +78,7 @@ export const useLessonProgress = create<LessonProgressState>()(
           };
         }),
 
-      completeSection: (sectionId) =>
+      completeSection: (sectionId) => {
         set((state) => ({
           sections: {
             ...state.sections,
@@ -85,7 +87,15 @@ export const useLessonProgress = create<LessonProgressState>()(
               completedRecords: state.sections[sectionId]?.completedRecords ?? [],
             },
           },
-        })),
+        }));
+        // Sync to server when using real API
+        if (!isMockApiEnabled) {
+          const section = _lessonSections.find((s) => s.id === sectionId);
+          if (section?.apiId) {
+            void apiClient.post(`/sections/${section.apiId}/complete`, {}).catch(() => {});
+          }
+        }
+      },
 
       getCompletedCount: (sectionId) => {
         return get().sections[sectionId]?.completedRecords.length || 0;

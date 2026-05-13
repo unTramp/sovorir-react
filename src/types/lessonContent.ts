@@ -117,6 +117,8 @@ export type ContentBlock =
 
 export interface LessonContentSection {
   id: number;
+  /** UUID of the section on the server — populated when loading from real API */
+  apiId?: string;
   title?: string;
   blocks: ContentBlock[];
   quizId?: string;
