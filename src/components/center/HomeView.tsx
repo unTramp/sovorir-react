@@ -44,10 +44,16 @@ export function HomeView() {
   const weekDays = useMemo(() => getWeekDays(), []);
   const latestNote = teacherNotes[0];
 
-  const totalSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
-  const completedSections = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
-  const completedPct = totalSections > 0 ? Math.round((completedSections / totalSections) * 100) : 0;
-  const stepsLeft = totalSections - completedSections;
+  const { totalSections, completedSections, completedPct, stepsLeft } = useMemo(() => {
+    const total = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
+    const completed = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
+    return {
+      totalSections: total,
+      completedSections: completed,
+      completedPct: total > 0 ? Math.round((completed / total) * 100) : 0,
+      stepsLeft: total - completed,
+    };
+  }, [currentLesson]);
 
   return (
     <div className="home-screen">

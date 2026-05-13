@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '../lib/apiClient';
+import { NotificationSchema } from '../lib/apiSchemas';
 import type { AppNotification } from '../types/notification';
 
 interface NotificationState {
@@ -21,7 +22,8 @@ export const useNotificationStore = create<NotificationState>()((set, get) => ({
   loadNotifications: async () => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.get<AppNotification[]>('/notifications');
+      const raw = await apiClient.get<unknown>('/notifications');
+      const data = NotificationSchema.array().parse(raw) as AppNotification[];
       set({ notifications: data, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Ошибка загрузки', isLoading: false });

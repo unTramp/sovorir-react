@@ -28,6 +28,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles/globals.css';
 import App from './App.tsx';
+import { setLogoutCallback } from './lib/apiClient';
+import { useAuthStore } from './stores/useAuthStore';
+
+setLogoutCallback(() => useAuthStore.getState().logout());
 
 async function cleanupDevPwaArtifacts() {
   if (!import.meta.env.DEV || typeof window === 'undefined') return;

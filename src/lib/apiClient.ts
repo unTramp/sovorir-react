@@ -39,6 +39,11 @@ export function clearTokens(): void {
   localStorage.removeItem(REFRESH_KEY);
 }
 
+let _onLogout: (() => void) | null = null;
+export function setLogoutCallback(fn: () => void): void {
+  _onLogout = fn;
+}
+
 let isRefreshing = false;
 let refreshQueue: Array<(token: string | null) => void> = [];
 
@@ -59,7 +64,7 @@ async function attemptRefresh(): Promise<string | null> {
     });
 
     if (!res.ok) {
-      clearTokens();
+      _onLogout?.();
       refreshQueue.forEach((cb) => cb(null));
       refreshQueue = [];
       return null;
@@ -71,7 +76,7 @@ async function attemptRefresh(): Promise<string | null> {
     refreshQueue = [];
     return data.accessToken;
   } catch {
-    clearTokens();
+    _onLogout?.();
     refreshQueue.forEach((cb) => cb(null));
     refreshQueue = [];
     return null;

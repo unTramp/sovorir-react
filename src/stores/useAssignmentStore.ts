@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '../lib/apiClient';
+import { AssignmentSchema, SubmissionSchema } from '../lib/apiSchemas';
 import type { Assignment, Submission, SubmitPayload, SubmissionStatus } from '../types/assignment';
 
 interface AssignmentState {
@@ -25,7 +26,8 @@ export const useAssignmentStore = create<AssignmentState>()((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const path = sectionId ? `/assignments?sectionId=${sectionId}` : '/assignments';
-      const data = await apiClient.get<Assignment[]>(path);
+      const raw = await apiClient.get<unknown>(path);
+      const data = AssignmentSchema.array().parse(raw);
       set({ assignments: data, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Ошибка загрузки заданий', isLoading: false });
@@ -35,7 +37,8 @@ export const useAssignmentStore = create<AssignmentState>()((set, get) => ({
   loadMySubmissions: async () => {
     set({ isLoading: true, error: null });
     try {
-      const data = await apiClient.get<Submission[]>('/my-submissions');
+      const raw = await apiClient.get<unknown>('/my-submissions');
+      const data = SubmissionSchema.array().parse(raw);
       set({ submissions: data, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Ошибка загрузки сабмитов', isLoading: false });

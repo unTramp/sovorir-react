@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { apiClient } from '../lib/apiClient';
+import { ConsultationSlotSchema, BookingSchema } from '../lib/apiSchemas';
 import type { ConsultationSlot, Booking, CreateSlotPayload } from '../types/consultation';
 
 interface ConsultationState {
@@ -24,10 +25,12 @@ export const useConsultationStore = create<ConsultationState>()((set, get) => ({
   loadSlots: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [slots, bookings] = await Promise.all([
-        apiClient.get<ConsultationSlot[]>('/consultation-slots'),
-        apiClient.get<Booking[]>('/my-bookings'),
+      const [rawSlots, rawBookings] = await Promise.all([
+        apiClient.get<unknown>('/consultation-slots'),
+        apiClient.get<unknown>('/my-bookings'),
       ]);
+      const slots = ConsultationSlotSchema.array().parse(rawSlots);
+      const bookings = BookingSchema.array().parse(rawBookings);
       set({ slots, myBookings: bookings, isLoading: false });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Ошибка загрузки', isLoading: false });

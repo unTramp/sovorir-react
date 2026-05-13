@@ -298,8 +298,14 @@ export async function mockApiRequest(
   }
 
   // ── Assignments ──────────────────────────────────────────
-  if (method === 'GET' && path.startsWith('/assignments')) {
-    return createResponse(200, MOCK_ASSIGNMENTS);
+  if (method === 'GET' && (path === '/assignments' || path.startsWith('/assignments?'))) {
+    const [, qs] = path.split('?');
+    const params = new URLSearchParams(qs ?? '');
+    const sectionId = params.get('sectionId');
+    const filtered = sectionId
+      ? MOCK_ASSIGNMENTS.filter((a) => a.sectionId === sectionId)
+      : MOCK_ASSIGNMENTS;
+    return createResponse(200, filtered);
   }
 
   if (method === 'POST' && /^\/assignments\/[\w-]+\/submit$/.test(path)) {

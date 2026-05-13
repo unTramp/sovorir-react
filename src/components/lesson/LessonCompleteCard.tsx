@@ -1,13 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
+import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
-import type { LessonContentSection } from '../../types/lessonContent';
 import type { Quiz, QuizResult } from '../../types/quiz';
-import {
-  subscribeAdminLessonBuilderSync,
-} from '../../lib/adminLessonBuilderStorage';
 
 export function LessonCompleteCard() {
   const currentSection = useLessonStore((s) => s.currentSection);
@@ -18,42 +15,8 @@ export function LessonCompleteCard() {
   const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
 
-  const [allSections, setAllSections] = useState<LessonContentSection[]>([]);
+  const allSections = useLessonSectionsStore((s) => s.sections);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
-
-  useEffect(() => {
-    contentRepository.getLessonSections().then(setAllSections);
-  }, []);
-
-  useEffect(() => {
-    const loadSections = () => {
-      contentRepository.getLessonSections().then(setAllSections);
-    };
-
-    function handleSync() {
-      loadSections();
-    }
-
-    function handleFocus() {
-      loadSections();
-    }
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === 'visible') {
-        loadSections();
-      }
-    }
-
-    const unsubscribeSync = subscribeAdminLessonBuilderSync(handleSync);
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    return () => {
-      unsubscribeSync();
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
 
   useEffect(() => {
     contentRepository.getQuizForSection(currentSection).then(setQuiz);
