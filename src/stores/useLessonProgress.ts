@@ -31,11 +31,27 @@ interface LessonProgressState {
   isQuizPassed: (sectionId: number) => boolean;
 }
 
-// Module-level cache populated via _initSections action.
+// Module-level cache — kept in sync with useLessonSectionsStore (which has apiId from real API).
 let _lessonSections: LessonContentSection[] = [];
-// Tracks the last in-flight server sync so callers can await it.
-let _pendingSectionSync: Promise<void> = Promise.resolve();
-export function awaitPendingSectionSync(): Promise<void> { return _pendingSectionSync; }
+
+/** Call this once the sections store is available to keep _lessonSections up to date. */
+export function syncLessonSectionsCache(sections: LessonContentSection[]): void {
+  if (sections.length > 0) _lessonSections = sections;
+}
+
+/** POSTs all locally-completed sections that have a server UUID — awaitable before navigation. */
+export async function syncCompletedSectionsToServer(): Promise<void> {
+  if (isMockApiEnabled) return;
+  const completedSectionIds = Object.entries(useLessonProgress.getState().sections)
+    .filter(([, v]) => v.completed)
+    .map(([k]) => Number(k));
+  await Promise.allSettled(
+    completedSectionIds
+      .map((id) => _lessonSections.find((s) => s.id === id))
+      .filter((s): s is LessonContentSection & { apiId: string } => Boolean(s?.apiId))
+      .map((s) => apiClient.post(`/sections/${s.apiId}/complete`, {})),
+  );
+}
 
 // Kick off the load immediately; the store action will set sectionsReady when done.
 contentRepository.getLessonSections().then((sections) => {
@@ -91,13 +107,11 @@ export const useLessonProgress = create<LessonProgressState>()(
             },
           },
         }));
-        // Sync to server when using real API
+        // Fire-and-forget individual sync; bulk sync happens on lesson complete
         if (!isMockApiEnabled) {
           const section = _lessonSections.find((s) => s.id === sectionId);
           if (section?.apiId) {
-            _pendingSectionSync = apiClient.post(`/sections/${section.apiId}/complete`, {})
-              .then(() => {})
-              .catch(() => {});
+            void apiClient.post(`/sections/${section.apiId}/complete`, {}).catch(() => {});
           }
         }
       },

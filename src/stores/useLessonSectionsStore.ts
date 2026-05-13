@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { contentRepository, apiContentRepository } from '../lib/contentRepository';
 import { subscribeAdminLessonBuilderSync } from '../lib/adminLessonBuilderStorage';
+import { syncLessonSectionsCache } from './useLessonProgress';
 import type { LessonContentSection } from '../types/lessonContent';
 
 interface LessonSectionsState {
@@ -15,6 +16,7 @@ export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
     if (invalidate) apiContentRepository.invalidate();
     void contentRepository.getLessonSections().then((sections) => {
       set({ sections });
+      syncLessonSectionsCache(sections); // keep useLessonProgress._lessonSections in sync
     });
   },
 }));
