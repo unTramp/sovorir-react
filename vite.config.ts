@@ -21,6 +21,8 @@ export default defineConfig({
         background_color: '#F6F2EF',
         display: 'standalone',
         start_url: '/',
+        scope: '/',
+        orientation: 'portrait',
         icons: [
           {
             src: '/icons/icon-192x192.png',
@@ -39,6 +41,10 @@ export default defineConfig({
             purpose: 'maskable',
           },
         ],
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
