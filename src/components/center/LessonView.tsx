@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
@@ -20,6 +21,15 @@ const EMPTY_COMPLETED_RECORDS: number[] = [];
 export function LessonView() {
   const [activeTab, setActiveTab] = useState<LessonTab>('materials');
   const location = useLocation();
+  const navigate = useNavigate();
+  const { currentLesson, allCompleted, hasLoaded } = useLessonCatalog();
+
+  // Redirect to home if course complete or no current lesson (once catalog is loaded)
+  useEffect(() => {
+    if (hasLoaded && (allCompleted || !currentLesson)) {
+      navigate('/', { replace: true });
+    }
+  }, [hasLoaded, allCompleted, currentLesson, navigate]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentSection = useLessonStore((s) => s.currentSection);
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);

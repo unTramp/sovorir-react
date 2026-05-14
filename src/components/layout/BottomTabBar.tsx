@@ -1,6 +1,5 @@
 import { useNavigate, useMatch } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import {
   HouseIcon,
   BookOpenIcon,
@@ -38,21 +37,11 @@ function Tab({ label, path, icon: Icon }: TabConfig) {
   const navigate = useNavigate();
   const match = useMatch(path === '/' ? { path: '/', end: true } : path);
   const isActive = !!match;
-  const { currentLesson, allCompleted } = useLessonCatalog();
-
-  function handleClick() {
-    // If this is the lessons tab and course is done or no current lesson — go home
-    if (path === '/lesson' && (allCompleted || !currentLesson)) {
-      navigate('/');
-      return;
-    }
-    navigate(path);
-  }
 
   return (
     <button
       className={`bottom-tab-bar__item${isActive ? ' active' : ''}`}
-      onClick={handleClick}
+      onClick={() => navigate(path)}
       aria-label={label}
     >
       <Icon size={22} />
