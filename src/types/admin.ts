@@ -4,7 +4,6 @@ export type AdminLessonStatus = 'draft' | 'published' | 'archived';
 
 export type AdminSectionType =
   | 'video'
-  | 'pdf'
   | 'dictionary'
   | 'notes'
   | 'ai_practice'

@@ -8,7 +8,7 @@ import type { ContentBlock } from '../../../types/lessonContent';
 
 export const SECTION_TYPE_OPTIONS: AdminSectionType[] = [
   'intro', 'vocabulary', 'grammar', 'practice', 'quiz', 'speaking', 'review',
-  'dictionary', 'notes', 'video', 'pdf', 'ai_practice',
+  'dictionary', 'notes', 'video', 'ai_practice',
 ];
 
 export const STATUS_OPTIONS: AdminLessonStatus[] = ['draft', 'published', 'archived'];
@@ -66,7 +66,6 @@ export function sectionTypeLabel(type: AdminSectionType): string {
     dictionary: 'Словарь',
     notes: 'Заметки',
     video: 'Видео',
-    pdf: 'PDF',
     ai_practice: 'AI-практика',
   };
 
@@ -85,7 +84,6 @@ export function sectionTypeDescription(type: AdminSectionType): string {
     dictionary: 'Справочный словарный раздел',
     notes: 'Заметки преподавателя',
     video: 'Видеообъяснение внутри урока',
-    pdf: 'Приложенный материал для чтения',
     ai_practice: 'Адаптивная AI-практика',
   };
 
