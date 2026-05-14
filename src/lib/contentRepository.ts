@@ -196,7 +196,7 @@ function mapApiLessonsToFrontend(apiLessons: ApiCourseLesson[]): CatalogSnapshot
   });
 
   const currentLessonIndex = lessons.findIndex((lesson) => lesson.status === 'current');
-  const currentLessonApiId = currentLessonIndex >= 0 ? ordered[currentLessonIndex]?.id ?? null : ordered[0]?.id ?? null;
+  const currentLessonApiId = currentLessonIndex >= 0 ? ordered[currentLessonIndex]?.id ?? null : null;
 
   return {
     lessons,
