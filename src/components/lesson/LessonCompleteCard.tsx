@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLessonStore } from '../../stores/useLessonStore';
-import { useLessonProgress, awaitPendingSectionSync } from '../../stores/useLessonProgress';
+import { useLessonProgress, syncCompletedSectionsToServer } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
 import { contentRepository } from '../../lib/contentRepository';
@@ -80,8 +80,8 @@ export function LessonCompleteCard() {
             className="lesson-complete__btn"
             onClick={() => {
               void (async () => {
-                // Wait for last section progress to reach the server
-                await awaitPendingSectionSync();
+                // Sync all completed sections to server (handles any missed fire-and-forget)
+                await syncCompletedSectionsToServer();
                 // Reset lesson view state so next lesson starts from section 1
                 useLessonStore.getState().setCurrentSection(1);
                 // Invalidate caches so HomeView fetches fresh lesson statuses
