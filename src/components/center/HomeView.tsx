@@ -38,7 +38,7 @@ export function HomeView() {
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
   const firstName = useAuthStore((s) => s.firstName);
-  const { currentLesson } = useLessonCatalog();
+  const { currentLesson, allCompleted } = useLessonCatalog();
 
   const today = todayISO();
   const weekDays = useMemo(() => getWeekDays(), []);
@@ -65,7 +65,27 @@ export function HomeView() {
       </div>
 
       {/* Hero Lesson Card */}
-      {currentLesson && (
+      {allCompleted && (
+        <div className="home-hero__card" style={{ cursor: 'default' }}>
+          <div className="home-hero__deco" />
+          <div className="home-hero__top-row">
+            <div className="home-hero__left">
+              <div className="home-hero__label">Курс завершён</div>
+              <div className="home-hero__title">Все уроки пройдены 🎉</div>
+            </div>
+            <div className="home-hero__play" style={{ fontSize: 28 }}>✓</div>
+          </div>
+          <div className="home-hero__bottom">
+            <div className="home-hero__bar">
+              <div className="home-hero__bar-fill" style={{ width: '100%' }} />
+            </div>
+            <div className="home-hero__footer-row">
+              <span className="home-hero__steps-hint">Продолжай практиковаться каждый день</span>
+            </div>
+          </div>
+        </div>
+      )}
+      {!allCompleted && currentLesson && (
         <button className="home-hero__card" onClick={() => navigate('/lesson')}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">

@@ -41,7 +41,12 @@ export function useLessonCatalog() {
   }, [reloadLessons]);
 
   const currentLesson = useMemo(
-    () => lessons.find((lesson) => lesson.status === 'current') ?? lessons[0] ?? null,
+    () => lessons.find((lesson) => lesson.status === 'current') ?? null,
+    [lessons],
+  );
+
+  const allCompleted = useMemo(
+    () => lessons.length > 0 && lessons.every((lesson) => lesson.status === 'completed'),
     [lessons],
   );
 
@@ -54,6 +59,7 @@ export function useLessonCatalog() {
     lessons,
     currentLesson,
     completedLessons,
+    allCompleted,
     isLoading,
     hasLoaded,
     error,
