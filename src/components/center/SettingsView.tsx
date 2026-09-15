@@ -1,9 +1,15 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { FlameIcon } from '../../icons';
+import { resetUserProgress } from '../../lib/resetUserProgress';
 
 export function SettingsView() {
+  const navigate = useNavigate();
+  const [isResetting, setIsResetting] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
   const profile = useAuthStore((s) => s.profile);
   const firstName = useAuthStore((s) => s.firstName);
   const lastName = useAuthStore((s) => s.lastName);
@@ -19,6 +25,19 @@ export function SettingsView() {
   const xp = completedSections * 32;
   const isStudent = profile?.role === 'student';
   const coursePercent = lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
+
+  const handleResetProgress = async () => {
+    if (!window.confirm('Сбросить весь прогресс и вернуться к Уроку 1?')) return;
+    setIsResetting(true);
+    setResetError(null);
+    try {
+      await resetUserProgress();
+      navigate('/lesson?section=1', { replace: true });
+    } catch {
+      setResetError('Не удалось сбросить прогресс. Попробуйте ещё раз.');
+      setIsResetting(false);
+    }
+  };
 
   return (
     <div className="profile-screen">
@@ -73,6 +92,20 @@ export function SettingsView() {
           Выйти
         </button>
       </section>
+
+      {import.meta.env.DEV && isStudent && (
+        <section className="profile-dev-tools" aria-labelledby="dev-tools-title">
+          <div>
+            <span className="profile-account__label">Для разработки</span>
+            <strong id="dev-tools-title">Тестирование первого урока</strong>
+            <p>Удаляет локальный и серверный прогресс текущего ученика.</p>
+          </div>
+          <button type="button" onClick={handleResetProgress} disabled={isResetting}>
+            {isResetting ? 'Сбрасываем…' : 'Сбросить прогресс'}
+          </button>
+          {resetError && <p className="profile-dev-tools__error" role="alert">{resetError}</p>}
+        </section>
+      )}
     </div>
   );
 }

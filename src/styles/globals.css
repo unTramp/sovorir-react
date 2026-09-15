@@ -6625,3 +6625,50 @@ button:focus-visible {
   .lesson-dialogue__message { max-width: 92%; }
   .lesson-dialogue__option { align-items: flex-start; flex-direction: column; }
 }
+.profile-dev-tools {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px dashed color-mix(in srgb, var(--color-primary) 45%, transparent);
+  border-radius: var(--radius-card);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-bg-white));
+}
+
+.profile-dev-tools > div {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.profile-dev-tools strong {
+  color: var(--color-text);
+}
+
+.profile-dev-tools p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--type-body-sm);
+}
+
+.profile-dev-tools > button {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-control);
+  color: var(--color-primary);
+  background: transparent;
+  font-weight: 700;
+}
+
+.profile-dev-tools > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.profile-dev-tools > button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.profile-dev-tools .profile-dev-tools__error {
+  color: var(--color-error-dark);
+}
