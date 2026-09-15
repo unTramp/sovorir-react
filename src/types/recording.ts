@@ -4,4 +4,7 @@ export interface Recording {
   recordIndex: number;
   duration: number;
   createdAt: number;
+  lessonAttemptId?: string;
+  interactionId?: string;
+  learningItemIds?: string[];
 }

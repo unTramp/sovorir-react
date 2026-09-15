@@ -1,3 +1,13 @@
+import type { LearningItem } from '../domain/learning';
+
+export interface InteractionTracking {
+  lessonId: string;
+  lessonRevision: number;
+  stepId: string;
+  interactionId: string;
+  learningItemIds: string[];
+}
+
 export interface PhraseBlock {
   type: 'phrase';
   id?: string;
@@ -9,6 +19,7 @@ export interface PhraseBlock {
   context?: string;
   reviewable?: boolean;
   status?: 'new' | 'learned' | 'review';
+  learningItemId?: string;
 }
 
 export interface PhraseCardBlock {
@@ -22,6 +33,7 @@ export interface PhraseCardBlock {
   context?: string;
   reviewable?: boolean;
   status?: 'new' | 'learned' | 'review';
+  learningItemId?: string;
 }
 
 export interface HeadingBlock {
@@ -98,11 +110,13 @@ export interface VideoBubbleBlock {
 export interface RecordBlock {
   type: 'record';
   prompt: string;
+  tracking?: InteractionTracking;
 }
 
 export interface PronunciationPromptBlock {
   type: 'pronunciationPrompt';
   prompt: string;
+  tracking?: InteractionTracking;
 }
 
 export interface DialogueBlock {
@@ -117,7 +131,9 @@ export interface DialogueBlock {
     translation?: string;
     correct: boolean;
     reply: string;
+    feedback?: string;
   }>;
+  tracking?: InteractionTracking;
 }
 
 export interface ActiveRecallBlock {
@@ -130,6 +146,7 @@ export interface ActiveRecallBlock {
     translation: string;
   };
   reviewIds: string[];
+  tracking?: InteractionTracking;
 }
 
 export type ContentBlock =
@@ -156,6 +173,12 @@ export interface LessonContentSection {
   apiId?: string;
   /** Confirmed server state, used to hydrate local progress across devices. */
   serverCompleted?: boolean;
+  canonical?: {
+    lessonId: string;
+    lessonRevision: number;
+    stepId: string;
+    learningItems: LearningItem[];
+  };
   title?: string;
   kind?: 'situation' | 'phrases' | 'pronunciation' | 'dialogue' | 'recall' | 'completion';
   objective?: string;

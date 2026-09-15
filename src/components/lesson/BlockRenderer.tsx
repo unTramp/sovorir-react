@@ -103,7 +103,9 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
       return (
         <RecordPrompt
           ref={recordRef}
-          block={block.type === 'pronunciationPrompt' ? { type: 'record', prompt: block.prompt } : block}
+          block={block.type === 'pronunciationPrompt'
+            ? { type: 'record', prompt: block.prompt, tracking: block.tracking }
+            : block}
           onSkip={onSkipRecord}
           completed={recordCompleted}
           sectionId={sectionId}

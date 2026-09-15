@@ -57,7 +57,7 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
           <div className="lesson-record-prompt__phrase" lang="hy">{phrase}</div>
           {completed && playbackUrl && (
             <div className="mt-2">
-              <RecordingPlayback audioUrl={playbackUrl} duration={recording?.duration ?? 0} />
+              <RecordingPlayback id={`recording-${recording?.id}`} audioUrl={playbackUrl} duration={recording?.duration ?? 0} />
             </div>
           )}
         </div>

@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { InteractionAttemptOutcome } from '../../domain/learning';
 import type { ActiveRecallBlock } from '../../types/lessonContent';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
+import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
 
 interface Props {
   block: ActiveRecallBlock;
@@ -9,12 +12,54 @@ interface Props {
 }
 
 export function ActiveRecall({ block, completed = false, onComplete }: Props) {
-  const [hintVisible, setHintVisible] = useState(false);
+  const [hintSheetOpen, setHintSheetOpen] = useState(false);
+  const [hintUsed, setHintUsed] = useState(false);
   const [answerVisible, setAnswerVisible] = useState(completed);
+  const attemptIdRef = useRef<string | null>(null);
   const unlockWords = useFlashcardStore((state) => state.unlockWords);
+  const startAttempt = useInteractionAttemptStore((state) => state.startAttempt);
+  const completeAttempt = useInteractionAttemptStore((state) => state.completeAttempt);
+  const getOrCreateLessonAttemptId = useLessonAttemptSessionStore((state) => state.getOrCreateAttemptId);
 
-  const finish = () => {
-    unlockWords(block.reviewIds);
+  const ensureAttempt = () => {
+    if (attemptIdRef.current || !block.tracking) return attemptIdRef.current;
+    attemptIdRef.current = startAttempt({
+      lessonAttemptId: getOrCreateLessonAttemptId(block.tracking.lessonId),
+      lessonId: block.tracking.lessonId,
+      lessonRevision: block.tracking.lessonRevision,
+      stepId: block.tracking.stepId,
+      interactionId: block.tracking.interactionId,
+      hintUsed: false,
+      retryCount: 0,
+    });
+    return attemptIdRef.current;
+  };
+
+  useEffect(() => {
+    if (!hintSheetOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setHintSheetOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [hintSheetOpen]);
+
+  const showHint = () => {
+    ensureAttempt();
+    setHintUsed(true);
+    setHintSheetOpen(true);
+  };
+
+  const revealAnswer = () => {
+    ensureAttempt();
+    setHintSheetOpen(false);
+    setAnswerVisible(true);
+  };
+
+  const finish = (outcome: InteractionAttemptOutcome) => {
+    const attemptId = ensureAttempt();
+    if (attemptId) completeAttempt(attemptId, outcome, { hintUsed });
+    if (!block.tracking) unlockWords(block.reviewIds);
     onComplete?.();
   };
 
@@ -24,13 +69,10 @@ export function ActiveRecall({ block, completed = false, onComplete }: Props) {
       <h2 className="active-recall__prompt">{block.prompt}</h2>
 
       {!answerVisible ? (
-        <>
-          {hintVisible && <p className="active-recall__hint">{block.hint}</p>}
-          <div className="active-recall__actions">
-            <button type="button" className="btn btn--primary btn--md" onClick={() => setAnswerVisible(true)}>Я ответил</button>
-            {!hintVisible && <button type="button" className="btn btn--ghost btn--md" onClick={() => setHintVisible(true)}>Подсказка</button>}
-          </div>
-        </>
+        <div className="active-recall__actions">
+          <button type="button" className="btn btn--primary btn--md" onClick={revealAnswer}>Я ответил</button>
+          <button type="button" className="btn btn--ghost btn--md" onClick={showHint}>Нужна подсказка</button>
+        </div>
       ) : (
         <div className="active-recall__answer">
           <strong lang="hy">{block.answer.armenian}</strong>
@@ -38,10 +80,24 @@ export function ActiveRecall({ block, completed = false, onComplete }: Props) {
           <p>{block.answer.translation}</p>
           {!completed && (
             <div className="active-recall__rating" aria-label="Как получилось">
-              <button type="button" className="btn btn--secondary btn--md" onClick={finish}>Нужно повторить</button>
-              <button type="button" className="btn btn--primary btn--md" onClick={finish}>Получилось</button>
+              <button type="button" className="btn btn--secondary btn--md" onClick={() => finish('needs-review')}>Нужно повторить</button>
+              <button type="button" className="btn btn--primary btn--md" onClick={() => finish('correct')}>Получилось</button>
             </div>
           )}
+        </div>
+      )}
+
+      {hintSheetOpen && (
+        <div className="lesson-hint-sheet" role="presentation" onMouseDown={(event) => {
+          if (event.target === event.currentTarget) setHintSheetOpen(false);
+        }}>
+          <div className="lesson-hint-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="lesson-hint-title">
+            <div className="lesson-hint-sheet__handle" aria-hidden="true" />
+            <span className="active-recall__eyebrow">Подсказка Лусине</span>
+            <h3 id="lesson-hint-title">Вспомните звучание</h3>
+            <p>{block.hint}</p>
+            <button type="button" className="btn btn--primary btn--md" onClick={() => setHintSheetOpen(false)}>Попробовать самому</button>
+          </div>
         </div>
       )}
     </section>

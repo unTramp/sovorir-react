@@ -45,6 +45,7 @@ export interface DialogueInteraction extends InteractionBase {
     text: string;
     correct: boolean;
     feedback: string;
+    reply?: string;
   }>;
 }
 
@@ -86,4 +87,3 @@ export interface InteractionAttempt {
   startedAt: string;
   completedAt?: string;
 }
-

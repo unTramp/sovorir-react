@@ -8,6 +8,8 @@ import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
 import type { Quiz, QuizResult } from '../../types/quiz';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
+import { handoffLessonItemsToReview } from '../../lib/lessonReviewHandoff';
 
 export function LessonCompleteCard() {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ export function LessonCompleteCard() {
   const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
   const unlockWords = useFlashcardStore((s) => s.unlockWords);
+  const finishLessonAttempt = useLessonAttemptSessionStore((s) => s.finishAttempt);
 
   const allSections = useLessonSectionsStore((s) => s.sections);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -49,12 +52,17 @@ export function LessonCompleteCard() {
       if (!confirmed) return;
 
       if (isLastSection) {
-      const reviewIds = allSections.flatMap((section) => section.blocks.flatMap((block) => {
-        if ((block.type === 'phrase' || block.type === 'phraseCard') && block.reviewable && block.id) return [block.id];
-        if (block.type === 'activeRecall') return block.reviewIds;
-        return [];
-      }));
-      unlockWords(reviewIds);
+        const canonical = allSections.find((section) => section.canonical)?.canonical;
+        if (canonical) {
+          handoffLessonItemsToReview(canonical.lessonId, canonical.learningItems);
+          finishLessonAttempt(canonical.lessonId);
+        }
+        const reviewIds = allSections.flatMap((section) => section.blocks.flatMap((block) => {
+          if ((block.type === 'phrase' || block.type === 'phraseCard') && block.reviewable && block.id) return [block.id];
+          if (block.type === 'activeRecall') return block.reviewIds;
+          return [];
+        }));
+        unlockWords(reviewIds);
       }
       if (!isLastSection) {
         const nextSectionNumber = currentSection + 1;
@@ -62,7 +70,7 @@ export function LessonCompleteCard() {
         navigate(`/lesson?section=${nextSectionNumber}`);
       }
     })();
-  }, [allSections, completeSection, currentSection, isLastSection, navigate, nextSection, unlockWords]);
+  }, [allSections, completeSection, currentSection, finishLessonAttempt, isLastSection, navigate, nextSection, unlockWords]);
 
   return (
     <>
@@ -79,8 +87,9 @@ export function LessonCompleteCard() {
             <div className="lesson-complete__summary">Отличная работа — вы стали ещё немного увереннее говорить по-армянски.</div>
             <ul className="lesson-complete__skills" aria-label="Теперь вы умеете">
               <li>Поздороваться с другом</li>
-              <li>Вежливо обратиться к незнакомому человеку</li>
-              <li>Попрощаться в нейтральной ситуации</li>
+              <li>Вежливо поздороваться с незнакомым человеком</li>
+              <li>Формально сказать «до свидания»</li>
+              <li>Неформально сказать «пока»</li>
             </ul>
             <button
               className="lesson-complete__btn"

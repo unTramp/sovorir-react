@@ -48,7 +48,7 @@ export const InteractionSchema = z.discriminatedUnion('type', [
     type: z.literal('dialogue'), context: z.string(),
     turns: z.array(z.object({ id: UUIDSchema, speaker: z.enum(['mentor', 'student', 'character']), text: z.string().optional(), audio: MediaAssetSchema.optional() })),
     responseMode: z.enum(['choice', 'voice']),
-    options: z.array(z.object({ id: UUIDSchema, text: z.string(), correct: z.boolean(), feedback: z.string() })).optional(),
+    options: z.array(z.object({ id: UUIDSchema, text: z.string(), correct: z.boolean(), feedback: z.string(), reply: z.string().optional() })).optional(),
   }),
   InteractionBaseSchema.extend({
     type: z.literal('recall'), prompt: z.string(), responseMode: z.enum(['voice', 'self-report']),

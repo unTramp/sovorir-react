@@ -180,7 +180,12 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
         <div ref={bottomRef} />
       </div>
       {showRecordCTA && (
-        <StickyRecordCTA onComplete={handleRecordComplete} sectionId={currentSection} recordIndex={completedRecords} />
+        <StickyRecordCTA
+          onComplete={handleRecordComplete}
+          sectionId={currentSection}
+          recordIndex={completedRecords}
+          tracking={activeBlock.type === 'record' || activeBlock.type === 'pronunciationPrompt' ? activeBlock.tracking : undefined}
+        />
       )}
     </div>
   );

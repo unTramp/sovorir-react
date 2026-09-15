@@ -4,6 +4,7 @@ import type { DictionaryWord } from '../types/dictionary';
 import type { Quiz } from '../types/quiz';
 import type { LiveLesson, ConversationClubSession } from '../types/liveLesson';
 import type { Lesson, Section, SectionStatus, SectionType } from '../types/lesson';
+import type { LearningItem } from '../domain/learning';
 import { lessonPages } from '../data/lessonPages';
 import { dictionary } from '../data/dictionary';
 import { liveLessons } from '../data/liveLessons';
@@ -88,6 +89,52 @@ interface ApiLessonDetail {
     blocks: ApiLessonBlock[];
     progress: { completed: boolean } | null;
   }>;
+}
+
+interface ApiLearningItem extends LearningItem {
+  stableKey: string;
+  schoolId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapApiLearningItem(item: ApiLearningItem): LearningItem {
+  return {
+    id: item.id,
+    revision: item.revision,
+    type: item.type,
+    armenian: item.armenian,
+    transliteration: item.transliteration,
+    translation: item.translation,
+    phoneticHint: item.phoneticHint,
+    audio: item.audio,
+    contexts: item.contexts,
+    register: item.register,
+    difficulty: item.difficulty,
+    tags: item.tags,
+    reviewable: item.reviewable,
+  };
+}
+
+function blockLearningItemIds(block: LessonContentSection['blocks'][number]): string[] {
+  const tracked = 'tracking' in block && block.tracking ? block.tracking.learningItemIds : [];
+  const direct = (block.type === 'phrase' || block.type === 'phraseCard')
+    ? [block.learningItemId ?? block.id].filter((id): id is string => Boolean(id))
+    : [];
+  return [...tracked, ...direct];
+}
+
+function normalizeApiBlock(
+  block: LessonContentSection['blocks'][number],
+  lessonId: string,
+  lessonRevision: number,
+  stepId: string,
+): LessonContentSection['blocks'][number] {
+  if (!('tracking' in block) || !block.tracking) return block;
+  return {
+    ...block,
+    tracking: { ...block.tracking, lessonId, lessonRevision, stepId },
+  };
 }
 
 interface CatalogSnapshot {
@@ -334,17 +381,26 @@ export class ApiContentRepository implements ContentRepository {
     }
 
     const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${catalog.currentLessonApiId}`);
-    this.currentSectionsCache = sortSections(detail.sections).map((section, index) => ({
-      id: index + 1,
-      apiId: section.id,
-      serverCompleted: section.progress?.completed ?? false,
-      title: section.title,
-      quizId:
-        typeof section.content?.quizId === 'string'
-          ? section.content.quizId
-          : undefined,
-      blocks: sortSections(section.blocks).map((block) => block.content),
-    }));
+    const orderedSections = sortSections(detail.sections);
+    const itemIds = [...new Set(orderedSections.flatMap((section) => section.blocks.flatMap((block) => blockLearningItemIds(block.content))))];
+    const learningItems = itemIds.length > 0
+      ? await apiClient.get<ApiLearningItem[]>(`/learning-items?ids=${encodeURIComponent(itemIds.join(','))}`)
+      : [];
+    const canonicalItems = learningItems.map(mapApiLearningItem);
+
+    this.currentSectionsCache = orderedSections.map((section, index) => {
+      const stepId = typeof section.content?.stepId === 'string' ? section.content.stepId : section.id;
+      const lessonRevision = typeof section.content?.lessonRevision === 'number' ? section.content.lessonRevision : 1;
+      return {
+        id: index + 1,
+        apiId: section.id,
+        serverCompleted: section.progress?.completed ?? false,
+        title: section.title,
+        quizId: typeof section.content?.quizId === 'string' ? section.content.quizId : undefined,
+        canonical: { lessonId: detail.id, lessonRevision, stepId, learningItems: canonicalItems },
+        blocks: sortSections(section.blocks).map((block) => normalizeApiBlock(block.content, detail.id, lessonRevision, stepId)),
+      };
+    });
     return this.currentSectionsCache;
   }
 

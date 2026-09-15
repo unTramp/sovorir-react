@@ -3,6 +3,7 @@ import { contentRepository, apiContentRepository } from '../lib/contentRepositor
 import { subscribeAdminLessonBuilderSync } from '../lib/adminLessonBuilderStorage';
 import { syncLessonSectionsCache } from './useLessonProgress';
 import type { LessonContentSection } from '../types/lessonContent';
+import { useLearningItemStore } from './useLearningItemStore';
 
 interface LessonSectionsState {
   sections: LessonContentSection[];
@@ -22,6 +23,10 @@ export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
     void contentRepository.getLessonSections()
       .then((sections) => {
         set({ sections, isLoading: false });
+        const canonicalItems = [...new Map(sections
+          .flatMap((section) => section.canonical?.learningItems ?? [])
+          .map((item) => [item.id, item])).values()];
+        if (canonicalItems.length > 0) useLearningItemStore.getState().upsertItems(canonicalItems);
         syncLessonSectionsCache(sections); // keep useLessonProgress._lessonSections in sync
       })
       .catch((error: unknown) => {

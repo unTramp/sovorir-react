@@ -10,7 +10,7 @@ const block = {
   instruction: 'Ответьте вежливо.',
   options: [
     { id: 'yes', text: 'Բարև ձեզ։', correct: true, reply: 'Ի՞նչ կցանկանաք։' },
-    { id: 'no', text: 'Ցտեսություն։', correct: false, reply: '' },
+    { id: 'no', text: 'Ցտեսություն։', correct: false, reply: '', feedback: 'Это прощание — разговор только начинается.' },
   ],
 };
 
@@ -26,11 +26,11 @@ describe('MiniDialogue', () => {
     render(<MiniDialogue block={block} onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Ցտեսություն։' }));
-    expect(screen.getByText('Попробуйте выбрать вежливое приветствие.')).toBeInTheDocument();
+    expect(screen.getByText('Это прощание — разговор только начинается.')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Բարև ձեզ։' }));
     expect(screen.getByLabelText('Ани печатает')).toBeInTheDocument();
-    act(() => vi.advanceTimersByTime(650));
+    act(() => vi.advanceTimersByTime(1200));
 
     expect(screen.getByText('Ի՞նչ կցանկանաք։')).toBeInTheDocument();
     expect(onComplete).toHaveBeenCalledOnce();
