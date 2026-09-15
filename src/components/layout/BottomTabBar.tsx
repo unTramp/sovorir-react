@@ -3,7 +3,8 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import {
   HouseIcon,
   BookOpenIcon,
-  SettingsGearIcon,
+  ZapIcon,
+  UserIcon,
   ClipboardIcon,
 } from '../../icons';
 
@@ -11,20 +12,21 @@ type TabConfig = { label: string; path: string; icon: React.ComponentType<{ size
 
 const STUDENT_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',             icon: HouseIcon },
-  { label: 'Уроки',    path: '/lesson',        icon: BookOpenIcon },
+  { label: 'Курс',      path: '/course',        icon: BookOpenIcon },
+  { label: 'Практика',  path: '/practice',      icon: ZapIcon },
   { label: 'Задания',  path: '/assignments',   icon: ClipboardIcon },
-  { label: 'Профиль',  path: '/settings',      icon: SettingsGearIcon },
+  { label: 'Профиль',  path: '/settings',      icon: UserIcon },
 ];
 
 const TEACHER_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
   { label: 'Проверка',  path: '/review-queue', icon: ClipboardIcon },
-  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+  { label: 'Профиль',   path: '/settings',  icon: UserIcon },
 ];
 
 const ADMIN_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+  { label: 'Профиль',   path: '/settings',  icon: UserIcon },
 ];
 
 function Tab({ label, path, icon: Icon }: TabConfig) {

@@ -281,3 +281,12 @@ export function UsersIcon({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
+
+export function UserIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0116 0" />
+    </svg>
+  );
+}

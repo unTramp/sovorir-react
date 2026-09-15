@@ -33,7 +33,8 @@ describe('BottomTabBar', () => {
   it('shows student tabs for student role', () => {
     renderTabBar('student');
     expect(screen.getByLabelText('Главная')).toBeInTheDocument();
-    expect(screen.getByLabelText('Уроки')).toBeInTheDocument();
+    expect(screen.getByLabelText('Курс')).toBeInTheDocument();
+    expect(screen.getByLabelText('Практика')).toBeInTheDocument();
     expect(screen.getByLabelText('Задания')).toBeInTheDocument();
     expect(screen.getByLabelText('Профиль')).toBeInTheDocument();
     expect(screen.queryByLabelText('Студенты')).not.toBeInTheDocument();
@@ -58,7 +59,7 @@ describe('BottomTabBar', () => {
     renderTabBar('student', '/');
     const homeBtn = screen.getByLabelText('Главная');
     expect(homeBtn.className).toContain('active');
-    expect(screen.getByLabelText('Уроки').className).not.toContain('active');
+    expect(screen.getByLabelText('Курс').className).not.toContain('active');
   });
 
   it('is hidden while the student is inside a lesson', () => {

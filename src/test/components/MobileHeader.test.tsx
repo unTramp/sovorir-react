@@ -46,6 +46,6 @@ describe('MobileHeader lesson navigation', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Выйти из урока' }));
 
-    expect(screen.getByTestId('location')).toHaveTextContent('/');
+    expect(screen.getByTestId('location')).toHaveTextContent('/course');
   });
 });

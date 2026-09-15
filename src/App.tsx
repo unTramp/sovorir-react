@@ -9,6 +9,7 @@ import { useAuthStore } from './stores/useAuthStore';
 
 // Lazy-loaded views — each gets its own chunk
 const HomeView              = lazy(() => import('./components/center/HomeView').then(m => ({ default: m.HomeView })));
+const CourseView            = lazy(() => import('./components/center/CourseView').then(m => ({ default: m.CourseView })));
 const LessonView            = lazy(() => import('./components/center/LessonView').then(m => ({ default: m.LessonView })));
 const PracticeView          = lazy(() => import('./components/center/PracticeView').then(m => ({ default: m.PracticeView })));
 const DictionaryView        = lazy(() => import('./components/center/DictionaryView').then(m => ({ default: m.DictionaryView })));
@@ -64,6 +65,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<AppShell />}>
           <Route index element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
+          <Route path="course"      element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><CourseView /></Suspense></RoleRoute>} />
           <Route path="lesson"      element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><LessonView /></Suspense></RoleRoute>} />
           <Route path="practice"    element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><PracticeView /></Suspense></RoleRoute>} />
           <Route path="dictionary"  element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><DictionaryView /></Suspense></RoleRoute>} />

@@ -1,14 +1,14 @@
 import { useNavigate, useMatch, useLocation } from 'react-router-dom';
-import { useAppStore } from '../../stores/useAppStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonStore } from '../../stores/useLessonStore';
-import { HamburgerIcon, FlameIcon, BackArrowIcon } from '../../icons';
+import { FlameIcon, BackArrowIcon } from '../../icons';
 import { NotificationBell } from '../ui/NotificationBell';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 
 const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: string }>> & Record<string, { title: string; subtitle?: string }> = {
   home:                  { title: 'Главная' },
+  course:                { title: 'Курс' },
   lesson:                { title: 'Урок 3' },
   video:                 { title: 'Видео' },
   audio:                 { title: 'Аудио' },
@@ -17,7 +17,7 @@ const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: strin
   notes:                 { title: 'Заметки' },
   'live-lessons':        { title: 'Живые уроки' },
   statistics:            { title: 'Статистика' },
-  settings:              { title: 'Настройки' },
+  settings:              { title: 'Профиль' },
   assignments:           { title: 'Задания' },
   teacher:               { title: 'Преподаватель' },
   students:              { title: 'Студенты' },
@@ -31,7 +31,6 @@ function pathnameToKey(pathname: string): string {
 
 export function MobileHeader() {
   const navigate = useNavigate();
-  const toggleSidebar = useAppStore((s) => s.toggleSidebar);
   const streak = useStreakStore((s) => s.currentStreak);
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
@@ -40,6 +39,7 @@ export function MobileHeader() {
   const location = useLocation();
   const lessonMatch = useMatch('/lesson');
   const isLesson = !!lessonMatch;
+  const showStreak = location.pathname === '/';
 
   const lessonHeaderTitle = currentLesson ? `Урок ${currentLesson.id}` : 'Урок';
   const lessonHeaderSubtitle = currentLesson?.title;
@@ -55,7 +55,7 @@ export function MobileHeader() {
       return;
     }
 
-    navigate('/');
+    navigate('/course');
   };
 
   return (
@@ -68,15 +68,7 @@ export function MobileHeader() {
         >
           <BackArrowIcon />
         </button>
-      ) : (
-        <button
-          onClick={() => toggleSidebar()}
-          className="mobile-header__btn"
-          aria-label="Меню"
-        >
-          <HamburgerIcon />
-        </button>
-      )}
+      ) : null}
 
       {isLesson ? (
         <div className="flex flex-1 min-w-0 items-center gap-3">
@@ -103,10 +95,12 @@ export function MobileHeader() {
 
       {!isLesson && (
         <div className="mobile-header__right">
-          <div className="mobile-header__streak">
-            <FlameIcon size={16} />
-            <span>{streak}</span>
-          </div>
+          {showStreak && (
+            <div className="mobile-header__streak">
+              <FlameIcon size={16} />
+              <span>{streak}</span>
+            </div>
+          )}
           <NotificationBell />
         </div>
       )}
