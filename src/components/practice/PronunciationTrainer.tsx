@@ -4,16 +4,18 @@ import { useMediaRecorder } from '../../hooks/useMediaRecorder';
 import { useRecordingStore } from '../../stores/useRecordingStore';
 import { RecordingPlayback } from '../audio/RecordingPlayback';
 import { AudioLevelMeter } from '../audio/AudioLevelMeter';
+import { PauseIcon, PlayIcon } from '../../icons';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 const TRAINER_SECTION_ID = 9000; // virtual section for trainer recordings
-
-function getSyllables(transcription: string): string {
-  // Strip brackets: [ba-rev] → ba-rev → Ба · рев
-  return transcription
-    .replace(/^\[|\]$/g, '')
-    .split('-')
+function getSyllables(syllables: string[] | undefined, transcription: string): string {
+  return (syllables ?? [transcription.replace(/^\[|\]$/g, '')])
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(' · ');
+}
+
+function formatTimer(seconds: number): string {
+  return `0:${String(seconds).padStart(2, '0')}`;
 }
 
 export function PronunciationTrainer() {
@@ -25,9 +27,14 @@ export function PronunciationTrainer() {
   const { start, stop, reset, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
   const saveRecording = useRecordingStore((s) => s.saveRecording);
   const getRecordingUrl = useRecordingStore((s) => s.getRecordingUrl);
+  const { togglePlay, playingId, loadingId } = useAudioPlayer();
 
   const word = dictionary[wordIndex];
   const total = dictionary.length;
+  const referenceAudioId = `trainer-reference-${word.id}`;
+  const referencePlaying = playingId === referenceAudioId;
+  const referenceLoading = loadingId === referenceAudioId;
+  const phase = isRecording ? 'recording' : audioBlob || playbackUrl ? 'recorded' : 'idle';
 
   const resetPlayback = useCallback(() => {
     setPlaybackUrl(null);
@@ -65,7 +72,10 @@ export function PronunciationTrainer() {
     };
   }, [recordingId, getRecordingUrl]);
 
-  const handleStart = useCallback(() => void start(), [start]);
+  const handleStart = useCallback(() => {
+    resetPlayback();
+    void start();
+  }, [resetPlayback, start]);
   const handleStop = useCallback(() => stop(), [stop]);
 
   const goNext = () => {
@@ -112,40 +122,35 @@ export function PronunciationTrainer() {
         <div className="trainer__word-armenian" lang="hy">{word.armenian}</div>
         <div className="trainer__word-transcription">{word.transcription}</div>
         <div className="trainer__word-translation">{word.translation}</div>
+        {word.audioSrc && (
+          <button
+            className="trainer__reference-btn"
+            type="button"
+            onClick={() => togglePlay(referenceAudioId, word.audioSrc!)}
+            disabled={referenceLoading}
+            aria-label={referenceLoading ? 'Загружается произношение преподавателя' : referencePlaying ? 'Пауза произношения преподавателя' : 'Прослушать произношение преподавателя'}
+            aria-pressed={referencePlaying}
+          >
+            {referencePlaying ? <PauseIcon /> : <PlayIcon />}
+            <span>{referencePlaying ? 'Пауза' : 'Послушать Лусине'}</span>
+          </button>
+        )}
       </div>
 
       {/* Syllables */}
       <div className="trainer__syllables">
         <div className="trainer__syllables-label">Разбейте на слоги</div>
-        <div className="trainer__syllables-text">{getSyllables(word.transcription)}</div>
+        <div className="trainer__syllables-text">{getSyllables(word.syllables, word.transcription)}</div>
       </div>
 
-      {/* Playback */}
-      {playbackUrl && (
-        <div className="trainer__playback">
-          <div className="trainer__playback-label">Ваша запись</div>
-          <RecordingPlayback audioUrl={playbackUrl} duration={recordingDuration} />
-        </div>
-      )}
-
-      {/* Record */}
-      <div className="trainer__record">
+      <div className={`trainer__record trainer__record--${phase}`} aria-live="polite">
         {error && <div className="trainer__error">{error}</div>}
-        {isRecording && <AudioLevelMeter level={audioLevel} />}
-        <div className="trainer__mic-wrap">
-          {isRecording ? (
-            <button
-              className="trainer__mic-btn trainer__mic-btn--recording"
-              onMouseUp={handleStop}
-              onTouchEnd={(e) => { e.preventDefault(); handleStop(); }}
-            >
-              <span className="trainer__pulse" /> {duration}с
-            </button>
-          ) : (
+        {phase === 'idle' && (
+          <div className="trainer__mic-wrap">
             <button
               className="trainer__mic-btn"
-              onMouseDown={handleStart}
-              onTouchStart={(e) => { e.preventDefault(); handleStart(); }}
+              type="button"
+              onClick={handleStart}
               aria-label="Записать произношение"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -153,11 +158,27 @@ export function PronunciationTrainer() {
                 <path d="M17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12H5C5 15.53 7.61 18.43 11 18.93V22H13V18.93C16.39 18.43 19 15.53 19 12H17Z" fill="currentColor"/>
               </svg>
             </button>
-          )}
-          <span className="trainer__mic-hint">
-            {isRecording ? 'Отпустите, чтобы остановить' : 'Удерживайте для записи'}
-          </span>
-        </div>
+            <span className="trainer__mic-hint">Нажмите, чтобы начать запись</span>
+          </div>
+        )}
+        {phase === 'recording' && (
+          <div className="trainer__recording-state">
+            <AudioLevelMeter level={audioLevel} />
+            <div className="trainer__recording-status"><span className="trainer__pulse" /> Запись · {formatTimer(duration)}</div>
+            <button className="trainer__stop-btn" type="button" onClick={handleStop}>
+              <span aria-hidden="true" /> Остановить
+            </button>
+          </div>
+        )}
+        {phase === 'recorded' && (
+          <div className="trainer__recorded-state">
+            <div className="trainer__playback-label">Ваша запись</div>
+            {playbackUrl
+              ? <RecordingPlayback audioUrl={playbackUrl} duration={recordingDuration} />
+              : <div className="trainer__saving">Готовим запись…</div>}
+            <button className="trainer__retry-btn" type="button" onClick={resetPlayback}>Записать ещё раз</button>
+          </div>
+        )}
       </div>
 
       {/* Next word */}

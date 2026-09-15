@@ -12,7 +12,7 @@ const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: strin
   lesson:                { title: 'Урок 3' },
   video:                 { title: 'Видео' },
   audio:                 { title: 'Аудио' },
-  practice:              { title: 'Тренировка' },
+  practice:              { title: 'Практика' },
   dictionary:            { title: 'Словарь' },
   notes:                 { title: 'Заметки' },
   'live-lessons':        { title: 'Живые уроки' },

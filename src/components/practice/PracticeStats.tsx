@@ -5,7 +5,7 @@ export function PracticeStats() {
   const learnedCount = useFlashcardStore((s) => s.getLearnedCount());
 
   return (
-    <span className="text-xs text-muted ml-auto">
+    <span>
       Выучено {learnedCount} из {dictionary.length}
     </span>
   );

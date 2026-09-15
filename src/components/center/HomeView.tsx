@@ -4,7 +4,7 @@ import { useStreakStore } from '../../stores/useStreakStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { teacherNotes } from '../../data/teacherNotes';
 import { todayISO, getWeekDays } from '../../lib/dateUtils';
-import { FlameIcon } from '../../icons';
+import { BookOpenIcon, BrainIcon, FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { TeacherDashboardView } from './TeacherDashboardView';
@@ -25,9 +25,9 @@ function PlayIcon() {
   );
 }
 
-const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: SectionType; xp: number; iconBg: string }[] = [
-  { label: 'Карточки', sub: 'Повтори слова за 2 минуты', emoji: '🃏', view: 'practice', xp: 15, iconBg: '#FFDBCD' },
-  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', emoji: '🧠', view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
+const PRACTICE_ITEMS: { label: string; sub: string; icon: React.ComponentType<{ size?: number }>; view: SectionType; xp: number; iconBg: string }[] = [
+  { label: 'Карточки', sub: 'Повтори слова за 2 минуты', icon: BookOpenIcon, view: 'practice', xp: 15, iconBg: '#FFDBCD' },
+  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', icon: BrainIcon, view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
 ];
 
 export function HomeView() {
@@ -69,12 +69,12 @@ function StudentHomeView() {
 
       {/* Hero Lesson Card */}
       {allCompleted && (
-        <div className="home-hero__card" style={{ cursor: 'default' }}>
+        <div className="home-hero__card surface-card--primary" style={{ cursor: 'default' }}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
               <div className="home-hero__label">Курс завершён</div>
-              <div className="home-hero__title">Все уроки пройдены 🎉</div>
+              <div className="home-hero__title">Все уроки пройдены</div>
             </div>
             <div className="home-hero__play" style={{ fontSize: 28 }}>✓</div>
           </div>
@@ -89,7 +89,7 @@ function StudentHomeView() {
         </div>
       )}
       {!allCompleted && currentLesson && (
-        <button className="home-hero__card" onClick={() => navigate('/lesson')}>
+        <button className="home-hero__card surface-card--primary" onClick={() => navigate('/lesson')}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
@@ -119,9 +119,9 @@ function StudentHomeView() {
         <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
           {PRACTICE_ITEMS.map((item) => (
-            <button key={item.label} className="home-daily-item" onClick={() => navigate(`/${item.view}`)}>
+            <button key={item.label} className="home-daily-item surface-card--interactive" onClick={() => navigate(`/${item.view}`)}>
               <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
-                <span>{item.emoji}</span>
+                <item.icon size={21} />
               </div>
               <div className="home-daily-item__body">
                 <div className="home-daily-item__name">{item.label}</div>
@@ -135,7 +135,7 @@ function StudentHomeView() {
 
       {/* Weekly Activity */}
       <div
-        className="home-weekly-section"
+        className="home-weekly-section surface-card"
         role="button"
         tabIndex={0}
         onClick={() => navigate('/practice')}
@@ -173,7 +173,7 @@ function StudentHomeView() {
       {/* Teacher Section */}
       {latestNote && (
         <div className="home-teacher-section">
-          <div className="home-teacher__bubble">
+          <div className="home-teacher__bubble surface-card">
             <div className="home-teacher__photo-wrap">
               <img src="/assets/teacher-avatar.png" alt="Лусине" className="home-teacher__photo" />
             </div>

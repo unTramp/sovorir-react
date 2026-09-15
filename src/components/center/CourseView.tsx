@@ -42,7 +42,7 @@ export function CourseView() {
           return (
             <button
               key={lesson.id}
-              className={`course-card course-card--${lesson.status}`}
+              className={`course-card course-card--${lesson.status} ${lesson.status === 'current' ? 'surface-card--interactive' : 'surface-card'}`}
               type="button"
               disabled={isLocked || isCompleted}
               onClick={() => navigate('/lesson')}
@@ -52,7 +52,7 @@ export function CourseView() {
               </span>
               <span className="course-card__content">
                 <span className="course-card__status">
-                  {isCompleted ? 'Завершён' : isLocked ? 'Откроется позже' : 'Текущий урок'}
+                  {isCompleted ? 'Завершён' : isLocked ? 'Откроется после предыдущего урока' : 'Текущий урок'}
                 </span>
                 <span className="course-card__title">{lesson.title}</span>
                 <span className="course-card__meta">{count} {count === 1 ? 'раздел' : count < 5 ? 'раздела' : 'разделов'}</span>

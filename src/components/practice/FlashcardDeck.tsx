@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { FlashcardCard } from './FlashcardCard';
 import { dictionary } from '../../data/dictionary';
 
 export function FlashcardDeck() {
+  const [revealed, setRevealed] = useState(false);
   const session = useFlashcardStore((s) => s.session);
   const answerCard = useFlashcardStore((s) => s.answerCard);
 
@@ -18,27 +20,27 @@ export function FlashcardDeck() {
       <div className="flashcard-deck__progress">
         {session.currentIndex + 1} / {session.cards.length}
       </div>
-      <FlashcardCard key={word.id} word={word} />
-      <div className="flashcard-deck__buttons">
+      <FlashcardCard key={word.id} word={word} revealed={revealed} onReveal={() => setRevealed(true)} />
+      {revealed && <div className="flashcard-deck__buttons" aria-label="Оцените, насколько хорошо вы помните слово">
         <button
           className="flashcard-answer flashcard-answer--again"
-          onClick={() => answerCard(word.id, 'again')}
+          onClick={() => { setRevealed(false); answerCard(word.id, 'again'); }}
         >
           Не помню
         </button>
         <button
           className="flashcard-answer flashcard-answer--hard"
-          onClick={() => answerCard(word.id, 'hard')}
+          onClick={() => { setRevealed(false); answerCard(word.id, 'hard'); }}
         >
           Сложно
         </button>
         <button
           className="flashcard-answer flashcard-answer--easy"
-          onClick={() => answerCard(word.id, 'easy')}
+          onClick={() => { setRevealed(false); answerCard(word.id, 'easy'); }}
         >
           Легко
         </button>
-      </div>
+      </div>}
     </div>
   );
 }

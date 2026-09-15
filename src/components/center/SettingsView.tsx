@@ -18,6 +18,7 @@ export function SettingsView() {
     .filter((section) => section.type !== 'video' && section.status === 'completed').length;
   const xp = completedSections * 32;
   const isStudent = profile?.role === 'student';
+  const coursePercent = lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
 
   return (
     <div className="profile-screen">
@@ -36,13 +37,28 @@ export function SettingsView() {
         </div>
         <div className="profile-stat">
           <strong>{completedLessons}</strong>
-          <span>уроков</span>
+          <span>уроков пройдено</span>
         </div>
         <div className="profile-stat profile-stat--streak">
           <strong><FlameIcon size={16} /> {streak}</strong>
           <span>{streak === 1 ? 'день' : streak >= 2 && streak <= 4 ? 'дня' : 'дней'} подряд</span>
         </div>
       </section>}
+
+      {isStudent && (
+        <section className="profile-progress surface-card" aria-label={`Прогресс курса ${coursePercent}%`}>
+          <div className="profile-progress__header">
+            <div>
+              <strong>Прогресс курса</strong>
+              <span>{completedLessons} из {lessons.length} уроков завершено</span>
+            </div>
+            <b>{coursePercent}%</b>
+          </div>
+          <div className="profile-progress__track" aria-hidden="true">
+            <span style={{ width: `${coursePercent}%` }} />
+          </div>
+        </section>
+      )}
 
       <section className="profile-account">
         <div>

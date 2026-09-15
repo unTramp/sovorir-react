@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { CheckIcon } from '../../icons';
 
 export function SessionResult() {
   const session = useFlashcardStore((s) => s.session);
@@ -19,9 +20,7 @@ export function SessionResult() {
 
   return (
     <div className="flashcard-result">
-      <div className="flashcard-result__emoji">
-        {stats.again === 0 ? '🎉' : stats.easy > stats.again ? '👍' : '💪'}
-      </div>
+      <div className="flashcard-result__icon"><CheckIcon /></div>
       <div className="flashcard-result__title">Тренировка завершена!</div>
       <div className="flashcard-result__stats">
         <div className="flashcard-result__stat flashcard-result__stat--easy">

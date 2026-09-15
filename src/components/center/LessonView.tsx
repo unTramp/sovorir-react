@@ -12,6 +12,7 @@ export function LessonView() {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentLesson, allCompleted, hasLoaded } = useLessonCatalog();
+  const currentLessonId = currentLesson?.id;
 
   // Redirect to home if course complete or no current lesson (once catalog is loaded)
   useEffect(() => {
@@ -31,8 +32,8 @@ export function LessonView() {
   const reloadSections = useLessonSectionsStore((s) => s.reload);
 
   useEffect(() => {
-    if (currentLesson) reloadSections(true);
-  }, [currentLesson?.id, reloadSections]);
+    if (currentLessonId) reloadSections(true);
+  }, [currentLessonId, reloadSections]);
 
   // Sync totalSections into useLessonStore whenever sections change
   useEffect(() => {

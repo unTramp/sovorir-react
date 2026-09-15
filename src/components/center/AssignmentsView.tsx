@@ -1,23 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAssignmentStore } from '../../stores/useAssignmentStore';
 import { SubmitModal } from '../assignments/SubmitModal';
-import type { Assignment, SubmissionStatus } from '../../types/assignment';
-
-const STATUS_LABEL: Record<SubmissionStatus, string> = {
-  draft: 'Черновик',
-  submitted: 'Отправлено',
-  in_review: 'На проверке',
-  needs_revision: 'На доработку',
-  accepted: 'Принято',
-};
-
-const STATUS_CLASS: Record<SubmissionStatus, string> = {
-  draft: 'badge--draft',
-  submitted: 'badge--submitted',
-  in_review: 'badge--review',
-  needs_revision: 'badge--revision',
-  accepted: 'badge--accepted',
-};
+import type { Assignment } from '../../types/assignment';
+import { AssignmentStatus } from '../assignments/AssignmentStatus';
+import { getAssignmentUiStatus } from '../../lib/assignmentStatus';
+import { ClipboardIcon } from '../../icons';
 
 function formatDueDate(dueAt: string | null): string {
   if (!dueAt) return '';
@@ -37,17 +24,13 @@ export function AssignmentsView() {
 
   return (
     <div className="view-panel home-screen">
-      <div className="home-greeting-section">
-        <h1 className="assignments__title">Задания</h1>
-      </div>
-
       {isLoading && assignments.length === 0 && (
         <div className="assignments__loading">Загрузка...</div>
       )}
 
       {!isLoading && assignments.length === 0 && (
         <div className="assignments__empty">
-          <div className="assignments__empty-icon">📋</div>
+          <div className="assignments__empty-icon"><ClipboardIcon size={28} /></div>
           <p>Заданий пока нет</p>
         </div>
       )}
@@ -55,18 +38,24 @@ export function AssignmentsView() {
       <div className="assignments__list">
         {assignments.map((asgn) => {
           const submission = getSubmissionForAssignment(asgn.id);
-          const status = submission?.status;
-          const canSubmit = !status || status === 'needs_revision';
+          const uiStatus = getAssignmentUiStatus(submission?.status, asgn.dueAt);
+          const actionLabel = uiStatus === 'pending' || uiStatus === 'overdue'
+            ? 'Выполнить'
+            : uiStatus === 'revisionRequired'
+              ? 'Доработать'
+              : 'Посмотреть ответ';
 
           return (
-            <div key={asgn.id} className="assignment-card">
+            <button
+              key={asgn.id}
+              className="assignment-card surface-card--interactive"
+              type="button"
+              onClick={() => setActiveAssignment(asgn)}
+              aria-label={`${asgn.title}. ${actionLabel}`}
+            >
               <div className="assignment-card__top">
                 <span className="assignment-card__title">{asgn.title}</span>
-                {status && (
-                  <span className={`badge ${STATUS_CLASS[status]}`}>
-                    {STATUS_LABEL[status]}
-                  </span>
-                )}
+                <AssignmentStatus status={uiStatus} />
               </div>
 
               {asgn.description && (
@@ -77,16 +66,9 @@ export function AssignmentsView() {
                 {asgn.dueAt && (
                   <span className="assignment-card__due">{formatDueDate(asgn.dueAt)}</span>
                 )}
-                {canSubmit && (
-                  <button
-                    className="assignment-card__submit-btn"
-                    onClick={() => setActiveAssignment(asgn)}
-                  >
-                    {status === 'needs_revision' ? 'Доработать' : 'Отправить'}
-                  </button>
-                )}
+                <span className="assignment-card__submit-btn">{actionLabel} →</span>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -94,6 +76,7 @@ export function AssignmentsView() {
       {activeAssignment && (
         <SubmitModal
           assignment={activeAssignment}
+          submission={getSubmissionForAssignment(activeAssignment.id)}
           onClose={() => setActiveAssignment(null)}
         />
       )}

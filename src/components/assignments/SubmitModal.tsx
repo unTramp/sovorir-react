@@ -1,19 +1,23 @@
 import { useState, useCallback } from 'react';
 import { useAssignmentStore } from '../../stores/useAssignmentStore';
-import type { Assignment } from '../../types/assignment';
+import type { Assignment, Submission } from '../../types/assignment';
+import { RecordingPlayback } from '../audio/RecordingPlayback';
+import { CloseIcon } from '../../icons';
 
 interface Props {
   assignment: Assignment;
+  submission?: Submission;
   onClose: () => void;
 }
 
-export function SubmitModal({ assignment, onClose }: Props) {
-  const [textContent, setTextContent] = useState('');
+export function SubmitModal({ assignment, submission, onClose }: Props) {
+  const [textContent, setTextContent] = useState(submission?.textContent ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const submitAssignment = useAssignmentStore((s) => s.submitAssignment);
+  const readOnly = Boolean(submission && submission.status !== 'draft' && submission.status !== 'needs_revision');
   const canSubmit = textContent.trim().length > 0 && !isSubmitting;
 
   const handleSubmit = useCallback(async () => {
@@ -33,7 +37,7 @@ export function SubmitModal({ assignment, onClose }: Props) {
 
   return (
     <div className="submit-modal__backdrop" onClick={onClose}>
-      <div className="submit-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="submit-modal" role="dialog" aria-modal="true" aria-labelledby="assignment-dialog-title" onClick={(e) => e.stopPropagation()}>
         {submitted ? (
           <div className="submit-modal__success">
             <div className="submit-modal__success-icon">✓</div>
@@ -46,8 +50,8 @@ export function SubmitModal({ assignment, onClose }: Props) {
         ) : (
           <>
             <div className="submit-modal__header">
-              <div className="submit-modal__title">{assignment.title}</div>
-              <button className="submit-modal__close" onClick={onClose} aria-label="Закрыть">✕</button>
+              <div className="submit-modal__title" id="assignment-dialog-title">{assignment.title}</div>
+              <button className="submit-modal__close" onClick={onClose} aria-label="Закрыть"><CloseIcon /></button>
             </div>
 
             {assignment.description && (
@@ -61,12 +65,25 @@ export function SubmitModal({ assignment, onClose }: Props) {
               placeholder="Напишите ответ..."
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
+              readOnly={readOnly}
               rows={4}
             />
+
+            {readOnly && submission?.audioUrl && (
+              <div className="submit-modal__audio">
+                <span className="submit-modal__label">Аудиозапись</span>
+                <RecordingPlayback audioUrl={submission.audioUrl} duration={0} />
+              </div>
+            )}
 
             {submitError && <p className="submit-modal__error">{submitError}</p>}
 
             <div className="submit-modal__actions">
+              {readOnly ? (
+                <button className="submit-modal__btn submit-modal__btn--primary" onClick={onClose}>
+                  Закрыть
+                </button>
+              ) : <>
               <button className="submit-modal__btn submit-modal__btn--ghost" onClick={onClose}>
                 Отмена
               </button>
@@ -77,6 +94,7 @@ export function SubmitModal({ assignment, onClose }: Props) {
               >
                 {isSubmitting ? 'Отправка...' : 'Отправить'}
               </button>
+              </>}
             </div>
           </>
         )}
