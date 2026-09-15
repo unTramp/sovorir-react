@@ -1110,7 +1110,10 @@ html.drawer-lock {
 }
 
 /* ==================== Main Content Scale ==================== */
-.main-content-area {}
+.main-content-area,
+.view-panel {
+  background: var(--color-bg-content);
+}
 
 /* ==================== Speed Toggle ==================== */
 .speed-btn {
@@ -3867,6 +3870,7 @@ html.drawer-lock {
   flex-direction: column;
   gap: 24px;
   font-family: var(--font-jakarta);
+  background: var(--color-bg-content);
 }
 
 /* --- Greeting --- */
@@ -4557,7 +4561,7 @@ html.drawer-lock {
   right: 0;
   height: calc(56px + env(safe-area-inset-bottom, 0px));
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background: var(--color-bg-app);
+  background: var(--color-bg-content);
   border-top: 1px solid var(--color-border);
   display: flex;
   align-items: stretch;
@@ -4868,10 +4872,11 @@ html.drawer-lock {
 .app-shell {
   min-height: 100dvh;
   padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  background: var(--color-bg-content);
 }
 
 .mobile-header {
-  background: var(--color-bg-app);
+  background: var(--color-bg-content);
   padding-top: env(safe-area-inset-top, 0px);
   min-height: calc(56px + env(safe-area-inset-top, 0px));
 }
@@ -5151,7 +5156,7 @@ button:focus-visible {
   gap: 4px;
   padding: 0 16px;
   border-bottom: 1px solid var(--color-border);
-  background: var(--color-bg-app);
+  background: var(--color-bg-content);
   overflow-x: auto;
   -ms-overflow-style: none;
   scrollbar-width: none;
