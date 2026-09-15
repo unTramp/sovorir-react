@@ -133,7 +133,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
 
   return (
     <div ref={scrollRef} className="lesson-scroll">
-      <div className="max-w-3xl mx-auto px-6 pt-8 pb-32">
+      <div className={`max-w-3xl mx-auto px-6 pt-8 ${allRecordsCompleted ? 'pb-6' : 'pb-32'}`}>
         <header className="lesson-step-heading">
           <h1 className="lesson-step-heading__title">{section.title}</h1>
         </header>
@@ -176,12 +176,8 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
             </div>
           );
         })}
-        {allRecordsCompleted && (
-          <div className="lesson-block-enter">
-            <LessonCompleteCard />
-          </div>
-      )}
-      <div ref={bottomRef} />
+        {allRecordsCompleted && <LessonCompleteCard />}
+        <div ref={bottomRef} />
       </div>
       {showRecordCTA && (
         <StickyRecordCTA onComplete={handleRecordComplete} sectionId={currentSection} recordIndex={completedRecords} />

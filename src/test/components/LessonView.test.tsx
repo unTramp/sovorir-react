@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LessonView } from '../../components/center/LessonView';
 import { useLessonStore } from '../../stores/useLessonStore';
@@ -43,9 +43,14 @@ vi.mock('../../hooks/useLessonCatalog', () => ({
 
 // Mock BlockRenderer to avoid deep rendering of lesson content
 vi.mock('../../components/lesson/BlockRenderer', () => ({
-  BlockRenderer: ({ block }: { block: { type: string } }) => (
-    <div data-testid={`block-${block.type}`}>{block.type}</div>
-  ),
+  BlockRenderer: ({ block, onSkipRecord }: { block: { type: string }; onSkipRecord?: () => void }) =>
+    onSkipRecord ? (
+      <button data-testid={`block-${block.type}`} onClick={onSkipRecord}>
+        Завершить интерактив
+      </button>
+    ) : (
+      <div data-testid={`block-${block.type}`}>{block.type}</div>
+    ),
 }));
 
 vi.mock('../../components/lesson/StickyRecordCTA', () => ({
@@ -134,5 +139,51 @@ describe('LessonView', () => {
     renderLesson();
     expect(screen.getByRole('heading', { name: 'Практика' })).toBeInTheDocument();
     expect(useLessonStore.getState().currentSection).toBe(3);
+  });
+
+  it('advances through multiple active recall blocks before unlocking completion', () => {
+    const interactiveSections = [
+      {
+        id: 1,
+        title: 'Без подсказки',
+        type: 'practice',
+        blocks: [
+          {
+            type: 'activeRecall',
+            prompt: 'Как поздороваться?',
+            answer: {
+              armenian: 'Բարև',
+              transcription: 'barev',
+              translation: 'Привет',
+            },
+            reviewIds: ['greeting'],
+          },
+          {
+            type: 'activeRecall',
+            prompt: 'Как попрощаться?',
+            answer: {
+              armenian: 'Ցտեսություն',
+              transcription: 'ts’tesut’yun',
+              translation: 'До свидания',
+            },
+            reviewIds: ['goodbye'],
+          },
+        ],
+      },
+    ] as unknown as LessonContentSection[];
+
+    useLessonStore.setState({ currentSection: 1, totalSections: 1 });
+    useLessonSectionsStore.setState({
+      sections: interactiveSections,
+      isLoading: false,
+      error: null,
+    });
+    renderLesson('/lesson?section=1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Завершить интерактив' }));
+    expect(useLessonProgress.getState().sections[1]?.completedRecords).toEqual([0]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Завершить интерактив' }));
+    expect(useLessonProgress.getState().sections[1]?.completedRecords).toEqual([0, 1]);
   });
 });

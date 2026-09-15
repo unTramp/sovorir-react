@@ -57,8 +57,6 @@ export function LessonCompleteCard() {
     }
   }, [allSections, completeSection, currentSection, isLastSection, navigate, nextSection, unlockWords]);
 
-  const actionLabel = isCurrentSectionDone ? 'На главную' : 'Завершить урок';
-
   return (
     <>
       {quiz && (
@@ -68,63 +66,51 @@ export function LessonCompleteCard() {
       )}
 
       {isLastSection ? (
-        <div className={`lesson-complete${isCurrentSectionDone ? ' lesson-complete--done' : ''}`}>
-          <div className="lesson-complete__title">
-            {isCurrentSectionDone ? 'Урок завершён!' : 'Последний шаг'}
-          </div>
-          <div className="lesson-complete__summary">
-            {isCurrentSectionDone
-              ? 'Отличная работа — вы стали ещё немного увереннее говорить по-армянски.'
-              : 'Когда будете готовы, завершите урок.'}
-          </div>
-          {isCurrentSectionDone && (
+        isCurrentSectionDone ? (
+          <div className="lesson-complete lesson-complete--done">
+            <div className="lesson-complete__title">Урок завершён!</div>
+            <div className="lesson-complete__summary">Отличная работа — вы стали ещё немного увереннее говорить по-армянски.</div>
             <ul className="lesson-complete__skills" aria-label="Теперь вы умеете">
               <li>Поздороваться с другом</li>
               <li>Вежливо обратиться к незнакомому человеку</li>
               <li>Попрощаться в нейтральной ситуации</li>
             </ul>
-          )}
-          {isCurrentSectionDone ? (
-          <button
-            className="lesson-complete__btn"
-            onClick={() => {
-              void (async () => {
-                // Sync all completed sections to server (handles any missed fire-and-forget)
-                await syncCompletedSectionsToServer();
-                // Reset lesson view state so next lesson starts from section 1
-                useLessonStore.getState().setCurrentSection(1);
-                // Invalidate caches so HomeView fetches fresh lesson statuses
-                useLessonSectionsStore.getState().reload(true);
-                await useLessonCatalogStore.getState().reloadLessons();
-                navigate('/');
-              })();
-            }}
-          >
-            На главную
-          </button>
-          ) : (
-          <button
-            className="lesson-complete__btn"
-            onClick={needsQuiz ? undefined : handleContinue}
-            disabled={needsQuiz}
-          >
-            {actionLabel}
-          </button>
-          )}
-        </div>
-      ) : (
-        <div className="lesson-next">
-          <div className="lesson-next__content">
-            <span className="lesson-next__eyebrow">Дальше</span>
-            <span className="lesson-next__title">
-              {nextSectionTitle || 'Следующий шаг'}
-            </span>
+            <button
+              className="lesson-complete__btn"
+              onClick={() => {
+                void (async () => {
+                  // Sync all completed sections to server (handles any missed fire-and-forget)
+                  await syncCompletedSectionsToServer();
+                  // Reset lesson view state so next lesson starts from section 1
+                  useLessonStore.getState().setCurrentSection(1);
+                  // Invalidate caches so HomeView fetches fresh lesson statuses
+                  useLessonSectionsStore.getState().reload(true);
+                  await useLessonCatalogStore.getState().reloadLessons();
+                  navigate('/');
+                })();
+              }}
+            >
+              На главную
+            </button>
           </div>
-          <button
-            className="lesson-next__btn"
-            onClick={needsQuiz ? undefined : handleContinue}
-            disabled={needsQuiz}
-          >
+        ) : (
+          <div className="lesson-action-dock lesson-action-dock--finish" role="region" aria-label="Завершение урока">
+            <div className="lesson-action-dock__content">
+              <span className="lesson-action-dock__eyebrow">Готово</span>
+              <span className="lesson-action-dock__title">Все фразы пройдены</span>
+            </div>
+            <button className="lesson-action-dock__btn" onClick={needsQuiz ? undefined : handleContinue} disabled={needsQuiz}>
+              {needsQuiz ? 'Сначала ответьте' : 'Завершить урок'}
+            </button>
+          </div>
+        )
+      ) : (
+        <div className="lesson-action-dock" role="region" aria-label="Переход к следующему разделу">
+          <div className="lesson-action-dock__content">
+            <span className="lesson-action-dock__eyebrow">Дальше</span>
+            <span className="lesson-action-dock__title">{nextSectionTitle || 'Следующий шаг'}</span>
+          </div>
+          <button className="lesson-action-dock__btn" onClick={needsQuiz ? undefined : handleContinue} disabled={needsQuiz}>
             <span>{needsQuiz ? 'Сначала ответьте' : 'Продолжить'}</span>
             {!needsQuiz && <span aria-hidden="true">→</span>}
           </button>

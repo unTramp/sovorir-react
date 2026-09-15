@@ -68,7 +68,8 @@ export function LessonView() {
     if (!section) return 0;
     let recordCounter = 0;
     for (let i = 0; i < section.blocks.length; i++) {
-      if (section.blocks[i].type === 'record' || section.blocks[i].type === 'pronunciationPrompt') {
+      const blockType = section.blocks[i].type;
+      if (blockType === 'record' || blockType === 'pronunciationPrompt' || blockType === 'dialogue' || blockType === 'activeRecall') {
         if (!completedSet.includes(recordCounter)) return recordCounter;
         recordCounter++;
       }
