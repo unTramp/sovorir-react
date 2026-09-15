@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { BottomTabBar } from '../../components/layout/BottomTabBar';
@@ -42,8 +42,7 @@ describe('BottomTabBar', () => {
   it('shows teacher tabs for teacher role', () => {
     renderTabBar('teacher');
     expect(screen.getByLabelText('Главная')).toBeInTheDocument();
-    expect(screen.getByLabelText('Задания')).toBeInTheDocument();
-    expect(screen.getByLabelText('Студенты')).toBeInTheDocument();
+    expect(screen.getByLabelText('Проверка')).toBeInTheDocument();
     expect(screen.getByLabelText('Профиль')).toBeInTheDocument();
     expect(screen.queryByLabelText('Тренажёр')).not.toBeInTheDocument();
   });
@@ -51,7 +50,7 @@ describe('BottomTabBar', () => {
   it('shows admin tabs for admin role', () => {
     renderTabBar('admin');
     expect(screen.getByLabelText('Главная')).toBeInTheDocument();
-    expect(screen.getByLabelText('Аналитика')).toBeInTheDocument();
+    expect(screen.getByLabelText('Профиль')).toBeInTheDocument();
     expect(screen.queryByLabelText('Задания')).not.toBeInTheDocument();
   });
 
@@ -62,9 +61,8 @@ describe('BottomTabBar', () => {
     expect(screen.getByLabelText('Уроки').className).not.toContain('active');
   });
 
-  it('active tab matches /lesson route', () => {
+  it('is hidden while the student is inside a lesson', () => {
     renderTabBar('student', '/lesson');
-    expect(screen.getByLabelText('Уроки').className).toContain('active');
-    expect(screen.getByLabelText('Главная').className).not.toContain('active');
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
   });
 });

@@ -5,6 +5,7 @@ import { HomeView } from '../../components/center/HomeView';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
+import { useReviewStore } from '../../stores/useReviewStore';
 import type { Lesson } from '../../types/lesson';
 
 // Prevent actual API / network calls
@@ -79,6 +80,12 @@ beforeEach(() => {
     isLoading: false,
     hasLoaded: true,
     error: null,
+  });
+  useReviewStore.setState({
+    queue: [],
+    isLoading: false,
+    error: null,
+    loadQueue: vi.fn().mockResolvedValue(undefined),
   });
 });
 

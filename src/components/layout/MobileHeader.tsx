@@ -35,6 +35,7 @@ export function MobileHeader() {
   const streak = useStreakStore((s) => s.currentStreak);
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
+  const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
   const { currentLesson } = useLessonCatalog();
   const location = useLocation();
   const lessonMatch = useMatch('/lesson');
@@ -46,13 +47,24 @@ export function MobileHeader() {
     ? { title: lessonHeaderTitle, subtitle: lessonHeaderSubtitle }
     : (VIEW_TITLES[pathnameToKey(location.pathname)] ?? { title: 'Sovorir' });
 
+  const handleLessonBack = () => {
+    if (currentSection > 1) {
+      const previousSection = currentSection - 1;
+      setCurrentSection(previousSection);
+      navigate(`/lesson?section=${previousSection}`, { replace: true });
+      return;
+    }
+
+    navigate('/');
+  };
+
   return (
     <header className="mobile-header h-14 flex items-center px-4 gap-3 flex-shrink-0 z-30 relative">
       {isLesson ? (
         <button
           className="mobile-header__btn"
-          onClick={() => navigate('/')}
-          aria-label="Назад"
+          onClick={handleLessonBack}
+          aria-label={currentSection > 1 ? 'Предыдущий шаг' : 'Выйти из урока'}
         >
           <BackArrowIcon />
         </button>
@@ -72,10 +84,14 @@ export function MobileHeader() {
             <div className="text-base font-semibold text-dark truncate">{title}</div>
             {subtitle ? <div className="text-xs text-muted truncate">{subtitle}</div> : null}
           </div>
-          <div className="lesson-header__dots">
-            {totalSections > 0 && Array.from({ length: totalSections }, (_, i) => (
-              <span key={i} className={`lesson-header__dot ${i < currentSection ? 'lesson-header__dot--done' : ''}`} />
-            ))}
+          <div className="lesson-header__progress" aria-label={`Шаг ${currentSection} из ${totalSections}`}>
+            <span className="lesson-header__step">{currentSection} из {totalSections}</span>
+            <span className="lesson-header__track" aria-hidden="true">
+              <span
+                className="lesson-header__fill"
+                style={{ width: `${totalSections > 0 ? (currentSection / totalSections) * 100 : 0}%` }}
+              />
+            </span>
           </div>
         </div>
       ) : (
@@ -85,13 +101,15 @@ export function MobileHeader() {
         </>
       )}
 
-      <div className="mobile-header__right">
-        <div className="mobile-header__streak">
-          <FlameIcon size={16} />
-          <span>{streak}</span>
+      {!isLesson && (
+        <div className="mobile-header__right">
+          <div className="mobile-header__streak">
+            <FlameIcon size={16} />
+            <span>{streak}</span>
+          </div>
+          <NotificationBell />
         </div>
-        <NotificationBell />
-      </div>
+      )}
     </header>
   );
 }

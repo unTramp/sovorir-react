@@ -27,7 +27,7 @@ function formatDueDate(dueAt: string | null): string {
 
 export function AssignmentsView() {
   const [activeAssignment, setActiveAssignment] = useState<Assignment | null>(null);
-  const { assignments, submissions, isLoading, loadAssignments, loadMySubmissions, getSubmissionForAssignment } =
+  const { assignments, isLoading, loadAssignments, loadMySubmissions, getSubmissionForAssignment } =
     useAssignmentStore();
 
   useEffect(() => {

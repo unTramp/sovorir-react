@@ -5,23 +5,24 @@ import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
+import { PhraseGroup } from '../lesson/PhraseGroup';
 
 function isRecordLikeBlock(block: ContentBlock) {
   return block.type === 'record' || block.type === 'pronunciationPrompt';
 }
 
-type LessonTab = 'materials' | 'dictionary' | 'audio' | 'video';
-
-const AUDIO_BLOCK_TYPES = new Set(['audio', 'audioExample', 'teacherBubble', 'studentBubble']);
-const DICTIONARY_BLOCK_TYPES = new Set(['phrase', 'phraseCard']);
+function isPhraseBlock(
+  block: ContentBlock,
+): block is Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }> {
+  return block.type === 'phrase' || block.type === 'phraseCard';
+}
 
 interface Props {
   completedRecords: number;
   onRecordComplete: () => void;
-  activeTab?: LessonTab;
 }
 
-export function LessonSectionView({ completedRecords, onRecordComplete, activeTab = 'materials' }: Props) {
+export function LessonSectionView({ completedRecords, onRecordComplete }: Props) {
   const currentSection = useLessonStore((s) => s.currentSection);
   const allSections = useLessonSectionsStore((s) => s.sections);
 
@@ -38,36 +39,23 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
   }, [currentSection]);
 
   // Compute record indices and visible blocks
-  const tabFilteredBlocks = useMemo(() => {
-    if (!section) return [] as ContentBlock[];
-    if (activeTab === 'dictionary') return section.blocks.filter((b) => DICTIONARY_BLOCK_TYPES.has(b.type));
-    if (activeTab === 'audio') return section.blocks.filter((b) => AUDIO_BLOCK_TYPES.has(b.type));
-    if (activeTab === 'video') return section.blocks.filter((b) => b.type === 'video');
-    return section.blocks;
-  }, [section, activeTab]);
-
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
     if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
-    // Non-materials tabs show all filtered blocks without record gating
-    if (activeTab !== 'materials') {
-      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: false };
-    }
-
     const recIndices: number[] = [];
-    tabFilteredBlocks.forEach((b, i) => {
+    section.blocks.forEach((b, i) => {
       if (isRecordLikeBlock(b)) recIndices.push(i);
     });
 
     const allDone = completedRecords >= recIndices.length;
 
     if (allDone) {
-      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: true };
+      return { visibleBlocks: section.blocks, allRecordsCompleted: true };
     }
 
     const cutoffIndex = recIndices[completedRecords];
-    return { visibleBlocks: tabFilteredBlocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords, activeTab, tabFilteredBlocks]);
+    return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
+  }, [section, completedRecords]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
@@ -117,11 +105,10 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
     );
   }
 
-  if (visibleBlocks.length === 0 && activeTab !== 'materials') {
-    const labels: Record<string, string> = { dictionary: 'слов', audio: 'аудио', video: 'видео' };
+  if (section.blocks.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted text-sm">
-        В этом разделе нет {labels[activeTab] ?? 'контента'}
+      <div className="flex-1 flex items-center justify-center px-6 text-center text-muted text-sm">
+        Этот шаг ещё не наполнен. Вернитесь к нему немного позже.
       </div>
     );
   }
@@ -133,8 +120,32 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
 
   return (
     <div ref={scrollRef} className="lesson-scroll">
-      <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
+      <div className="max-w-3xl mx-auto px-6 pt-8 pb-32">
+        <header className="lesson-step-heading">
+          <h1 className="lesson-step-heading__title">{section.title}</h1>
+        </header>
         {visibleBlocks.map((block, i) => {
+          if (isPhraseBlock(block)) {
+            if (i > 0 && isPhraseBlock(visibleBlocks[i - 1])) return null;
+
+            const items: Array<{
+              block: Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }>;
+              index: number;
+            }> = [];
+
+            for (let phraseIndex = i; phraseIndex < visibleBlocks.length; phraseIndex++) {
+              const phraseBlock = visibleBlocks[phraseIndex];
+              if (!isPhraseBlock(phraseBlock)) break;
+              items.push({ block: phraseBlock, index: phraseIndex });
+            }
+
+            return (
+              <div key={`${currentSection}-phrases-${i}`} className="lesson-block-enter">
+                <PhraseGroup items={items} sectionId={currentSection} />
+              </div>
+            );
+          }
+
           const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
           const isCompletedRecord = isRecordLikeBlock(block) && !isLastRecord;
           const recIdx = recordIndexMap.get(i);

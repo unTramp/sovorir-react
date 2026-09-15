@@ -10,7 +10,7 @@ const QUIZ: Quiz = {
     {
       type: 'multiple-choice',
       question: 'Как будет "Привет" по-армянски?',
-      options: ['Բarев', 'Ողджуйн', 'Шноракалутюн', 'Лав'],
+      options: ['Բարև', 'Ողջույն', 'Շնորհակալություն', 'Լավ'],
       correctIndex: 0,
     },
     {
@@ -22,7 +22,7 @@ const QUIZ: Quiz = {
     {
       type: 'multiple-choice',
       question: 'Как сказать "Спасибо"?',
-      options: ['Барев', 'Лав', 'Шноракалутюн', 'Ողджуйн'],
+      options: ['Барев', 'Лав', 'Шноракалутюн', 'Вохджуйн'],
       correctIndex: 2,
     },
   ],
@@ -45,7 +45,7 @@ describe('QuizContainer', () => {
 
   it('advances to next question after correct answer', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
-    fireEvent.click(screen.getByText('Բarев'));
+    fireEvent.click(screen.getByText('Բարև'));
     act(() => { vi.advanceTimersByTime(800); });
     expect(screen.getByText('Что значит "Лав"?')).toBeInTheDocument();
     expect(screen.getByText('2 / 3')).toBeInTheDocument();
@@ -53,14 +53,14 @@ describe('QuizContainer', () => {
 
   it('advances to next question after wrong answer', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
-    fireEvent.click(screen.getByText('Ողджуйн')); // wrong
+    fireEvent.click(screen.getByText('Ողջույն')); // wrong
     act(() => { vi.advanceTimersByTime(800); });
     expect(screen.getByText('Что значит "Лав"?')).toBeInTheDocument();
   });
 
   it('disables options after selection', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
-    fireEvent.click(screen.getByText('Բarев'));
+    fireEvent.click(screen.getByText('Բարև'));
     const options = screen.getAllByRole('button');
     options.forEach((btn) => expect(btn).toBeDisabled());
   });
@@ -70,7 +70,7 @@ describe('QuizContainer', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={onComplete} />);
 
     // Q1 correct
-    fireEvent.click(screen.getByText('Բarев'));
+    fireEvent.click(screen.getByText('Բարև'));
     act(() => { vi.advanceTimersByTime(800); });
 
     // Q2 correct
@@ -91,7 +91,7 @@ describe('QuizContainer', () => {
   it('shows passed result screen when score >= 70%', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
 
-    fireEvent.click(screen.getByText('Բarев')); // correct
+    fireEvent.click(screen.getByText('Բարև')); // correct
     act(() => { vi.advanceTimersByTime(800); });
     fireEvent.click(screen.getByText('Хорошо')); // correct
     act(() => { vi.advanceTimersByTime(800); });
@@ -105,7 +105,7 @@ describe('QuizContainer', () => {
   it('shows failed result screen when score < 70%', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
 
-    fireEvent.click(screen.getByText('Ողджуйн')); // wrong
+    fireEvent.click(screen.getByText('Ողջույն')); // wrong
     act(() => { vi.advanceTimersByTime(800); });
     fireEvent.click(screen.getByText('Плохо')); // wrong
     act(() => { vi.advanceTimersByTime(800); });
@@ -118,7 +118,7 @@ describe('QuizContainer', () => {
   it('resets and shows first question after retry', () => {
     render(<QuizContainer quiz={QUIZ} onComplete={vi.fn()} />);
 
-    fireEvent.click(screen.getByText('Ողджуйн')); // wrong
+    fireEvent.click(screen.getByText('Ողջույն')); // wrong
     act(() => { vi.advanceTimersByTime(800); });
     fireEvent.click(screen.getByText('Плохо')); // wrong
     act(() => { vi.advanceTimersByTime(800); });

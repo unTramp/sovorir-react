@@ -69,7 +69,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
       return <p className="lesson-text">{block.content}</p>;
     case 'phrase':
     case 'phraseCard':
-      return <PhraseCard block={block} />;
+      return <PhraseCard block={block} audioId={`phrase-${sectionId ?? 'section'}-${index}`} />;
     case 'audioExample':
       return <LessonAudioCard block={block} index={index} />;
     case 'multipleChoice':

@@ -47,10 +47,22 @@ function stop(id: string) {
   playStartOffset = 0;
   cancelAnimationFrame(activeRaf);
   useAudioStore.getState().resetProgress(id);
+  if (useAudioStore.getState().loadingId === id) {
+    useAudioStore.getState().setLoadingId(null);
+  }
 }
 
 function togglePlay(id: string, src: string, duration?: number) {
-  const { playingId, playbackRate, isLooping, setPlayingId } = useAudioStore.getState();
+  const {
+    playingId,
+    playbackRate,
+    isLooping,
+    setPlayingId,
+    setLoadingId,
+    setErrorId,
+  } = useAudioStore.getState();
+
+  setErrorId(null);
 
   // Same sound — toggle pause/resume
   if (playingId === id) {
@@ -65,6 +77,7 @@ function togglePlay(id: string, src: string, duration?: number) {
         isActive = false;
         cancelAnimationFrame(activeRaf);
         setPlayingId(null);
+        setLoadingId(null);
       } else {
         howl.rate(playbackRate);
         howl.play();
@@ -95,20 +108,33 @@ function togglePlay(id: string, src: string, duration?: number) {
     playStartOffset = 0;
     cancelAnimationFrame(activeRaf);
     useAudioStore.getState().setPlayingId(null);
+    useAudioStore.getState().setLoadingId(null);
     useAudioStore.getState().resetProgress(id);
   };
 
   let howl = howlCache.get(id);
   if (!howl) {
+    setLoadingId(id);
     howl = new Howl({
       src: [src],
       format: ['opus'],
       rate: playbackRate,
       loop: isLooping,
+      onload: () => useAudioStore.getState().setLoadingId(null),
+      onplay: () => useAudioStore.getState().setLoadingId(null),
       onend: onEnd,
-      onloaderror: () => console.warn('Audio load error for', id),
+      onloaderror: () => {
+        isActive = false;
+        cancelAnimationFrame(activeRaf);
+        useAudioStore.getState().setPlayingId(null);
+        useAudioStore.getState().setLoadingId(null);
+        useAudioStore.getState().setErrorId(id);
+        console.warn('Audio load error for', id);
+      },
     });
     howlCache.set(id, howl);
+  } else {
+    setLoadingId(null);
   }
 
   howl.rate(playbackRate);
@@ -120,6 +146,8 @@ function togglePlay(id: string, src: string, duration?: number) {
 
 export function useAudioPlayer() {
   const playingId = useAudioStore((s) => s.playingId);
+  const loadingId = useAudioStore((s) => s.loadingId);
+  const errorId = useAudioStore((s) => s.errorId);
   const playbackRate = useAudioStore((s) => s.playbackRate);
   const isLooping = useAudioStore((s) => s.isLooping);
 
@@ -141,5 +169,5 @@ export function useAudioPlayer() {
     return () => cancelAnimationFrame(activeRaf);
   }, []);
 
-  return { togglePlay, playingId };
+  return { togglePlay, playingId, loadingId, errorId };
 }

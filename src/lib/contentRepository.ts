@@ -419,11 +419,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getLessonSections());
     }
-    try {
-      return await this.apiRepository.getLessonSections();
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getLessonSections());
-    }
+    return this.apiRepository.getLessonSections();
   }
 
   getDictionary() {
@@ -434,11 +430,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getQuizForSection(sectionId));
     }
-    try {
-      return await this.apiRepository.getQuizForSection(sectionId);
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getQuizForSection(sectionId));
-    }
+    return this.apiRepository.getQuizForSection(sectionId);
   }
 
   getLiveLessons() {
@@ -457,11 +449,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getLessons());
     }
-    try {
-      return await this.apiRepository.getLessons();
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getLessons());
-    }
+    return this.apiRepository.getLessons();
   }
 }
 

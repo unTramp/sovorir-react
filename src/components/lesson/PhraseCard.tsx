@@ -1,43 +1,36 @@
+import { PauseIcon, PlayIcon } from '../../icons';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
+import { useAudioStore } from '../../stores/useAudioStore';
 import type { PhraseBlock, PhraseCardBlock } from '../../types/lessonContent';
-
-const WORD_STATUS_LABELS: Record<NonNullable<PhraseBlock['status']>, string> = {
-  new: 'Новое',
-  learned: 'Изучено',
-  review: 'Повтор',
-};
-
-function SpeakerIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="btn-bg" cx="35%" cy="28%" r="70%">
-          <stop offset="0%" stopColor="#F8EFEA"/>
-          <stop offset="100%" stopColor="#D9C8BE"/>
-        </radialGradient>
-      </defs>
-      <rect width="48" height="48" rx="24" fill="url(#btn-bg)"/>
-      <path d="M26 32.75V30.7C27.5 30.2667 28.7083 29.4333 29.625 28.2C30.5417 26.9667 31 25.5667 31 24C31 22.4333 30.5417 21.0333 29.625 19.8C28.7083 18.5667 27.5 17.7333 26 17.3V15.25C28.0667 15.7167 29.75 16.7625 31.05 18.3875C32.35 20.0125 33 21.8833 33 24C33 26.1167 32.35 27.9875 31.05 29.6125C29.75 31.2375 28.0667 32.2833 26 32.75V32.75M15 27.025V21.025H19L24 16.025V32.025L19 27.025H15V27.025M26 28.025V19.975C26.7833 20.3417 27.3958 20.8917 27.8375 21.625C28.2792 22.3583 28.5 23.1583 28.5 24.025C28.5 24.875 28.2792 25.6625 27.8375 26.3875C27.3958 27.1125 26.7833 27.6583 26 28.025V28.025M22 20.875L19.85 23.025H17V25.025H19.85L22 27.175V20.875V20.875M19.5 24.025V24.025V24.025V24.025V24.025V24.025V24.025V24.025" fill="#8D4A2A"/>
-    </svg>
-  );
-}
 
 interface Props {
   block: PhraseBlock | PhraseCardBlock;
+  audioId: string;
+  grouped?: boolean;
 }
 
-export function PhraseCard({ block }: Props) {
-  const { togglePlay } = useAudioPlayer();
-  const msgId = `phrase-${block.armenian}`;
-  const status = block.status ?? 'new';
+export function PhraseCard({ block, audioId, grouped = false }: Props) {
+  const { togglePlay, playingId, loadingId, errorId } = useAudioPlayer();
+  const progress = useAudioStore((state) => state.progress[audioId] || 0);
+  const isPlaying = playingId === audioId;
+  const isLoading = loadingId === audioId;
+  const hasError = errorId === audioId;
+  const hasAudio = Boolean(block.audioSrc);
+
+  const audioLabel = !hasAudio
+    ? `Аудио для ${block.armenian} пока недоступно`
+    : hasError
+      ? `Повторить загрузку произношения ${block.armenian}`
+      : isLoading
+        ? `Загружается произношение ${block.armenian}`
+        : isPlaying
+          ? `Поставить произношение ${block.armenian} на паузу`
+          : `Прослушать произношение ${block.armenian}`;
 
   return (
-    <div className={`word-card word-card--${status}`}>
+    <div className={`word-card${grouped ? ' word-card--grouped' : ''}${isPlaying ? ' word-card--playing' : ''}`}>
       <div className="word-card__info">
-        <div className="word-card__header">
-          <span className="word-card__armenian" lang="hy">{block.armenian}</span>
-          <span className="word-card__badge">{WORD_STATUS_LABELS[status]}</span>
-        </div>
+        <span className="word-card__armenian" lang="hy">{block.armenian}</span>
         <div className="word-card__meta">
           <span className="word-card__transcription">{block.transcription}</span>
           <span className="word-card__dot" aria-hidden="true" />
@@ -48,11 +41,27 @@ export function PhraseCard({ block }: Props) {
         )}
       </div>
       <button
-        className="word-card__audio-btn"
-        aria-label="Прослушать произношение"
-        onClick={() => block.audioSrc && togglePlay(msgId, block.audioSrc)}
+        className={`word-card__audio-btn${isPlaying ? ' is-playing' : ''}${isLoading ? ' is-loading' : ''}${hasError ? ' has-error' : ''}`}
+        type="button"
+        aria-label={audioLabel}
+        aria-pressed={isPlaying}
+        disabled={!hasAudio || isLoading}
+        onClick={() => block.audioSrc && togglePlay(audioId, block.audioSrc)}
       >
-        <SpeakerIcon />
+        <svg className="word-card__audio-progress" viewBox="0 0 44 44" aria-hidden="true">
+          <circle className="word-card__audio-track" cx="22" cy="22" r="20" pathLength="1" />
+          <circle
+            className="word-card__audio-value"
+            cx="22"
+            cy="22"
+            r="20"
+            pathLength="1"
+            style={{ strokeDashoffset: 1 - progress }}
+          />
+        </svg>
+        <span className="word-card__audio-icon" aria-hidden="true">
+          {isLoading ? <span className="word-card__audio-spinner" /> : hasError ? '!' : isPlaying ? <PauseIcon size={17} /> : <PlayIcon size={18} />}
+        </span>
       </button>
     </div>
   );

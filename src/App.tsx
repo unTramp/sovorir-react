@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { LoginView } from './components/auth/LoginView';
@@ -13,14 +13,10 @@ const LessonView            = lazy(() => import('./components/center/LessonView'
 const PracticeView          = lazy(() => import('./components/center/PracticeView').then(m => ({ default: m.PracticeView })));
 const DictionaryView        = lazy(() => import('./components/center/DictionaryView').then(m => ({ default: m.DictionaryView })));
 const NotesView             = lazy(() => import('./components/center/NotesView').then(m => ({ default: m.NotesView })));
-const LiveLessonsView       = lazy(() => import('./components/center/LiveLessonsView').then(m => ({ default: m.LiveLessonsView })));
-const StatisticsView        = lazy(() => import('./components/center/StatisticsView').then(m => ({ default: m.StatisticsView })));
 const SettingsView          = lazy(() => import('./components/center/SettingsView').then(m => ({ default: m.SettingsView })));
-const AudioMobileView       = lazy(() => import('./components/center/AudioMobileView').then(m => ({ default: m.AudioMobileView })));
 const TeacherDashboardView  = lazy(() => import('./components/center/TeacherDashboardView').then(m => ({ default: m.TeacherDashboardView })));
 const AssignmentsView       = lazy(() => import('./components/center/AssignmentsView').then(m => ({ default: m.AssignmentsView })));
 const ReviewQueueView       = lazy(() => import('./components/center/ReviewQueueView').then(m => ({ default: m.ReviewQueueView })));
-const ConsultationsView     = lazy(() => import('./components/center/ConsultationsView').then(m => ({ default: m.ConsultationsView })));
 
 function ViewFallback() {
   return (
@@ -68,20 +64,15 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<AppShell />}>
           <Route index element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
-          <Route path="lesson"      element={<Suspense fallback={<ViewFallback />}><LessonView /></Suspense>} />
-          <Route path="practice"    element={<Suspense fallback={<ViewFallback />}><PracticeView /></Suspense>} />
-          <Route path="dictionary"  element={<Suspense fallback={<ViewFallback />}><DictionaryView /></Suspense>} />
-          <Route path="notes"       element={<Suspense fallback={<ViewFallback />}><NotesView /></Suspense>} />
-          <Route path="live-lessons"element={<Suspense fallback={<ViewFallback />}><LiveLessonsView /></Suspense>} />
-          <Route path="statistics"  element={<Suspense fallback={<ViewFallback />}><StatisticsView /></Suspense>} />
+          <Route path="lesson"      element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><LessonView /></Suspense></RoleRoute>} />
+          <Route path="practice"    element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><PracticeView /></Suspense></RoleRoute>} />
+          <Route path="dictionary"  element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><DictionaryView /></Suspense></RoleRoute>} />
+          <Route path="notes"       element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><NotesView /></Suspense></RoleRoute>} />
           <Route path="settings"    element={<Suspense fallback={<ViewFallback />}><SettingsView /></Suspense>} />
-          <Route path="audio"       element={<Suspense fallback={<ViewFallback />}><AudioMobileView /></Suspense>} />
-          <Route path="video"       element={<Suspense fallback={<ViewFallback />}><HomeView /></Suspense>} />
           <Route path="teacher"      element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
-          <Route path="students"     element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><TeacherDashboardView /></Suspense></RoleRoute>} />
-          <Route path="assignments"   element={<Suspense fallback={<ViewFallback />}><AssignmentsView /></Suspense>} />
+          <Route path="assignments"   element={<RoleRoute allow={['student']}><Suspense fallback={<ViewFallback />}><AssignmentsView /></Suspense></RoleRoute>} />
           <Route path="review-queue"    element={<RoleRoute allow={['teacher', 'admin']}><Suspense fallback={<ViewFallback />}><ReviewQueueView /></Suspense></RoleRoute>} />
-          <Route path="consultations"   element={<Suspense fallback={<ViewFallback />}><ConsultationsView /></Suspense>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </ErrorBoundary>

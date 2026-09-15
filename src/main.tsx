@@ -41,10 +41,10 @@ void (async () => {
   // Wait for auth to be available (tokens may be in localStorage already)
   await new Promise<void>((resolve) => {
     const unsub = useAuthStore.subscribe((s) => {
-      if (s.accessToken) { unsub(); resolve(); }
+      if (s.authReady && s.profile) { unsub(); resolve(); }
     });
     // Also resolve immediately if already authenticated
-    if (useAuthStore.getState().accessToken) { unsub(); resolve(); }
+    if (useAuthStore.getState().authReady && useAuthStore.getState().profile) { unsub(); resolve(); }
     // Timeout safety — give up after 10s
     setTimeout(resolve, 10_000);
   });

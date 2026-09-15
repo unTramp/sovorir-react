@@ -1,7 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAssignmentStore } from '../../stores/useAssignmentStore';
-import { useMediaRecorder } from '../../hooks/useMediaRecorder';
-import { AudioLevelMeter } from '../audio/AudioLevelMeter';
 import type { Assignment } from '../../types/assignment';
 
 interface Props {
@@ -11,29 +9,19 @@ interface Props {
 
 export function SubmitModal({ assignment, onClose }: Props) {
   const [textContent, setTextContent] = useState('');
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const submitAssignment = useAssignmentStore((s) => s.submitAssignment);
-  const { start, stop, isRecording, audioBlob: recBlob, audioLevel, duration, error: recError } = useMediaRecorder();
-
-  useEffect(() => {
-    if (recBlob) setAudioBlob(recBlob);
-  }, [recBlob]);
-
-  const canSubmit = (textContent.trim().length > 0 || audioBlob !== null) && !isSubmitting;
+  const canSubmit = textContent.trim().length > 0 && !isSubmitting;
 
   const handleSubmit = useCallback(async () => {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      // In production: upload audioBlob to R2 first, get audioUrl
-      // For now: pass null for audioUrl (mock accepts it)
       await submitAssignment(assignment.id, {
         textContent: textContent.trim() || undefined,
-        audioUrl: undefined,
       });
       setSubmitted(true);
     } catch {
@@ -66,42 +54,15 @@ export function SubmitModal({ assignment, onClose }: Props) {
               <p className="submit-modal__desc">{assignment.description}</p>
             )}
 
-            <label className="submit-modal__label">Ваш ответ</label>
+            <label className="submit-modal__label" htmlFor="assignment-answer">Ваш ответ</label>
             <textarea
+              id="assignment-answer"
               className="submit-modal__textarea"
               placeholder="Напишите ответ..."
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
               rows={4}
             />
-
-            <div className="submit-modal__record-section">
-              <label className="submit-modal__label">Или запишите голос</label>
-              {recError && <p className="submit-modal__error">{recError}</p>}
-              {isRecording && <AudioLevelMeter level={audioLevel} />}
-              <div className="submit-modal__record-row">
-                {isRecording ? (
-                  <button
-                    className="submit-modal__rec-btn submit-modal__rec-btn--active"
-                    onMouseUp={() => stop()}
-                    onTouchEnd={(e) => { e.preventDefault(); stop(); }}
-                  >
-                    <span className="submit-modal__pulse" /> {duration}с — отпустите
-                  </button>
-                ) : (
-                  <button
-                    className="submit-modal__rec-btn"
-                    onMouseDown={() => void start()}
-                    onTouchStart={(e) => { e.preventDefault(); void start(); }}
-                  >
-                    🎤 Удерживайте для записи
-                  </button>
-                )}
-                {audioBlob && !isRecording && (
-                  <span className="submit-modal__rec-done">✓ Запись готова</span>
-                )}
-              </div>
-            </div>
 
             {submitError && <p className="submit-modal__error">{submitError}</p>}
 

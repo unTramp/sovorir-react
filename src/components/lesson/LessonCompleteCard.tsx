@@ -25,10 +25,7 @@ export function LessonCompleteCard() {
     contentRepository.getQuizForSection(currentSection).then(setQuiz);
   }, [currentSection]);
 
-  const section = allSections.find((item) => item.id === currentSection);
   const nextSectionData = allSections.find((item) => item.id === currentSection + 1);
-
-  const currentHeading = section?.blocks.find((b) => b.type === 'heading');
 
   const nextHeading = nextSectionData?.blocks.find((b) => b.type === 'heading');
   const nextSectionTitle = nextSectionData?.title ?? (nextHeading?.type === 'heading' ? nextHeading.text : '');
@@ -44,38 +41,33 @@ export function LessonCompleteCard() {
   const handleContinue = useCallback(() => {
     completeSection(currentSection);
     if (!isLastSection) {
+      const nextSectionNumber = currentSection + 1;
       nextSection();
+      navigate(`/lesson?section=${nextSectionNumber}`);
     }
-  }, [completeSection, currentSection, isLastSection, nextSection]);
+  }, [completeSection, currentSection, isLastSection, navigate, nextSection]);
 
-  const actionLabel = isLastSection
-    ? (isCurrentSectionDone ? 'Урок завершён' : 'Завершить урок')
-    : needsQuiz
-      ? 'Пройдите тест'
-      : 'Следующая секция';
+  const actionLabel = isCurrentSectionDone ? 'На главную' : 'Завершить урок';
 
   return (
     <>
-      <div className="lesson-complete">
-        <div className="lesson-complete__title">
-          {section?.title ?? (currentHeading?.type === 'heading' ? currentHeading.text : 'Секция завершена')}
+      {quiz && (
+        <div className="mt-4">
+          <QuizContainer quiz={quiz} onComplete={handleQuizComplete} />
         </div>
-        <div className="lesson-complete__summary">
-          {isLastSection
-            ? 'Это последняя секция урока.'
-            : `Дальше: ${nextSectionTitle.toLowerCase() || 'следующая секция'}.`}
-        </div>
-        {!isLastSection && nextSectionTitle && (
-          <div className="lesson-complete__next-hint">
-            <img
-              src="/assets/teacher-avatar.png"
-              className="lesson-complete__avatar"
-              alt="Лусине"
-            />
-            <span>Продолжить к: {nextSectionTitle.toLowerCase()}?</span>
+      )}
+
+      {isLastSection ? (
+        <div className={`lesson-complete${isCurrentSectionDone ? ' lesson-complete--done' : ''}`}>
+          <div className="lesson-complete__title">
+            {isCurrentSectionDone ? 'Урок завершён!' : 'Последний шаг'}
           </div>
-        )}
-        {isLastSection && isCurrentSectionDone ? (
+          <div className="lesson-complete__summary">
+            {isCurrentSectionDone
+              ? 'Отличная работа — вы стали ещё немного увереннее говорить по-армянски.'
+              : 'Когда будете готовы, завершите урок.'}
+          </div>
+          {isCurrentSectionDone ? (
           <button
             className="lesson-complete__btn"
             onClick={() => {
@@ -93,7 +85,7 @@ export function LessonCompleteCard() {
           >
             На главную
           </button>
-        ) : (
+          ) : (
           <button
             className="lesson-complete__btn"
             onClick={needsQuiz ? undefined : handleContinue}
@@ -101,11 +93,24 @@ export function LessonCompleteCard() {
           >
             {actionLabel}
           </button>
-        )}
-      </div>
-      {quiz && (
-        <div className="mt-4">
-          <QuizContainer quiz={quiz} onComplete={handleQuizComplete} />
+          )}
+        </div>
+      ) : (
+        <div className="lesson-next">
+          <div className="lesson-next__content">
+            <span className="lesson-next__eyebrow">Дальше</span>
+            <span className="lesson-next__title">
+              {nextSectionTitle || 'Следующий шаг'}
+            </span>
+          </div>
+          <button
+            className="lesson-next__btn"
+            onClick={needsQuiz ? undefined : handleContinue}
+            disabled={needsQuiz}
+          >
+            <span>{needsQuiz ? 'Сначала ответьте' : 'Продолжить'}</span>
+            {!needsQuiz && <span aria-hidden="true">→</span>}
+          </button>
         </div>
       )}
     </>

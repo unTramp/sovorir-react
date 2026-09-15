@@ -25,7 +25,8 @@ function generateBars(seed: string, count: number): number[] {
     const dist = Math.abs(i - center) / center;
     const base = (1 - dist * 0.5) * 22;
     const variation = (rng() - 0.5) * 14;
-    result.push(Math.max(3, Math.min(30, Math.round(base + variation))));
+    // Keep enough headroom for the live animation so neither half is clipped.
+    result.push(Math.max(4, Math.min(26, Math.round(base + variation))));
   }
   return result;
 }

@@ -1,7 +1,6 @@
 import { useAppStore } from '../../stores/useAppStore';
 import { DrawerProfile } from './DrawerProfile';
 import { DrawerNav } from './DrawerNav';
-import { DrawerUpgrade } from './DrawerUpgrade';
 
 export function FloatingDrawer() {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
@@ -16,7 +15,6 @@ export function FloatingDrawer() {
       <div className="floating-drawer__scroll">
         <DrawerNav />
       </div>
-      <DrawerUpgrade />
     </div>
   );
 }

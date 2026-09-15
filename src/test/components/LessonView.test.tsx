@@ -1,5 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LessonView } from '../../components/center/LessonView';
 import { useLessonStore } from '../../stores/useLessonStore';
@@ -33,6 +33,14 @@ vi.mock('../../lib/apiClient', () => ({
   isMockApiEnabled: false,
 }));
 
+vi.mock('../../hooks/useLessonCatalog', () => ({
+  useLessonCatalog: () => ({
+    currentLesson: null,
+    allCompleted: false,
+    hasLoaded: false,
+  }),
+}));
+
 // Mock BlockRenderer to avoid deep rendering of lesson content
 vi.mock('../../components/lesson/BlockRenderer', () => ({
   BlockRenderer: ({ block }: { block: { type: string } }) => (
@@ -42,6 +50,10 @@ vi.mock('../../components/lesson/BlockRenderer', () => ({
 
 vi.mock('../../components/lesson/StickyRecordCTA', () => ({
   StickyRecordCTA: () => null,
+}));
+
+vi.mock('../../components/lesson/LessonCompleteCard', () => ({
+  LessonCompleteCard: () => null,
 }));
 
 const MOCK_SECTIONS: LessonContentSection[] = [
@@ -56,7 +68,7 @@ const MOCK_SECTIONS: LessonContentSection[] = [
     title: 'Словарь',
     type: 'vocabulary',
     blocks: [
-      { type: 'phrase', russian: 'Привет', armenian: 'Բarев', transcription: 'barev', translation: 'Привет', status: 'new' },
+      { type: 'phrase', russian: 'Привет', armenian: 'Բարև', transcription: 'barev', translation: 'Привет', status: 'new' },
     ],
   },
   {
@@ -77,7 +89,7 @@ function renderLesson(initialEntry = '/lesson') {
 
 beforeEach(() => {
   useLessonStore.setState({ currentSection: 1, totalSections: 3, isFullscreen: false });
-  useLessonSectionsStore.setState({ sections: MOCK_SECTIONS });
+  useLessonSectionsStore.setState({ sections: MOCK_SECTIONS, isLoading: false, error: null });
   useLessonProgress.setState({ sections: {} });
 });
 
@@ -86,12 +98,11 @@ afterEach(() => {
 });
 
 describe('LessonView', () => {
-  it('renders lesson tabs', () => {
+  it('renders a single linear lesson flow without content tabs', () => {
     renderLesson();
-    expect(screen.getByText('Материалы')).toBeInTheDocument();
-    expect(screen.getByText('Словарь')).toBeInTheDocument();
-    expect(screen.getByText('Аудио')).toBeInTheDocument();
-    expect(screen.getByText('Видео')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Введение' })).toBeInTheDocument();
+    expect(screen.queryByText('Шаг 1 из 3')).not.toBeInTheDocument();
+    expect(screen.queryByText('Материалы')).not.toBeInTheDocument();
   });
 
   it('shows section 1 content by default', () => {
@@ -102,14 +113,8 @@ describe('LessonView', () => {
   it('shows section 2 content when currentSection is 2', () => {
     useLessonStore.setState({ currentSection: 2, totalSections: 3 });
     renderLesson();
-    expect(screen.getByTestId('block-phrase')).toBeInTheDocument();
-  });
-
-  it('switches between tabs', () => {
-    renderLesson();
-    fireEvent.click(screen.getByText('Словарь'));
-    // Dictionary tab shows phrase blocks only — block-heading not visible
-    expect(screen.queryByTestId('block-heading')).not.toBeInTheDocument();
+    expect(screen.getByText('Բարև')).toBeInTheDocument();
+    expect(screen.getByLabelText('Фразы для изучения')).toBeInTheDocument();
   });
 
   it('respects ?section= query param', () => {
@@ -124,9 +129,10 @@ describe('LessonView', () => {
     expect(useLessonStore.getState().totalSections).toBe(3);
   });
 
-  it('renders "Секция не найдена" when section is out of range', () => {
+  it('bounds an out-of-range section to the last available step', () => {
     useLessonStore.setState({ currentSection: 99, totalSections: 3 });
     renderLesson();
-    expect(screen.getByText('Секция не найдена')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Практика' })).toBeInTheDocument();
+    expect(useLessonStore.getState().currentSection).toBe(3);
   });
 });

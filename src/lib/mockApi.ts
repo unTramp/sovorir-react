@@ -132,7 +132,7 @@ const MOCK_ASSIGNMENTS: Assignment[] = [
     id: 'asgn-1',
     sectionId: 'section-1',
     title: 'Запишите приветствие',
-    description: 'Произнесите «Բarев» и «Bарев Ձes» — запишите голос или напишите транскрипцию.',
+    description: 'Напишите транскрипцию приветствий «Բարև» и «Բարև ձեզ».',
     dueAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: new Date().toISOString(),
   },
@@ -225,7 +225,7 @@ function createTokens(userId: string): RefreshResponse {
 
 function extractUserFromToken(token: string | null): MockUser | undefined {
   if (!token?.startsWith('mock-access:')) return undefined;
-  const [, , userId] = token.split(':');
+  const [, userId] = token.split(':');
   return getUserById(userId);
 }
 

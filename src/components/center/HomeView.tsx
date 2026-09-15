@@ -32,8 +32,13 @@ const PRACTICE_ITEMS: { label: string; sub: string; emoji: string; view: Section
 
 export function HomeView() {
   const role = useAuthStore((s) => s.profile?.role);
-  if (role === 'teacher' || role === 'admin') return <TeacherDashboardView />;
 
+  return role === 'teacher' || role === 'admin'
+    ? <TeacherDashboardView />
+    : <StudentHomeView />;
+}
+
+function StudentHomeView() {
   const navigate = useNavigate();
   const streak = useStreakStore((s) => s.currentStreak);
   const practiceDates = useStreakStore((s) => s.practiceDates);
@@ -44,12 +49,10 @@ export function HomeView() {
   const weekDays = useMemo(() => getWeekDays(), []);
   const latestNote = teacherNotes[0];
 
-  const { totalSections, completedSections, completedPct, stepsLeft } = useMemo(() => {
+  const { completedPct, stepsLeft } = useMemo(() => {
     const total = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
     const completed = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video' && s.status === 'completed').length : 0;
     return {
-      totalSections: total,
-      completedSections: completed,
       completedPct: total > 0 ? Math.round((completed / total) * 100) : 0,
       stepsLeft: total - completed,
     };

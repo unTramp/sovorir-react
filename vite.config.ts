@@ -8,6 +8,10 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    env: {
+      VITE_USE_MOCK_API: 'true',
+      VITE_API_URL: 'http://localhost:3000',
+    },
   },
   plugins: [
     react(),
@@ -88,7 +92,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\.(?:mp3|wav|ogg)$/i,
+            urlPattern: /\.(?:mp3|wav|ogg|opus)$/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'audio-cache',

@@ -15,7 +15,26 @@ export function DrawerProfile() {
   const firstName = useAuthStore((s) => s.firstName);
   const lastName = useAuthStore((s) => s.lastName);
   const avatarUrl = useAuthStore((s) => s.avatarUrl);
+  const role = useAuthStore((s) => s.profile?.role);
   const { lessons } = useLessonCatalog();
+
+  if (role === 'teacher' || role === 'admin') {
+    return (
+      <div className="drawer-profile">
+        <div className="flex items-center gap-4">
+          <div className="drawer-profile__avatar">
+            <img src={avatarUrl} alt={`${firstName} ${lastName}`} className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="drawer-profile__name truncate">{firstName} {lastName}</div>
+            <div className="drawer-profile__meta">
+              {role === 'admin' ? 'Администратор' : 'Преподаватель'}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const xp = lessons
     .flatMap((l) => l.sections)

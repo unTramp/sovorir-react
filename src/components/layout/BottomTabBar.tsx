@@ -1,13 +1,10 @@
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 import {
   HouseIcon,
   BookOpenIcon,
-  ZapIcon,
   SettingsGearIcon,
   ClipboardIcon,
-  UsersIcon,
-  BarChartIcon,
 } from '../../icons';
 
 type TabConfig = { label: string; path: string; icon: React.ComponentType<{ size?: number }> };
@@ -21,15 +18,12 @@ const STUDENT_TABS: TabConfig[] = [
 
 const TEACHER_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Задания',   path: '/teacher',   icon: ClipboardIcon },
-  { label: 'Студенты',  path: '/students',  icon: UsersIcon },
+  { label: 'Проверка',  path: '/review-queue', icon: ClipboardIcon },
   { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
 ];
 
 const ADMIN_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Уроки',     path: '/lesson',    icon: BookOpenIcon },
-  { label: 'Аналитика', path: '/statistics',icon: BarChartIcon },
   { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
 ];
 
@@ -52,7 +46,10 @@ function Tab({ label, path, icon: Icon }: TabConfig) {
 
 export function BottomTabBar() {
   const role = useAuthStore((s) => s.profile?.role);
+  const location = useLocation();
   const tabs = role === 'teacher' ? TEACHER_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+
+  if (location.pathname === '/lesson') return null;
 
   return (
     <nav className="bottom-tab-bar">

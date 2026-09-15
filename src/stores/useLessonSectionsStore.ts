@@ -6,18 +6,28 @@ import type { LessonContentSection } from '../types/lessonContent';
 
 interface LessonSectionsState {
   sections: LessonContentSection[];
-  reload: () => void;
+  isLoading: boolean;
+  error: string | null;
+  reload: (invalidate?: boolean) => void;
 }
 
 export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
   sections: [],
+  isLoading: true,
+  error: null,
 
   reload: (invalidate = false) => {
     if (invalidate) apiContentRepository.invalidate();
-    void contentRepository.getLessonSections().then((sections) => {
-      set({ sections });
-      syncLessonSectionsCache(sections); // keep useLessonProgress._lessonSections in sync
-    });
+    set({ isLoading: true, error: null });
+    void contentRepository.getLessonSections()
+      .then((sections) => {
+        set({ sections, isLoading: false });
+        syncLessonSectionsCache(sections); // keep useLessonProgress._lessonSections in sync
+      })
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : 'Не удалось загрузить урок';
+        set({ sections: [], isLoading: false, error: message });
+      });
   },
 }));
 

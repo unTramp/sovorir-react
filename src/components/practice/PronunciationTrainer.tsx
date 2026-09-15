@@ -22,28 +22,31 @@ export function PronunciationTrainer() {
   const [recordingId, setRecordingId] = useState<string | null>(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
-  const { start, stop, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
+  const { start, stop, reset, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
   const saveRecording = useRecordingStore((s) => s.saveRecording);
   const getRecordingUrl = useRecordingStore((s) => s.getRecordingUrl);
 
   const word = dictionary[wordIndex];
   const total = dictionary.length;
 
-  // Reset playback on word change
-  useEffect(() => {
+  const resetPlayback = useCallback(() => {
     setPlaybackUrl(null);
     setRecordingId(null);
-  }, [wordIndex]);
+    setRecordingDuration(0);
+    reset();
+  }, [reset]);
 
   // Save recording when blob is ready
   useEffect(() => {
     if (!audioBlob) return;
     const id = `trainer-${wordIndex}-${word.id}-${Date.now()}`;
-    setRecordingDuration(duration);
     void saveRecording(
       { id, sectionId: TRAINER_SECTION_ID, recordIndex: wordIndex, duration, createdAt: Date.now() },
       audioBlob,
-    ).then(() => setRecordingId(id));
+    ).then(() => {
+      setRecordingDuration(duration);
+      setRecordingId(id);
+    });
   }, [audioBlob, duration, saveRecording, word.id, wordIndex]);
 
   // Load playback URL when recording is saved
@@ -65,8 +68,14 @@ export function PronunciationTrainer() {
   const handleStart = useCallback(() => void start(), [start]);
   const handleStop = useCallback(() => stop(), [stop]);
 
-  const goNext = () => setWordIndex((i) => Math.min(i + 1, total - 1));
-  const goPrev = () => setWordIndex((i) => Math.max(i - 1, 0));
+  const goNext = () => {
+    resetPlayback();
+    setWordIndex((i) => Math.min(i + 1, total - 1));
+  };
+  const goPrev = () => {
+    resetPlayback();
+    setWordIndex((i) => Math.max(i - 1, 0));
+  };
 
   return (
     <div className="trainer">

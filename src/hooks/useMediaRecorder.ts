@@ -3,6 +3,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 interface UseMediaRecorderResult {
   start: () => Promise<void>;
   stop: () => void;
+  reset: () => void;
   isRecording: boolean;
   audioBlob: Blob | null;
   audioLevel: number;
@@ -104,6 +105,12 @@ export function useMediaRecorder(): UseMediaRecorderResult {
     setAudioLevel(0);
   }, []);
 
+  const reset = useCallback(() => {
+    setAudioBlob(null);
+    setDuration(0);
+    setError(null);
+  }, []);
+
   useEffect(() => {
     return () => {
       cancelAnimationFrame(rafRef.current);
@@ -116,5 +123,5 @@ export function useMediaRecorder(): UseMediaRecorderResult {
     };
   }, []);
 
-  return { start, stop, isRecording, audioBlob, audioLevel, error, duration };
+  return { start, stop, reset, isRecording, audioBlob, audioLevel, error, duration };
 }
