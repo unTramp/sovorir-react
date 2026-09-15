@@ -7,6 +7,8 @@ import { LessonVideoBubble } from './LessonVideoBubble';
 import { RecordPrompt } from './RecordPrompt';
 import { LessonAudioCard } from './LessonAudioCard';
 import { MultipleChoiceCard } from '../quiz/MultipleChoiceCard';
+import { MiniDialogue } from './MiniDialogue';
+import { ActiveRecall } from './ActiveRecall';
 
 interface Props {
   block: ContentBlock;
@@ -108,5 +110,9 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
           recordIndex={recordIndex}
         />
       );
+    case 'dialogue':
+      return <MiniDialogue block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
+    case 'activeRecall':
+      return <ActiveRecall block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
   }
 }

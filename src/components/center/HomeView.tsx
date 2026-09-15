@@ -8,6 +8,7 @@ import { BookOpenIcon, BrainIcon, FlameIcon } from '../../icons';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { TeacherDashboardView } from './TeacherDashboardView';
+import { useFlashcardStore } from '../../stores/useFlashcardStore';
 
 function CheckIcon() {
   return (
@@ -25,9 +26,9 @@ function PlayIcon() {
   );
 }
 
-const PRACTICE_ITEMS: { label: string; sub: string; icon: React.ComponentType<{ size?: number }>; view: SectionType; xp: number; iconBg: string }[] = [
-  { label: 'Карточки', sub: 'Повтори слова за 2 минуты', icon: BookOpenIcon, view: 'practice', xp: 15, iconBg: '#FFDBCD' },
-  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', icon: BrainIcon, view: 'lesson', xp: 20, iconBg: '#ECE0DA' },
+const PRACTICE_ITEMS: { label: string; sub: string; icon: React.ComponentType<{ size?: number }>; view: SectionType; iconBg: string }[] = [
+  { label: 'Повторение', sub: 'Фразы вернутся в нужный день', icon: BookOpenIcon, view: 'practice', iconBg: 'rgb(var(--color-primary-rgb) / 0.12)' },
+  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', icon: BrainIcon, view: 'lesson', iconBg: 'var(--color-bg-surface)' },
 ];
 
 export function HomeView() {
@@ -44,6 +45,7 @@ function StudentHomeView() {
   const practiceDates = useStreakStore((s) => s.practiceDates);
   const firstName = useAuthStore((s) => s.firstName);
   const { currentLesson, allCompleted } = useLessonCatalog();
+  const dueCount = useFlashcardStore((s) => s.getDueCount());
 
   const today = todayISO();
   const weekDays = useMemo(() => getWeekDays(), []);
@@ -118,16 +120,15 @@ function StudentHomeView() {
       <div className="home-section">
         <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
-          {PRACTICE_ITEMS.map((item) => (
+          {PRACTICE_ITEMS.map((item, index) => (
             <button key={item.label} className="home-daily-item surface-card--interactive" onClick={() => navigate(`/${item.view}`)}>
               <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
                 <item.icon size={21} />
               </div>
               <div className="home-daily-item__body">
                 <div className="home-daily-item__name">{item.label}</div>
-                <div className="home-daily-item__sub">{item.sub}</div>
+                <div className="home-daily-item__sub">{index === 0 && dueCount > 0 ? `${dueCount} ${dueCount === 1 ? 'фраза' : 'фраз'} · около 2 минут` : item.sub}</div>
               </div>
-              <div className="home-daily-item__xp">+{item.xp} XP</div>
             </button>
           ))}
         </div>

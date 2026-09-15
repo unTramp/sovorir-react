@@ -118,7 +118,7 @@ describe('HomeView', () => {
 
   it('renders practice items', () => {
     renderHome();
-    expect(screen.getByText('Карточки')).toBeInTheDocument();
+    expect(screen.getByText('Повторение')).toBeInTheDocument();
     expect(screen.getByText('Ежедневный квиз')).toBeInTheDocument();
   });
 

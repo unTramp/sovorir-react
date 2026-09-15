@@ -7,8 +7,11 @@ import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
 import { PhraseGroup } from '../lesson/PhraseGroup';
 
-function isRecordLikeBlock(block: ContentBlock) {
-  return block.type === 'record' || block.type === 'pronunciationPrompt';
+function isRequiredInteraction(block: ContentBlock) {
+  return block.type === 'record'
+    || block.type === 'pronunciationPrompt'
+    || block.type === 'dialogue'
+    || block.type === 'activeRecall';
 }
 
 function isPhraseBlock(
@@ -30,6 +33,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevSectionRef = useRef(currentSection);
+  const previousVisibleCountRef = useRef(0);
   const recordPromptRef = useRef<HTMLDivElement>(null);
   const [recordPromptVisible, setRecordPromptVisible] = useState(false);
 
@@ -44,7 +48,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
 
     const recIndices: number[] = [];
     section.blocks.forEach((b, i) => {
-      if (isRecordLikeBlock(b)) recIndices.push(i);
+      if (isRequiredInteraction(b)) recIndices.push(i);
     });
 
     const allDone = completedRecords >= recIndices.length;
@@ -61,11 +65,17 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
   useEffect(() => {
     if (prevSectionRef.current !== currentSection) {
       prevSectionRef.current = currentSection;
+      previousVisibleCountRef.current = visibleBlocks.length;
       return;
     }
-    if (bottomRef.current) {
+    if (previousVisibleCountRef.current === 0) {
+      previousVisibleCountRef.current = visibleBlocks.length;
+      return;
+    }
+    if (visibleBlocks.length > previousVisibleCountRef.current && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
+    previousVisibleCountRef.current = visibleBlocks.length;
   }, [visibleBlocks.length, allRecordsCompleted, currentSection]);
 
   // Show/hide sticky CTA based on record prompt visibility
@@ -92,7 +102,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
     const map = new Map<number, number>();
     let counter = 0;
     visibleBlocks.forEach((block, i) => {
-      if (isRecordLikeBlock(block)) map.set(i, counter++);
+      if (isRequiredInteraction(block)) map.set(i, counter++);
     });
     return map;
   }, [visibleBlocks]);
@@ -115,8 +125,11 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
 
   const hasActiveRecord = !allRecordsCompleted &&
     visibleBlocks.length > 0 &&
-    isRecordLikeBlock(visibleBlocks[visibleBlocks.length - 1]);
-  const showRecordCTA = hasActiveRecord && recordPromptVisible;
+    isRequiredInteraction(visibleBlocks[visibleBlocks.length - 1]);
+  const activeBlock = visibleBlocks[visibleBlocks.length - 1];
+  const showRecordCTA = hasActiveRecord
+    && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt')
+    && recordPromptVisible;
 
   return (
     <div ref={scrollRef} className="lesson-scroll">
@@ -147,7 +160,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
           }
 
           const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
-          const isCompletedRecord = isRecordLikeBlock(block) && !isLastRecord;
+          const isCompletedRecord = isRequiredInteraction(block) && !isLastRecord;
           const recIdx = recordIndexMap.get(i);
           return (
             <div key={`${currentSection}-${i}`} className="lesson-block-enter">

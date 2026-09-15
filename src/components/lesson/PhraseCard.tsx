@@ -31,14 +31,10 @@ export function PhraseCard({ block, audioId, grouped = false }: Props) {
     <div className={`word-card${grouped ? ' word-card--grouped' : ''}${isPlaying ? ' word-card--playing' : ''}`}>
       <div className="word-card__info">
         <span className="word-card__armenian" lang="hy">{block.armenian}</span>
-        <div className="word-card__meta">
-          <span className="word-card__transcription">{block.transcription}</span>
-          <span className="word-card__dot" aria-hidden="true" />
-          <span className="word-card__russian">{block.russian}</span>
-        </div>
-        {block.translation && (
-          <div className="word-card__translation">{block.translation}</div>
-        )}
+        <span className="word-card__transcription">{block.transcription}</span>
+        {block.translation && <div className="word-card__translation">{block.translation}</div>}
+        {block.context && <div className="word-card__context">{block.context}</div>}
+        {block.russian && <div className="word-card__russian">Произношение: {block.russian}</div>}
       </div>
       <button
         className={`word-card__audio-btn${isPlaying ? ' is-playing' : ''}${isLoading ? ' is-loading' : ''}${hasError ? ' has-error' : ''}`}

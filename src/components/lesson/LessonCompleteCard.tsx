@@ -7,6 +7,7 @@ import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
 import { contentRepository } from '../../lib/contentRepository';
 import { QuizContainer } from '../quiz/QuizContainer';
 import type { Quiz, QuizResult } from '../../types/quiz';
+import { useFlashcardStore } from '../../stores/useFlashcardStore';
 
 export function LessonCompleteCard() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function LessonCompleteCard() {
   const isSectionCompleted = useLessonProgress((s) => s.isSectionCompleted(currentSection));
   const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
+  const unlockWords = useFlashcardStore((s) => s.unlockWords);
 
   const allSections = useLessonSectionsStore((s) => s.sections);
   const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -39,13 +41,21 @@ export function LessonCompleteCard() {
   }, [currentSection, saveQuizResult]);
 
   const handleContinue = useCallback(() => {
+    if (isLastSection) {
+      const reviewIds = allSections.flatMap((section) => section.blocks.flatMap((block) => {
+        if ((block.type === 'phrase' || block.type === 'phraseCard') && block.reviewable && block.id) return [block.id];
+        if (block.type === 'activeRecall') return block.reviewIds;
+        return [];
+      }));
+      unlockWords(reviewIds);
+    }
     completeSection(currentSection);
     if (!isLastSection) {
       const nextSectionNumber = currentSection + 1;
       nextSection();
       navigate(`/lesson?section=${nextSectionNumber}`);
     }
-  }, [completeSection, currentSection, isLastSection, navigate, nextSection]);
+  }, [allSections, completeSection, currentSection, isLastSection, navigate, nextSection, unlockWords]);
 
   const actionLabel = isCurrentSectionDone ? 'На главную' : 'Завершить урок';
 
@@ -67,6 +77,13 @@ export function LessonCompleteCard() {
               ? 'Отличная работа — вы стали ещё немного увереннее говорить по-армянски.'
               : 'Когда будете готовы, завершите урок.'}
           </div>
+          {isCurrentSectionDone && (
+            <ul className="lesson-complete__skills" aria-label="Теперь вы умеете">
+              <li>Поздороваться с другом</li>
+              <li>Вежливо обратиться к незнакомому человеку</li>
+              <li>Попрощаться в нейтральной ситуации</li>
+            </ul>
+          )}
           {isCurrentSectionDone ? (
           <button
             className="lesson-complete__btn"

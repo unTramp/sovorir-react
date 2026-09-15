@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, forwardRef } from 'react';
 import type { RecordBlock } from '../../types/lessonContent';
 import { useRecordingStore } from '../../stores/useRecordingStore';
 import { RecordingPlayback } from '../audio/RecordingPlayback';
+import { CheckIcon, MicSmallIcon } from '../../icons';
 
 interface Props {
   block: RecordBlock;
@@ -49,7 +50,10 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
     return (
       <div ref={ref} className={`lesson-record-prompt ${completed ? 'lesson-record-prompt--done' : ''}`}>
         <div className="lesson-record-prompt__body">
-          <div className="lesson-record-prompt__label">{completed ? '✓' : '🎤'} {label}</div>
+          <div className="lesson-record-prompt__label">
+            {completed ? <CheckIcon /> : <MicSmallIcon />}
+            <span>{label}</span>
+          </div>
           <div className="lesson-record-prompt__phrase" lang="hy">{phrase}</div>
           {completed && playbackUrl && (
             <div className="mt-2">

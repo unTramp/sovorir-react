@@ -14,6 +14,8 @@ export function PracticeView() {
   const [activeTab, setActiveTab] = useState<PracticeTab>('flashcards');
   const session = useFlashcardStore((s) => s.session);
   const startSession = useFlashcardStore((s) => s.startSession);
+  const dueCount = useFlashcardStore((s) => s.getDueCount());
+  const availableCount = useFlashcardStore((s) => s.getAvailableCount());
 
   const sessionComplete = session && session.currentIndex >= session.cards.length;
 
@@ -31,13 +33,21 @@ export function PracticeView() {
             {!session && (
               <div className="flashcard-start">
                 <div className="flashcard-start__icon"><BrainIcon size={28} /></div>
-                <div className="flashcard-start__title">Карточки для запоминания</div>
-                <div className="flashcard-start__desc">
-                  {dictionary.length} слов из словаря урока. Повторяйте каждый день — интервальное запоминание поможет выучить слова надолго.
+                <div className="flashcard-start__title">
+                  {availableCount === 0 ? 'Повторение появится после урока' : dueCount === 0 ? 'На сегодня всё' : 'Пора повторить'}
                 </div>
-                <button className="flashcard-start__btn" onClick={startSession}>
-                  Начать тренировку
-                </button>
+                <div className="flashcard-start__desc">
+                  {availableCount === 0
+                    ? 'Фразы из пройденных уроков автоматически появятся здесь в нужный день.'
+                    : dueCount === 0
+                      ? `${availableCount} фраз уже в вашем плане. Мы вернём их, когда придёт время повторения.`
+                      : `${dueCount} ${dueCount === 1 ? 'фраза готова' : dueCount < 5 ? 'фразы готовы' : 'фраз готовы'} к короткому повторению.`}
+                </div>
+                {dueCount > 0 && (
+                  <button className="flashcard-start__btn" onClick={startSession}>
+                    Начать повторение
+                  </button>
+                )}
               </div>
             )}
             {session && !sessionComplete && <FlashcardDeck />}

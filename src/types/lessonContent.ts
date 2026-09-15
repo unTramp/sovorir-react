@@ -1,20 +1,26 @@
 export interface PhraseBlock {
   type: 'phrase';
+  id?: string;
   russian: string;
   armenian: string;
   transcription: string;
   translation: string;
   audioSrc?: string;
+  context?: string;
+  reviewable?: boolean;
   status?: 'new' | 'learned' | 'review';
 }
 
 export interface PhraseCardBlock {
   type: 'phraseCard';
+  id?: string;
   russian: string;
   armenian: string;
   transcription: string;
   translation: string;
   audioSrc?: string;
+  context?: string;
+  reviewable?: boolean;
   status?: 'new' | 'learned' | 'review';
 }
 
@@ -99,6 +105,33 @@ export interface PronunciationPromptBlock {
   prompt: string;
 }
 
+export interface DialogueBlock {
+  type: 'dialogue';
+  characterName: string;
+  characterRole?: string;
+  message: string;
+  instruction: string;
+  options: Array<{
+    id: string;
+    text: string;
+    translation?: string;
+    correct: boolean;
+    reply: string;
+  }>;
+}
+
+export interface ActiveRecallBlock {
+  type: 'activeRecall';
+  prompt: string;
+  hint: string;
+  answer: {
+    armenian: string;
+    transcription: string;
+    translation: string;
+  };
+  reviewIds: string[];
+}
+
 export type ContentBlock =
   | PhraseBlock
   | PhraseCardBlock
@@ -113,13 +146,17 @@ export type ContentBlock =
   | StudentBubbleBlock
   | VideoBubbleBlock
   | RecordBlock
-  | PronunciationPromptBlock;
+  | PronunciationPromptBlock
+  | DialogueBlock
+  | ActiveRecallBlock;
 
 export interface LessonContentSection {
   id: number;
   /** UUID of the section on the server — populated when loading from real API */
   apiId?: string;
   title?: string;
+  kind?: 'situation' | 'phrases' | 'pronunciation' | 'dialogue' | 'recall' | 'completion';
+  objective?: string;
   blocks: ContentBlock[];
   quizId?: string;
   dictionaryWordIds?: string[];
