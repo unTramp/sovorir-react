@@ -59,32 +59,40 @@ beforeEach(() => {
 });
 
 describe('useLessonProgress', () => {
-  it('does not auto-complete content-only sections until they are explicitly completed', () => {
+  it('does not auto-complete content-only sections until they are explicitly completed', async () => {
     expect(useLessonProgress.getState().isSectionCompleted(1)).toBe(false);
+    expect(useLessonProgress.getState().areSectionInteractionsComplete(1)).toBe(true);
 
-    useLessonProgress.getState().completeSection(1);
+    await useLessonProgress.getState().completeSection(1);
 
     expect(useLessonProgress.getState().isSectionCompleted(1)).toBe(true);
   });
 
-  it('completes record sections only after all record prompts are done', () => {
+  it('keeps interaction readiness separate from confirmed section completion', async () => {
     expect(useLessonProgress.getState().isSectionCompleted(2)).toBe(false);
+    expect(useLessonProgress.getState().areSectionInteractionsComplete(2)).toBe(false);
 
     useLessonProgress.getState().completeRecord(2, 0);
 
+    expect(useLessonProgress.getState().areSectionInteractionsComplete(2)).toBe(true);
+    expect(useLessonProgress.getState().isSectionCompleted(2)).toBe(false);
+
+    await useLessonProgress.getState().completeSection(2);
     expect(useLessonProgress.getState().isSectionCompleted(2)).toBe(true);
   });
 
-  it('treats pronunciation prompts as record-like completion gates', () => {
+  it('treats pronunciation prompts as record-like completion gates', async () => {
     expect(useLessonProgress.getState().isSectionCompleted(4)).toBe(false);
 
     useLessonProgress.getState().completeRecord(4, 0);
 
+    expect(useLessonProgress.getState().areSectionInteractionsComplete(4)).toBe(true);
+    await useLessonProgress.getState().completeSection(4);
     expect(useLessonProgress.getState().isSectionCompleted(4)).toBe(true);
   });
 
-  it('requires a passed quiz for quiz sections even when there are no record prompts', () => {
-    useLessonProgress.getState().completeSection(3);
+  it('requires a passed quiz before explicit completion', async () => {
+    expect(await useLessonProgress.getState().completeSection(3)).toBe(false);
     expect(useLessonProgress.getState().isSectionCompleted(3)).toBe(false);
 
     useLessonProgress.getState().saveQuizResult(3, {
@@ -95,14 +103,23 @@ describe('useLessonProgress', () => {
       completedAt: Date.now(),
     });
 
+    expect(useLessonProgress.getState().areSectionInteractionsComplete(3)).toBe(true);
+    expect(await useLessonProgress.getState().completeSection(3)).toBe(true);
     expect(useLessonProgress.getState().isSectionCompleted(3)).toBe(true);
   });
 
-  it('computes overall percentage from completed sections instead of record counts', () => {
-    useLessonProgress.getState().completeSection(1);
+  it('computes overall percentage from explicitly completed sections', async () => {
+    await useLessonProgress.getState().completeSection(1);
     useLessonProgress.getState().completeRecord(2, 0);
+    await useLessonProgress.getState().completeSection(2);
 
     expect(useLessonProgress.getState().getOverallPercentage()).toBe(50);
     expect(useLessonProgress.getState().getCompletedSections()).toBe(2);
+  });
+
+  it('hydrates confirmed completion returned by the server', () => {
+    useLessonProgress.getState()._initSections([{ ...sectionsFixture[0], serverCompleted: true }]);
+    expect(useLessonProgress.getState().isSectionCompleted(1)).toBe(true);
+    expect(useLessonProgress.getState().sections[1]?.completionStatus).toBe('confirmed');
   });
 });

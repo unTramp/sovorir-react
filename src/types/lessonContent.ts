@@ -154,6 +154,8 @@ export interface LessonContentSection {
   id: number;
   /** UUID of the section on the server — populated when loading from real API */
   apiId?: string;
+  /** Confirmed server state, used to hydrate local progress across devices. */
+  serverCompleted?: boolean;
   title?: string;
   kind?: 'situation' | 'phrases' | 'pronunciation' | 'dialogue' | 'recall' | 'completion';
   objective?: string;

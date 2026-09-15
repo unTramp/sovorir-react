@@ -92,7 +92,7 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /\.(?:mp3|wav|ogg|opus)$/i,
+            urlPattern: /\.(?:mp3|m4a|mp4|aac|wav|ogg|opus|webm)$/i,
             handler: 'CacheFirst',
             options: {
               cacheName: 'audio-cache',

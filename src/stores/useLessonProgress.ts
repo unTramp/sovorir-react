@@ -10,6 +10,8 @@ import { apiClient } from '../lib/apiClient';
 interface SectionProgress {
   completedRecords: number[];
   completed: boolean;
+  completionStatus?: 'idle' | 'syncing' | 'confirmed' | 'error';
+  completionError?: string;
 }
 
 interface LessonProgressState {
@@ -21,9 +23,10 @@ interface LessonProgressState {
   // Actions
   _initSections: (sections: LessonContentSection[]) => void;
   completeRecord: (sectionId: number, recordIndex: number) => void;
-  completeSection: (sectionId: number) => void;
+  completeSection: (sectionId: number) => Promise<boolean>;
   getCompletedCount: (sectionId: number) => number;
   getTotalRecords: (sectionId: number) => number;
+  areSectionInteractionsComplete: (sectionId: number) => boolean;
   isSectionCompleted: (sectionId: number) => boolean;
   getOverallPercentage: () => number;
   getCompletedSections: () => number;
@@ -36,7 +39,10 @@ let _lessonSections: LessonContentSection[] = [];
 
 /** Call this once the sections store is available to keep _lessonSections up to date. */
 export function syncLessonSectionsCache(sections: LessonContentSection[]): void {
-  if (sections.length > 0) _lessonSections = sections;
+  if (sections.length > 0) {
+    _lessonSections = sections;
+    useLessonProgress.getState()._initSections(sections);
+  }
 }
 
 /** POSTs all locally-completed sections that have a server UUID — awaitable before navigation. */
@@ -82,7 +88,19 @@ export const useLessonProgress = create<LessonProgressState>()(
 
       _initSections: (sections: LessonContentSection[]) => {
         _lessonSections = sections;
-        set({ sectionsReady: true });
+        set((state) => {
+          const nextSections = { ...state.sections };
+          sections.forEach((section) => {
+            if (!section.serverCompleted) return;
+            const current = nextSections[section.id];
+            nextSections[section.id] = {
+              completedRecords: current?.completedRecords ?? [],
+              completed: true,
+              completionStatus: 'confirmed',
+            };
+          });
+          return { sections: nextSections, sectionsReady: true };
+        });
       },
 
       completeRecord: (sectionId, recordIndex) =>
@@ -95,27 +113,45 @@ export const useLessonProgress = create<LessonProgressState>()(
               [sectionId]: {
                 completed: state.sections[sectionId]?.completed ?? false,
                 completedRecords: [...current, recordIndex],
+                completionStatus: state.sections[sectionId]?.completionStatus ?? 'idle',
               },
             },
           };
         }),
 
-      completeSection: (sectionId) => {
-        set((state) => ({
+      completeSection: async (sectionId) => {
+        if (!get().areSectionInteractionsComplete(sectionId)) return false;
+
+        const setCompletionState = (
+          completed: boolean,
+          completionStatus: SectionProgress['completionStatus'],
+          completionError?: string,
+        ) => set((state) => ({
           sections: {
             ...state.sections,
             [sectionId]: {
-              completed: true,
+              completed,
               completedRecords: state.sections[sectionId]?.completedRecords ?? [],
+              completionStatus,
+              completionError,
             },
           },
         }));
-        // Fire-and-forget individual sync; bulk sync happens on lesson complete
-        if (!isMockApiEnabled) {
-          const section = _lessonSections.find((s) => s.id === sectionId);
-          if (section?.apiId) {
-            void apiClient.post(`/sections/${section.apiId}/complete`, {}).catch(() => {});
-          }
+
+        const section = _lessonSections.find((item) => item.id === sectionId);
+        if (isMockApiEnabled || !section?.apiId) {
+          setCompletionState(true, 'confirmed');
+          return true;
+        }
+
+        setCompletionState(false, 'syncing');
+        try {
+          await apiClient.post(`/sections/${section.apiId}/complete`, {});
+          setCompletionState(true, 'confirmed');
+          return true;
+        } catch {
+          setCompletionState(false, 'error', 'Не удалось сохранить прогресс. Проверьте соединение и попробуйте ещё раз.');
+          return false;
         }
       },
 
@@ -125,17 +161,16 @@ export const useLessonProgress = create<LessonProgressState>()(
 
       getTotalRecords: (sectionId) => countRecords(sectionId),
 
-      isSectionCompleted: (sectionId) => {
+      areSectionInteractionsComplete: (sectionId) => {
         const total = countRecords(sectionId);
         const sectionProgress = get().sections[sectionId];
         const recordsCompleted = (sectionProgress?.completedRecords.length || 0) >= total;
         const quizCompleted = !hasQuiz(sectionId) || get().isQuizPassed(sectionId);
+        return recordsCompleted && quizCompleted;
+      },
 
-        if (total > 0) {
-          return recordsCompleted && quizCompleted;
-        }
-
-        return Boolean(sectionProgress?.completed) && quizCompleted;
+      isSectionCompleted: (sectionId) => {
+        return Boolean(get().sections[sectionId]?.completed);
       },
 
       getOverallPercentage: () => {

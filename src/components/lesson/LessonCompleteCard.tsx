@@ -16,6 +16,9 @@ export function LessonCompleteCard() {
   const nextSection = useLessonStore((s) => s.nextSection);
   const completeSection = useLessonProgress((s) => s.completeSection);
   const isSectionCompleted = useLessonProgress((s) => s.isSectionCompleted(currentSection));
+  const interactionsComplete = useLessonProgress((s) => s.areSectionInteractionsComplete(currentSection));
+  const completionStatus = useLessonProgress((s) => s.sections[currentSection]?.completionStatus);
+  const completionError = useLessonProgress((s) => s.sections[currentSection]?.completionError);
   const isQuizPassed = useLessonProgress((s) => s.isQuizPassed(currentSection));
   const saveQuizResult = useLessonProgress((s) => s.saveQuizResult);
   const unlockWords = useFlashcardStore((s) => s.unlockWords);
@@ -41,20 +44,24 @@ export function LessonCompleteCard() {
   }, [currentSection, saveQuizResult]);
 
   const handleContinue = useCallback(() => {
-    if (isLastSection) {
+    void (async () => {
+      const confirmed = await completeSection(currentSection);
+      if (!confirmed) return;
+
+      if (isLastSection) {
       const reviewIds = allSections.flatMap((section) => section.blocks.flatMap((block) => {
         if ((block.type === 'phrase' || block.type === 'phraseCard') && block.reviewable && block.id) return [block.id];
         if (block.type === 'activeRecall') return block.reviewIds;
         return [];
       }));
       unlockWords(reviewIds);
-    }
-    completeSection(currentSection);
-    if (!isLastSection) {
-      const nextSectionNumber = currentSection + 1;
-      nextSection();
-      navigate(`/lesson?section=${nextSectionNumber}`);
-    }
+      }
+      if (!isLastSection) {
+        const nextSectionNumber = currentSection + 1;
+        nextSection();
+        navigate(`/lesson?section=${nextSectionNumber}`);
+      }
+    })();
   }, [allSections, completeSection, currentSection, isLastSection, navigate, nextSection, unlockWords]);
 
   return (
@@ -99,8 +106,13 @@ export function LessonCompleteCard() {
               <span className="lesson-action-dock__eyebrow">Готово</span>
               <span className="lesson-action-dock__title">Все фразы пройдены</span>
             </div>
-            <button className="lesson-action-dock__btn" onClick={needsQuiz ? undefined : handleContinue} disabled={needsQuiz}>
-              {needsQuiz ? 'Сначала ответьте' : 'Завершить урок'}
+            {completionError && <div className="lesson-record-sticky__error" role="alert">{completionError}</div>}
+            <button
+              className="lesson-action-dock__btn"
+              onClick={needsQuiz || !interactionsComplete ? undefined : handleContinue}
+              disabled={needsQuiz || !interactionsComplete || completionStatus === 'syncing'}
+            >
+              {completionStatus === 'syncing' ? 'Сохраняем…' : needsQuiz ? 'Сначала ответьте' : 'Завершить урок'}
             </button>
           </div>
         )
@@ -110,8 +122,13 @@ export function LessonCompleteCard() {
             <span className="lesson-action-dock__eyebrow">Дальше</span>
             <span className="lesson-action-dock__title">{nextSectionTitle || 'Следующий шаг'}</span>
           </div>
-          <button className="lesson-action-dock__btn" onClick={needsQuiz ? undefined : handleContinue} disabled={needsQuiz}>
-            <span>{needsQuiz ? 'Сначала ответьте' : 'Продолжить'}</span>
+          {completionError && <div className="lesson-record-sticky__error" role="alert">{completionError}</div>}
+          <button
+            className="lesson-action-dock__btn"
+            onClick={needsQuiz || !interactionsComplete ? undefined : handleContinue}
+            disabled={needsQuiz || !interactionsComplete || completionStatus === 'syncing'}
+          >
+            <span>{completionStatus === 'syncing' ? 'Сохраняем…' : needsQuiz ? 'Сначала ответьте' : 'Продолжить'}</span>
             {!needsQuiz && <span aria-hidden="true">→</span>}
           </button>
         </div>

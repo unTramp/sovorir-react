@@ -337,6 +337,7 @@ export class ApiContentRepository implements ContentRepository {
     this.currentSectionsCache = sortSections(detail.sections).map((section, index) => ({
       id: index + 1,
       apiId: section.id,
+      serverCompleted: section.progress?.completed ?? false,
       title: section.title,
       quizId:
         typeof section.content?.quizId === 'string'
