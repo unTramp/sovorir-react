@@ -21,6 +21,17 @@ interface TransportResponse {
   text(): Promise<string>;
 }
 
+export function createRequestHeaders(
+  token: string | null,
+  hasBody: boolean,
+  isFormData = false,
+): Record<string, string> {
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (hasBody && !isFormData) headers['Content-Type'] = 'application/json';
+  return headers;
+}
+
 export function getAccessToken(): string | null {
   return localStorage.getItem(ACCESS_KEY);
 }
@@ -124,9 +135,8 @@ async function transportRequest(
     return mockApiRequest(method, path, body, token);
   }
 
-  const headers: Record<string, string> = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  if (!isFormData) headers['Content-Type'] = 'application/json';
+  const hasBody = body !== undefined;
+  const headers = createRequestHeaders(token, hasBody, isFormData);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -136,7 +146,7 @@ async function transportRequest(
       method,
       headers,
       signal: controller.signal,
-      body: body
+      body: hasBody
         ? isFormData
           ? (body as FormData)
           : JSON.stringify(body)
