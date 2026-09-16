@@ -216,7 +216,7 @@ function deriveSectionStatuses(
 
 function mapApiLessonsToFrontend(apiLessons: ApiCourseLesson[]): CatalogSnapshot {
   const ordered = apiLessons
-    .filter((lesson) => lesson.status === 'published')
+    .filter((lesson) => lesson.status === 'published' && lesson.description !== 'Будущий урок курса.')
     .slice()
     .sort((a, b) => a.orderIndex - b.orderIndex);
   const lessonStatuses = deriveLessonStatuses(ordered);
@@ -226,6 +226,7 @@ function mapApiLessonsToFrontend(apiLessons: ApiCourseLesson[]): CatalogSnapshot
 
     return {
       id: lessonIndex + 1,
+      apiId: lesson.id,
       title: lesson.title,
       icon: '\u{1F4D6}',
       status: lessonStatuses[lessonIndex],
@@ -346,6 +347,13 @@ export class LocalAdminDraftContentRepository implements ContentRepository {
 export class ApiContentRepository implements ContentRepository {
   private catalogCache: CatalogSnapshot | null = null;
   private currentSectionsCache: LessonContentSection[] | null = null;
+  private selectedLessonApiId: string | null = null;
+
+  selectLesson(apiId: string | null): void {
+    if (this.selectedLessonApiId === apiId) return;
+    this.selectedLessonApiId = apiId;
+    this.currentSectionsCache = null;
+  }
 
   invalidate(): void {
     this.catalogCache = null;
@@ -375,12 +383,13 @@ export class ApiContentRepository implements ContentRepository {
     }
 
     const catalog = await this.loadCatalog();
-    if (!catalog.currentLessonApiId) {
+    const lessonApiId = this.selectedLessonApiId ?? catalog.currentLessonApiId;
+    if (!lessonApiId) {
       this.currentSectionsCache = [];
       return this.currentSectionsCache;
     }
 
-    const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${catalog.currentLessonApiId}`);
+    const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${lessonApiId}`);
     const orderedSections = sortSections(detail.sections);
     const itemIds = [...new Set(orderedSections.flatMap((section) => section.blocks.flatMap((block) => blockLearningItemIds(block.content))))];
     const learningItems = itemIds.length > 0

@@ -14,7 +14,6 @@ const STUDENT_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',             icon: HouseIcon },
   { label: 'Курс',      path: '/course',        icon: BookOpenIcon },
   { label: 'Практика',  path: '/practice',      icon: ZapIcon },
-  { label: 'Задания',  path: '/assignments',   icon: ClipboardIcon },
   { label: 'Профиль',  path: '/settings',      icon: UserIcon },
 ];
 

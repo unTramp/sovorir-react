@@ -5,21 +5,26 @@ import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { LessonSectionView } from './LessonPageView';
+import { useAppStore } from '../../stores/useAppStore';
 
 const EMPTY_COMPLETED_RECORDS: number[] = [];
 
 export function LessonView() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentLesson, allCompleted, hasLoaded } = useLessonCatalog();
-  const currentLessonId = currentLesson?.id;
+  const { lessons = [], currentLesson, hasLoaded } = useLessonCatalog();
+  const selectedLessonId = useAppStore((state) => state.currentLesson);
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId && lesson.status !== 'locked');
+  const lessonToOpen = selectedLesson ?? currentLesson;
+  const currentLessonId = lessonToOpen?.id;
+  const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
 
   // Redirect to home if course complete or no current lesson (once catalog is loaded)
   useEffect(() => {
-    if (hasLoaded && (allCompleted || !currentLesson)) {
+    if (hasLoaded && !lessonToOpen) {
       navigate('/', { replace: true });
     }
-  }, [hasLoaded, allCompleted, currentLesson, navigate]);
+  }, [hasLoaded, lessonToOpen, navigate]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentSection = useLessonStore((s) => s.currentSection);
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
@@ -33,8 +38,10 @@ export function LessonView() {
   const reloadSections = useLessonSectionsStore((s) => s.reload);
 
   useEffect(() => {
-    if (currentLessonId) reloadSections(true);
-  }, [currentLessonId, reloadSections]);
+    if (!lessonToOpen) return;
+    selectLesson(lessonToOpen.apiId);
+    reloadSections(true);
+  }, [currentLessonId, lessonToOpen, reloadSections, selectLesson]);
 
   // Sync totalSections into useLessonStore whenever sections change
   useEffect(() => {

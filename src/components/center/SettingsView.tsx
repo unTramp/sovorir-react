@@ -5,6 +5,7 @@ import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { FlameIcon } from '../../icons';
 import { resetUserProgress } from '../../lib/resetUserProgress';
+import { useLearningItemStore } from '../../stores/useLearningItemStore';
 
 export function SettingsView() {
   const navigate = useNavigate();
@@ -19,10 +20,7 @@ export function SettingsView() {
   const streak = useStreakStore((s) => s.currentStreak);
   const { lessons, completedLessons } = useLessonCatalog();
 
-  const completedSections = lessons
-    .flatMap((lesson) => lesson.sections)
-    .filter((section) => section.type !== 'video' && section.status === 'completed').length;
-  const xp = completedSections * 32;
+  const learnedPhrases = useLearningItemStore((state) => Object.keys(state.reviewQueue).length);
   const isStudent = profile?.role === 'student';
   const devToolsEnabled = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_TOOLS === 'true';
   const coursePercent = lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
@@ -52,8 +50,8 @@ export function SettingsView() {
 
       {isStudent && <section className="profile-stats" aria-label="Прогресс">
         <div className="profile-stat">
-          <strong>{xp}</strong>
-          <span>XP</span>
+          <strong>{learnedPhrases}</strong>
+          <span>фраз изучено</span>
         </div>
         <div className="profile-stat">
           <strong>{completedLessons}</strong>

@@ -5,6 +5,7 @@ import { FlameIcon, BackArrowIcon } from '../../icons';
 import { NotificationBell } from '../ui/NotificationBell';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
+import { useAppStore } from '../../stores/useAppStore';
 
 const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: string }>> & Record<string, { title: string; subtitle?: string }> = {
   home:                  { title: 'Главная' },
@@ -35,14 +36,16 @@ export function MobileHeader() {
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
-  const { currentLesson } = useLessonCatalog();
+  const { lessons = [], currentLesson } = useLessonCatalog();
+  const selectedLessonId = useAppStore((state) => state.currentLesson);
+  const lessonForHeader = lessons.find((lesson) => lesson.id === selectedLessonId) ?? currentLesson;
   const location = useLocation();
   const lessonMatch = useMatch('/lesson');
   const isLesson = !!lessonMatch;
   const showStreak = location.pathname === '/';
 
-  const lessonHeaderTitle = currentLesson ? `Урок ${currentLesson.id}` : 'Урок';
-  const lessonHeaderSubtitle = currentLesson?.title;
+  const lessonHeaderTitle = lessonForHeader ? `Урок ${lessonForHeader.id}` : 'Урок';
+  const lessonHeaderSubtitle = lessonForHeader?.title;
   const { title, subtitle } = isLesson
     ? { title: lessonHeaderTitle, subtitle: lessonHeaderSubtitle }
     : (VIEW_TITLES[pathnameToKey(location.pathname)] ?? { title: 'Sovorir' });

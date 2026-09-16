@@ -24,4 +24,20 @@ describe('lesson-linked review queue', () => {
     useFlashcardStore.getState().startSession();
     expect(useFlashcardStore.getState().session?.cards).toEqual(['greeting-polite']);
   });
+
+  it('keeps unlocked canonical phrases when another word source initializes later', () => {
+    const canonicalWord = {
+      ...dictionary[0],
+      id: 'canonical-phrase-id',
+      armenian: 'Բարև',
+      translation: 'Привет',
+    };
+
+    useFlashcardStore.getState()._initWords([canonicalWord]);
+    useFlashcardStore.getState().unlockWords([canonicalWord.id]);
+    useFlashcardStore.getState()._initWords(dictionary);
+
+    expect(useFlashcardStore.getState().availableWordIds).toContain(canonicalWord.id);
+    expect(useFlashcardStore.getState().words[canonicalWord.id]).toMatchObject({ translation: 'Привет' });
+  });
 });

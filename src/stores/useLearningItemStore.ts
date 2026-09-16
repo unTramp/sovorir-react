@@ -10,6 +10,7 @@ interface LearningItemState {
   removeItem: (id: UUID) => void;
   getItem: (id: UUID) => LearningItem | undefined;
   enqueueForReview: (itemIds: UUID[], sourceLessonId: UUID, now?: Date) => void;
+  scheduleReview: (itemId: UUID, quality: 'again' | 'hard' | 'easy', now?: Date) => void;
   getReviewQueue: () => LearningItem[];
 }
 
@@ -35,6 +36,21 @@ export const useLearningItemStore = create<LearningItemState>()(
           .filter((id) => state.items[id]?.reviewable)
           .map((id) => [id, { sourceLessonId, unlockedAt, nextReviewAt }]));
         return { reviewQueue: { ...state.reviewQueue, ...additions } };
+      }),
+      scheduleReview: (itemId, quality, now = new Date()) => set((state) => {
+        const current = state.reviewQueue[itemId];
+        if (!current) return state;
+        const delay = quality === 'again'
+          ? 5 * 60 * 1000
+          : quality === 'hard'
+            ? 24 * 60 * 60 * 1000
+            : 7 * 24 * 60 * 60 * 1000;
+        return {
+          reviewQueue: {
+            ...state.reviewQueue,
+            [itemId]: { ...current, nextReviewAt: new Date(now.getTime() + delay).toISOString() },
+          },
+        };
       }),
       getReviewQueue: () => Object.keys(get().reviewQueue)
         .map((id) => get().items[id])

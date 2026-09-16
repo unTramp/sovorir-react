@@ -35,7 +35,7 @@ describe('BottomTabBar', () => {
     expect(screen.getByLabelText('Главная')).toBeInTheDocument();
     expect(screen.getByLabelText('Курс')).toBeInTheDocument();
     expect(screen.getByLabelText('Практика')).toBeInTheDocument();
-    expect(screen.getByLabelText('Задания')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Задания')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Профиль')).toBeInTheDocument();
     expect(screen.queryByLabelText('Студенты')).not.toBeInTheDocument();
   });

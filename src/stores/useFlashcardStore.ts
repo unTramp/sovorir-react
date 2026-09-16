@@ -4,12 +4,14 @@ import type { FlashcardProgress, FlashcardSession } from '../types/flashcard';
 import type { DictionaryWord } from '../types/dictionary';
 import { contentRepository } from '../lib/contentRepository';
 import { practiceEvents } from '../lib/practiceEvents';
+import { useLearningItemStore } from './useLearningItemStore';
 
 interface FlashcardState {
   progress: Record<string, FlashcardProgress>;
   availableWordIds: string[];
   session: FlashcardSession | null;
   wordsReady: boolean;
+  words: Record<string, DictionaryWord>;
 
   _initWords: (words: DictionaryWord[]) => void;
   startSession: () => void;
@@ -24,17 +26,18 @@ interface FlashcardState {
 const SESSION_SIZE = 10;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-let _flashcardWords: DictionaryWord[] = [];
-
 contentRepository.getFlashcardWords().then((words) => {
   useFlashcardStore.getState()._initWords(words);
 });
 
-function selectCards(progress: Record<string, FlashcardProgress>, availableWordIds: string[]): string[] {
+function selectCards(
+  progress: Record<string, FlashcardProgress>,
+  availableWordIds: string[],
+  words: Record<string, DictionaryWord>,
+): string[] {
   const now = Date.now();
-  const knownIds = new Set(_flashcardWords.map((word) => word.id));
   return availableWordIds
-    .filter((id) => knownIds.has(id) && (!progress[id] || progress[id].nextReview <= now))
+    .filter((id) => words[id] && (!progress[id] || progress[id].nextReview <= now))
     .sort((a, b) => (progress[a]?.nextReview ?? 0) - (progress[b]?.nextReview ?? 0))
     .slice(0, SESSION_SIZE);
 }
@@ -46,20 +49,27 @@ export const useFlashcardStore = create<FlashcardState>()(
       availableWordIds: [],
       session: null,
       wordsReady: false,
+      words: {},
 
       _initWords: (words: DictionaryWord[]) => {
-        _flashcardWords = words;
-        set((state) => ({
-          wordsReady: true,
-          availableWordIds: Array.from(new Set([
-            ...state.availableWordIds,
-            ...Object.keys(state.progress),
-          ])).filter((id) => words.some((word) => word.id === id)),
-        }));
+        set((state) => {
+          const mergedWords = {
+            ...state.words,
+            ...Object.fromEntries(words.map((word) => [word.id, word])),
+          };
+          return {
+            words: mergedWords,
+            wordsReady: true,
+            availableWordIds: Array.from(new Set([
+              ...state.availableWordIds,
+              ...Object.keys(state.progress),
+            ])).filter((id) => Boolean(mergedWords[id])),
+          };
+        });
       },
 
       startSession: () => {
-        const cards = selectCards(get().progress, get().availableWordIds);
+        const cards = selectCards(get().progress, get().availableWordIds, get().words);
         set({
           session: {
             cards,
@@ -70,8 +80,7 @@ export const useFlashcardStore = create<FlashcardState>()(
       },
 
       unlockWords: (wordIds) => set((state) => {
-        const knownIds = new Set(_flashcardWords.map((word) => word.id));
-        const nextIds = wordIds.filter((id) => knownIds.has(id));
+        const nextIds = wordIds.filter((id) => state.words[id]);
         const nextReview = Date.now() + DAY_MS;
         const progress = { ...state.progress };
         nextIds.forEach((id) => {
@@ -110,6 +119,8 @@ export const useFlashcardStore = create<FlashcardState>()(
             easeFactor,
           };
 
+          useLearningItemStore.getState().scheduleReview(wordId, quality);
+
           const session = state.session;
           if (!session) return state;
 
@@ -135,7 +146,7 @@ export const useFlashcardStore = create<FlashcardState>()(
         return get().availableWordIds.length;
       },
 
-      getDueCount: () => selectCards(get().progress, get().availableWordIds).length,
+      getDueCount: () => selectCards(get().progress, get().availableWordIds, get().words).length,
 
       getAvailableCount: () => get().availableWordIds.length,
     }),

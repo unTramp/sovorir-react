@@ -4,11 +4,13 @@ import { useStreakStore } from '../../stores/useStreakStore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { teacherNotes } from '../../data/teacherNotes';
 import { todayISO, getWeekDays } from '../../lib/dateUtils';
-import { BookOpenIcon, BrainIcon, FlameIcon } from '../../icons';
-import type { SectionType } from '../../types/lesson';
+import { BookOpenIcon, FlameIcon } from '../../icons';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { TeacherDashboardView } from './TeacherDashboardView';
-import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { useLearningItemStore } from '../../stores/useLearningItemStore';
+import { useAppStore } from '../../stores/useAppStore';
+import { useLessonStore } from '../../stores/useLessonStore';
+import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 
 function CheckIcon() {
   return (
@@ -26,11 +28,6 @@ function PlayIcon() {
   );
 }
 
-const PRACTICE_ITEMS: { label: string; sub: string; icon: React.ComponentType<{ size?: number }>; view: SectionType; iconBg: string }[] = [
-  { label: 'Повторение', sub: 'Фразы вернутся в нужный день', icon: BookOpenIcon, view: 'practice', iconBg: 'rgb(var(--color-primary-rgb) / 0.12)' },
-  { label: 'Ежедневный квиз', sub: 'Проверь себя за 2 минуты', icon: BrainIcon, view: 'lesson', iconBg: 'var(--color-bg-surface)' },
-];
-
 export function HomeView() {
   const role = useAuthStore((s) => s.profile?.role);
 
@@ -45,11 +42,25 @@ function StudentHomeView() {
   const practiceDates = useStreakStore((s) => s.practiceDates);
   const firstName = useAuthStore((s) => s.firstName);
   const { currentLesson, allCompleted } = useLessonCatalog();
-  const dueCount = useFlashcardStore((s) => s.getDueCount());
-
+  const reviewQueue = useLearningItemStore((state) => state.reviewQueue);
   const today = todayISO();
+  const reviewCount = Object.keys(reviewQueue).length;
+  const dueCount = Object.values(reviewQueue)
+    .filter((entry) => entry.nextReviewAt.slice(0, 10) <= today).length;
+  const setCurrentLesson = useAppStore((state) => state.setCurrentLesson);
+  const setCurrentSection = useLessonStore((state) => state.setCurrentSection);
+  const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
+
   const weekDays = useMemo(() => getWeekDays(), []);
   const latestNote = teacherNotes[0];
+
+  const continueLesson = () => {
+    if (!currentLesson) return;
+    setCurrentLesson(currentLesson.id);
+    setCurrentSection(1);
+    selectLesson(currentLesson.apiId);
+    navigate('/lesson');
+  };
 
   const { completedPct, stepsLeft } = useMemo(() => {
     const total = currentLesson ? currentLesson.sections.filter(s => s.type !== 'video').length : 0;
@@ -65,18 +76,18 @@ function StudentHomeView() {
 
       {/* Greeting */}
       <div className="home-greeting-section">
-        <h1 className="home-greeting__title">Բарев, {firstName}!</h1>
-        <p className="home-greeting__sub">Не прерви серию сегодня <FlameIcon size={14} /></p>
+        <h1 className="home-greeting__title"><span lang="hy">Բարև</span>, {firstName}!</h1>
+        <p className="home-greeting__sub">Небольшой шаг сегодня поможет сохранить ритм <FlameIcon size={14} /></p>
       </div>
 
       {/* Hero Lesson Card */}
       {allCompleted && (
-        <div className="home-hero__card surface-card--primary" style={{ cursor: 'default' }}>
+        <button className="home-hero__card surface-card--primary" onClick={() => navigate('/course')}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
-              <div className="home-hero__label">Курс завершён</div>
-              <div className="home-hero__title">Все уроки пройдены</div>
+              <div className="home-hero__label">Урок завершён</div>
+              <div className="home-hero__title">Фразы можно повторить в любой момент</div>
             </div>
             <div className="home-hero__play" style={{ fontSize: 28 }}>✓</div>
           </div>
@@ -85,13 +96,13 @@ function StudentHomeView() {
               <div className="home-hero__bar-fill" style={{ width: '100%' }} />
             </div>
             <div className="home-hero__footer-row">
-              <span className="home-hero__steps-hint">Продолжай практиковаться каждый день</span>
+              <span className="home-hero__steps-hint">Открыть пройденные уроки</span>
             </div>
           </div>
-        </div>
+        </button>
       )}
       {!allCompleted && currentLesson && (
-        <button className="home-hero__card surface-card--primary" onClick={() => navigate('/lesson')}>
+        <button className="home-hero__card surface-card--primary" onClick={continueLesson}>
           <div className="home-hero__deco" />
           <div className="home-hero__top-row">
             <div className="home-hero__left">
@@ -108,7 +119,7 @@ function StudentHomeView() {
             </div>
             <div className="home-hero__footer-row">
               <span className="home-hero__steps-hint">
-                Осталось {stepsLeft} {stepsLeft === 1 ? 'шаг' : stepsLeft < 5 ? 'шага' : 'шагов'} · +20 XP
+                Осталось {stepsLeft} {stepsLeft === 1 ? 'шаг' : stepsLeft < 5 ? 'шага' : 'шагов'}
               </span>
               <span className="home-hero__pct-label">{completedPct}%</span>
             </div>
@@ -120,17 +131,21 @@ function StudentHomeView() {
       <div className="home-section">
         <h3 className="home-section__title">Быстрая практика</h3>
         <div className="home-daily-list">
-          {PRACTICE_ITEMS.map((item, index) => (
-            <button key={item.label} className="home-daily-item surface-card--interactive" onClick={() => navigate(`/${item.view}`)}>
-              <div className="home-daily-item__icon" style={{ background: item.iconBg }}>
-                <item.icon size={21} />
+          <button className="home-daily-item surface-card--interactive" onClick={() => navigate('/practice')}>
+            <div className="home-daily-item__icon" style={{ background: 'rgb(var(--color-primary-rgb) / 0.12)' }}>
+              <BookOpenIcon size={21} />
+            </div>
+            <div className="home-daily-item__body">
+              <div className="home-daily-item__name">Повторение</div>
+              <div className="home-daily-item__sub">
+                {dueCount > 0
+                  ? `${dueCount} ${dueCount === 1 ? 'фраза' : 'фраз'} на сегодня · около 2 минут`
+                  : reviewCount > 0
+                    ? `${reviewCount} ${reviewCount === 1 ? 'фраза добавлена' : 'фраз добавлено'} в план повторения`
+                    : 'Фразы появятся после первого урока'}
               </div>
-              <div className="home-daily-item__body">
-                <div className="home-daily-item__name">{item.label}</div>
-                <div className="home-daily-item__sub">{index === 0 && dueCount > 0 ? `${dueCount} ${dueCount === 1 ? 'фраза' : 'фраз'} · около 2 минут` : item.sub}</div>
-              </div>
-            </button>
-          ))}
+            </div>
+          </button>
         </div>
       </div>
 
@@ -162,7 +177,7 @@ function StudentHomeView() {
                   missed ? 'missed' : '',
                   future ? 'future' : '',
                 ].filter(Boolean).join(' ')}>
-                  {done || d.isToday ? <CheckIcon /> : null}
+                  {done ? <CheckIcon /> : null}
                 </div>
                 <span className={`home-weekly__day-label${d.isToday ? ' today' : ''}`}>{d.label}</span>
               </div>

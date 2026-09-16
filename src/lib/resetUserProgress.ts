@@ -26,6 +26,7 @@ export async function resetUserProgress(): Promise<void> {
   useAppStore.getState().setCurrentLesson(1);
   useLessonStore.setState({ currentSection: 1, isFullscreen: false });
 
+  apiContentRepository.selectLesson(null);
   apiContentRepository.invalidate();
   useLessonCatalogStore.setState({ lessons: [], isLoading: false, hasLoaded: false, error: null });
   useLessonSectionsStore.setState({ sections: [], isLoading: true, error: null });

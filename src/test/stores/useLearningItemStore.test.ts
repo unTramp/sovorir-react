@@ -40,4 +40,22 @@ describe('useLearningItemStore', () => {
       nextReviewAt: '2026-09-16T10:00:00.000Z',
     });
   });
+
+  it('reschedules canonical reviews after a flashcard answer', () => {
+    const now = new Date('2026-09-15T10:00:00.000Z');
+    useLearningItemStore.getState().replaceItems([item]);
+    useLearningItemStore.getState().enqueueForReview([item.id], item.id, now);
+
+    useLearningItemStore.getState().scheduleReview(item.id, 'again', now);
+    expect(useLearningItemStore.getState().reviewQueue[item.id]?.nextReviewAt)
+      .toBe('2026-09-15T10:05:00.000Z');
+
+    useLearningItemStore.getState().scheduleReview(item.id, 'hard', now);
+    expect(useLearningItemStore.getState().reviewQueue[item.id]?.nextReviewAt)
+      .toBe('2026-09-16T10:00:00.000Z');
+
+    useLearningItemStore.getState().scheduleReview(item.id, 'easy', now);
+    expect(useLearningItemStore.getState().reviewQueue[item.id]?.nextReviewAt)
+      .toBe('2026-09-22T10:00:00.000Z');
+  });
 });

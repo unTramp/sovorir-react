@@ -55,7 +55,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
       if (isRequiredInteraction(b)) recIndices.push(i);
     });
 
-    const allDone = completedRecords >= recIndices.length;
+    const allDone = sectionCompleted || completedRecords >= recIndices.length;
 
     if (allDone) {
       return { visibleBlocks: section.blocks, allRecordsCompleted: true };
@@ -63,7 +63,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
 
     const cutoffIndex = recIndices[completedRecords];
     return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords]);
+  }, [section, completedRecords, sectionCompleted]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {

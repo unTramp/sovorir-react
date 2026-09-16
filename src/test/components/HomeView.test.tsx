@@ -119,7 +119,7 @@ describe('HomeView', () => {
   it('renders practice items', () => {
     renderHome();
     expect(screen.getByText('Повторение')).toBeInTheDocument();
-    expect(screen.getByText('Ежедневный квиз')).toBeInTheDocument();
+    expect(screen.queryByText('Ежедневный квиз')).not.toBeInTheDocument();
   });
 
   it('shows 0 steps left when all sections completed', () => {

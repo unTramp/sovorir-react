@@ -64,7 +64,7 @@ Example `.env.local` for the deployed backend:
 
 ```env
 VITE_USE_MOCK_API=false
-VITE_API_URL=https://api.65-109-135-215.sslip.io
+VITE_API_URL=https://sovorir-api.2.28.11.199.sslip.io
 ```
 
 ## Live scripts
@@ -73,6 +73,7 @@ For quick integration checks against the deployed backend, you can use dedicated
 
 ```bash
 npm run dev:live
+npm run build:pilot
 npm run build:live
 npm run preview:live
 ```
@@ -80,7 +81,9 @@ npm run preview:live
 These scripts force:
 
 - `VITE_USE_MOCK_API=false`
-- `VITE_API_URL=https://api.65-109-135-215.sslip.io`
+- `VITE_API_URL=https://sovorir-api.2.28.11.199.sslip.io`
+
+`build:pilot` keeps developer tools such as Reset Progress available for acceptance testing. `build:live` disables them for an external production build.
 
 ## Separate admin app
 
@@ -130,7 +133,7 @@ Recommended next backend endpoints after auth:
 
 The backend is currently available at:
 
-- `https://api.65-109-135-215.sslip.io`
+- `https://sovorir-api.2.28.11.199.sslip.io`
 
 Seeded backend credentials:
 

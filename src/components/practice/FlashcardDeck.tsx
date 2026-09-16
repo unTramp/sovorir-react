@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { FlashcardCard } from './FlashcardCard';
-import { dictionary } from '../../data/dictionary';
 
 export function FlashcardDeck() {
   const [revealed, setRevealed] = useState(false);
   const session = useFlashcardStore((s) => s.session);
   const answerCard = useFlashcardStore((s) => s.answerCard);
+  const words = useFlashcardStore((state) => state.words);
 
   if (!session) return null;
 
   const currentWordId = session.cards[session.currentIndex];
-  const word = dictionary.find((w) => w.id === currentWordId);
+  const word = currentWordId ? words[currentWordId] : undefined;
 
   if (!word) return null;
 

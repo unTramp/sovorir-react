@@ -2,6 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { BackArrowIcon, CheckIcon, LockIcon } from '../../icons';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import type { Lesson } from '../../types/lesson';
+import { useAppStore } from '../../stores/useAppStore';
+import { useLessonStore } from '../../stores/useLessonStore';
+import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 
 function lessonMeta(lesson: Lesson) {
   const availableSections = lesson.sections.filter((section) => section.type !== 'video');
@@ -16,6 +19,16 @@ function lessonMeta(lesson: Lesson) {
 export function CourseView() {
   const navigate = useNavigate();
   const { lessons, isLoading, error } = useLessonCatalog();
+  const setCurrentLesson = useAppStore((state) => state.setCurrentLesson);
+  const setCurrentSection = useLessonStore((state) => state.setCurrentSection);
+  const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
+
+  const openLesson = (lesson: Lesson) => {
+    setCurrentLesson(lesson.id);
+    setCurrentSection(1);
+    selectLesson(lesson.apiId);
+    navigate('/lesson?section=1');
+  };
 
   if (isLoading && lessons.length === 0) {
     return <div className="course-state">Загружаем курс…</div>;
@@ -44,15 +57,15 @@ export function CourseView() {
               key={lesson.id}
               className={`course-card course-card--${lesson.status} ${lesson.status === 'current' ? 'surface-card--interactive' : 'surface-card'}`}
               type="button"
-              disabled={isLocked || isCompleted}
-              onClick={() => navigate('/lesson')}
+              disabled={isLocked}
+              onClick={() => openLesson(lesson)}
             >
               <span className="course-card__number">
                 {isCompleted ? <CheckIcon /> : isLocked ? <LockIcon /> : lesson.id}
               </span>
               <span className="course-card__content">
                 <span className="course-card__status">
-                  {isCompleted ? 'Завершён' : isLocked ? 'Откроется после предыдущего урока' : 'Текущий урок'}
+                  {isCompleted ? 'Можно повторить' : isLocked ? 'Откроется после предыдущего урока' : 'Текущий урок'}
                 </span>
                 <span className="course-card__title">{lesson.title}</span>
                 <span className="course-card__meta">{count} {count === 1 ? 'раздел' : count < 5 ? 'раздела' : 'разделов'}</span>
