@@ -8,6 +8,8 @@ import { useLessonCatalogStore } from '../stores/useLessonCatalogStore';
 import { useLessonProgress } from '../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../stores/useLessonSectionsStore';
 import { useLessonStore } from '../stores/useLessonStore';
+import { useFlashcardStore } from '../stores/useFlashcardStore';
+import { useRecordingStore } from '../stores/useRecordingStore';
 
 export async function resetUserProgress(): Promise<void> {
   if (!isMockApiEnabled) {
@@ -18,6 +20,8 @@ export async function resetUserProgress(): Promise<void> {
   useLearningItemStore.setState({ items: {}, reviewQueue: {} });
   useInteractionAttemptStore.setState({ attempts: {} });
   useLessonAttemptSessionStore.setState({ attemptIds: {} });
+  useFlashcardStore.setState({ progress: {}, availableWordIds: [], session: null });
+  await useRecordingStore.getState().clearRecordings();
 
   useAppStore.getState().setCurrentLesson(1);
   useLessonStore.setState({ currentSection: 1, isFullscreen: false });

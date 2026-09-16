@@ -23,6 +23,7 @@ interface LessonProgressState {
   // Actions
   _initSections: (sections: LessonContentSection[]) => void;
   completeRecord: (sectionId: number, recordIndex: number) => void;
+  retryRecord: (sectionId: number, recordIndex: number) => void;
   completeSection: (sectionId: number) => Promise<boolean>;
   getCompletedCount: (sectionId: number) => number;
   getTotalRecords: (sectionId: number) => number;
@@ -118,6 +119,20 @@ export const useLessonProgress = create<LessonProgressState>()(
             },
           };
         }),
+
+      retryRecord: (sectionId, recordIndex) =>
+        set((state) => ({
+          sections: {
+            ...state.sections,
+            [sectionId]: {
+              completed: false,
+              completedRecords: (state.sections[sectionId]?.completedRecords ?? [])
+                .filter((index) => index < recordIndex),
+              completionStatus: 'idle',
+              completionError: undefined,
+            },
+          },
+        })),
 
       completeSection: async (sectionId) => {
         if (!get().areSectionInteractionsComplete(sectionId)) return false;

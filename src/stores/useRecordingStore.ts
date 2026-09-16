@@ -10,6 +10,7 @@ interface RecordingState {
   saveRecording: (meta: Recording, blob: Blob) => Promise<void>;
   getRecordingUrl: (id: string) => Promise<string | null>;
   deleteRecording: (id: string) => Promise<void>;
+  clearRecordings: () => Promise<void>;
   getRecordingForPrompt: (sectionId: number, recordIndex: number) => Recording | undefined;
 }
 
@@ -39,6 +40,11 @@ export const useRecordingStore = create<RecordingState>()(
           delete rest[id];
           return { recordings: rest };
         });
+      },
+
+      clearRecordings: async () => {
+        await Promise.all(Object.keys(get().recordings).map((id) => deleteBlob(id)));
+        set({ recordings: {} });
       },
 
       getRecordingForPrompt: (sectionId, recordIndex) => {

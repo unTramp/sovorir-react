@@ -24,9 +24,10 @@ function isPhraseBlock(
 interface Props {
   completedRecords: number;
   onRecordComplete: () => void;
+  onRecordRetry: (recordIndex: number) => void;
 }
 
-export function LessonSectionView({ completedRecords, onRecordComplete }: Props) {
+export function LessonSectionView({ completedRecords, onRecordComplete, onRecordRetry }: Props) {
   const currentSection = useLessonStore((s) => s.currentSection);
   const allSections = useLessonSectionsStore((s) => s.sections);
   const sectionCompleted = useLessonProgress((s) => Boolean(s.sections[currentSection]?.completed));
@@ -179,6 +180,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
                   sectionId={currentSection}
                   recordIndex={recIdx}
                   actionDock={interactionDock}
+                  onRecordRetry={recIdx == null ? undefined : () => onRecordRetry(recIdx)}
                 />
               </div>
             );

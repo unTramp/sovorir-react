@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useMediaRecorder } from '../../hooks/useMediaRecorder';
 import { useRecordingStore } from '../../stores/useRecordingStore';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
@@ -28,6 +28,7 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
   const completeAttempt = useInteractionAttemptStore((s) => s.completeAttempt);
   const getOrCreateLessonAttemptId = useLessonAttemptSessionStore((s) => s.getOrCreateAttemptId);
   const attemptIdRef = useRef<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!audioBlob) return;
@@ -48,10 +49,13 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
     ).then(() => {
       if (attemptIdRef.current) completeAttempt(attemptIdRef.current, 'completed', { recordingId: id });
       onComplete();
+    }).catch(() => {
+      setSaveError('Не удалось сохранить запись. Освободите место и попробуйте ещё раз.');
     });
   }, [audioBlob, completeAttempt, duration, getOrCreateLessonAttemptId, onComplete, recordIndex, saveRecording, sectionId, tracking]);
 
   const handleStart = useCallback(() => {
+    setSaveError(null);
     if (tracking) {
       const lessonAttemptId = getOrCreateLessonAttemptId(tracking.lessonId);
       attemptIdRef.current = startAttempt({
@@ -73,8 +77,8 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
 
   return (
     <div className="lesson-record-sticky">
-      {error && (
-        <div className="lesson-record-sticky__error">{error}</div>
+      {(error || saveError) && (
+        <div className="lesson-record-sticky__error" role="alert">{error || saveError}</div>
       )}
       <div className="lesson-record-sticky__actions">
         {isRecording && <AudioLevelMeter level={audioLevel} />}

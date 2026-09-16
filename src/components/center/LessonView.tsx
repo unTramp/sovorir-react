@@ -25,6 +25,7 @@ export function LessonView() {
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
   const setTotalSections = useLessonStore((s) => s.setTotalSections);
   const completeRecord = useLessonProgress((s) => s.completeRecord);
+  const retryRecord = useLessonProgress((s) => s.retryRecord);
   const sectionProgress = useLessonProgress((s) => s.sections[currentSection]);
   const allSections = useLessonSectionsStore((s) => s.sections);
   const sectionsLoading = useLessonSectionsStore((s) => s.isLoading);
@@ -81,6 +82,10 @@ export function LessonView() {
     completeRecord(currentSection, nextRecordIndex);
   }, [completeRecord, currentSection, nextRecordIndex]);
 
+  const handleRecordRetry = useCallback((recordIndex: number) => {
+    retryRecord(currentSection, recordIndex);
+  }, [currentSection, retryRecord]);
+
   if (sectionsLoading && allSections.length === 0) {
     return <div className="flex flex-1 items-center justify-center text-sm text-muted">Загружаем урок…</div>;
   }
@@ -100,6 +105,7 @@ export function LessonView() {
       <LessonSectionView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}
+        onRecordRetry={handleRecordRetry}
       />
     </div>
   );

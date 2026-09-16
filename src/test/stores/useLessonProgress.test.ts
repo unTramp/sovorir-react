@@ -81,6 +81,21 @@ describe('useLessonProgress', () => {
     expect(useLessonProgress.getState().isSectionCompleted(2)).toBe(true);
   });
 
+  it('rewinds the interaction sequence when a recording is retried', () => {
+    const store = useLessonProgress.getState();
+    store.completeRecord(2, 0);
+    store.completeRecord(2, 1);
+    store.completeRecord(2, 2);
+
+    store.retryRecord(2, 1);
+
+    expect(useLessonProgress.getState().sections[2]).toMatchObject({
+      completed: false,
+      completedRecords: [0],
+      completionStatus: 'idle',
+    });
+  });
+
   it('treats pronunciation prompts as record-like completion gates', async () => {
     expect(useLessonProgress.getState().isSectionCompleted(4)).toBe(false);
 

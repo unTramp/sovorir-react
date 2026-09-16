@@ -10,17 +10,20 @@ interface Props {
   completed?: boolean;
   sectionId?: number;
   recordIndex?: number;
+  onRetry?: () => void;
 }
 
 export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
-  ({ block, onSkip, completed, sectionId, recordIndex }, ref) => {
+  ({ block, onSkip, completed, sectionId, recordIndex, onRetry }, ref) => {
     const colonIdx = block.prompt.indexOf(':');
     const label = colonIdx !== -1 ? block.prompt.slice(0, colonIdx).trim() : 'Произнесите';
     const phrase = colonIdx !== -1 ? block.prompt.slice(colonIdx + 1).trim() : block.prompt;
 
     const getRecordingForPrompt = useRecordingStore((s) => s.getRecordingForPrompt);
     const getRecordingUrl = useRecordingStore((s) => s.getRecordingUrl);
+    const deleteRecording = useRecordingStore((s) => s.deleteRecording);
     const [playbackUrl, setPlaybackUrl] = useState<string | null>(null);
+    const [retryError, setRetryError] = useState<string | null>(null);
     const recording = useMemo(() => {
       if (!completed || sectionId == null || recordIndex == null) return undefined;
       return getRecordingForPrompt(sectionId, recordIndex);
@@ -47,6 +50,17 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
       };
     }, [getRecordingUrl, recording]);
 
+    const handleRetry = async () => {
+      if (!recording || !onRetry) return;
+      setRetryError(null);
+      try {
+        await deleteRecording(recording.id);
+        onRetry();
+      } catch {
+        setRetryError('Не удалось удалить запись. Попробуйте ещё раз.');
+      }
+    };
+
     return (
       <div ref={ref} className={`lesson-record-prompt ${completed ? 'lesson-record-prompt--done' : ''}`}>
         <div className="lesson-record-prompt__body">
@@ -60,6 +74,12 @@ export const RecordPrompt = forwardRef<HTMLDivElement, Props>(
               <RecordingPlayback id={`recording-${recording?.id}`} audioUrl={playbackUrl} duration={recording?.duration ?? 0} />
             </div>
           )}
+          {completed && recording && onRetry && (
+            <button type="button" className="lesson-record-prompt__retry" onClick={() => void handleRetry()}>
+              Записать ещё раз
+            </button>
+          )}
+          {retryError && <div className="lesson-record-sticky__error" role="alert">{retryError}</div>}
         </div>
         {onSkip && (
           <button className="lesson-record-prompt__skip" onClick={onSkip}>

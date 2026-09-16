@@ -19,6 +19,7 @@ interface Props {
   sectionId?: number;
   recordIndex?: number;
   actionDock?: HTMLElement | null;
+  onRecordRetry?: () => void;
 }
 
 function toAudioMessage(
@@ -63,7 +64,7 @@ function toAudioMessage(
   };
 }
 
-export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex, actionDock }: Props) {
+export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex, actionDock, onRecordRetry }: Props) {
   switch (block.type) {
     case 'heading':
       return <h2 className="lesson-heading">{block.text}</h2>;
@@ -111,6 +112,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
           completed={recordCompleted}
           sectionId={sectionId}
           recordIndex={recordIndex}
+          onRetry={onRecordRetry}
         />
       );
     case 'dialogue':
