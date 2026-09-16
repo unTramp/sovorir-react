@@ -121,7 +121,7 @@ export const lesson1Canonical: Lesson = {
     },
     {
       id: '81d3f8a4-3d95-46a0-8fab-b3b2bcc876b5', revision: 1, order: 5, type: 'active-recall',
-      title: 'Теперь без подсказки', objective: 'Вспомнить четыре фразы без готовых вариантов.', content: [],
+      title: 'Короткий разговор (без подсказок)', objective: 'Вспомнить четыре фразы без готовых вариантов.', content: [],
       learningItemIds: lesson1LearningItems.map((item) => item.id),
       interactions: lesson1LearningItems.map((item, index) => ({
         id: ['67895208-982f-466c-90ba-7dcf2498014f', '93604e4a-21ee-4b73-83a1-9a6e2a45849b', '8eebd760-7e9f-40f7-9a02-da8413c0bb01', '3b841db3-2f78-41e0-8818-b43e70129216'][index],

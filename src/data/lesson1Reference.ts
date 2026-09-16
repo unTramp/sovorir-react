@@ -68,7 +68,7 @@ export const lesson1Reference: AdminAiLessonDraft = {
       ],
     },
     {
-      title: 'Теперь без подсказки',
+      title: 'Короткий разговор (без подсказок)',
       type: 'review',
       blocks: [
         {

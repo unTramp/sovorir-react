@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { InteractionAttemptOutcome } from '../../domain/learning';
 import type { ActiveRecallBlock } from '../../types/lessonContent';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
@@ -9,9 +10,10 @@ interface Props {
   block: ActiveRecallBlock;
   completed?: boolean;
   onComplete?: () => void;
+  actionDock?: HTMLElement | null;
 }
 
-export function ActiveRecall({ block, completed = false, onComplete }: Props) {
+export function ActiveRecall({ block, completed = false, onComplete, actionDock }: Props) {
   const [hintSheetOpen, setHintSheetOpen] = useState(false);
   const [hintUsed, setHintUsed] = useState(false);
   const [answerVisible, setAnswerVisible] = useState(completed);
@@ -64,28 +66,35 @@ export function ActiveRecall({ block, completed = false, onComplete }: Props) {
   };
 
   return (
-    <section className={`active-recall${completed ? ' active-recall--done' : ''}`} aria-live="polite">
-      <span className="active-recall__eyebrow">Без подсказки</span>
-      <h2 className="active-recall__prompt">{block.prompt}</h2>
+    <section className={`lesson-dialogue active-recall${completed ? ' active-recall--done' : ''}`} aria-live="polite">
+      <p className="lesson-dialogue__instruction">{block.prompt}</p>
 
-      {!answerVisible ? (
-        <div className="active-recall__actions">
-          <button type="button" className="btn btn--primary btn--md" onClick={revealAnswer}>Я ответил</button>
-          <button type="button" className="btn btn--ghost btn--md" onClick={showHint}>Нужна подсказка</button>
+      {answerVisible && (
+        <div className="lesson-dialogue__thread active-recall__thread">
+          <div className="lesson-dialogue__message lesson-dialogue__message--learner active-recall__answer">
+            <span className="lesson-dialogue__speaker">Вы</span>
+            <strong lang="hy">{block.answer.armenian}</strong>
+            <span>{block.answer.transcription}</span>
+            <p>{block.answer.translation}</p>
+          </div>
         </div>
-      ) : (
-        <div className="active-recall__answer">
-          <strong lang="hy">{block.answer.armenian}</strong>
-          <span>{block.answer.transcription}</span>
-          <p>{block.answer.translation}</p>
-          {!completed && (
+      )}
+
+      {!completed && actionDock && createPortal(
+        <div className="lesson-interaction-actions">
+          {!answerVisible ? (
+            <>
+              <button type="button" className="btn btn--primary btn--md" onClick={revealAnswer}>Я ответил</button>
+              <button type="button" className="btn btn--ghost btn--md" onClick={showHint}>Нужна подсказка</button>
+            </>
+          ) : (
             <div className="active-recall__rating" aria-label="Как получилось">
               <button type="button" className="btn btn--secondary btn--md" onClick={() => finish('needs-review')}>Нужно повторить</button>
               <button type="button" className="btn btn--primary btn--md" onClick={() => finish('correct')}>Получилось</button>
             </div>
           )}
         </div>
-      )}
+      , actionDock)}
 
       {hintSheetOpen && (
         <div className="lesson-hint-sheet" role="presentation" onMouseDown={(event) => {

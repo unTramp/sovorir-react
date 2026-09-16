@@ -6388,10 +6388,31 @@ button:focus-visible {
 }
 
 .lesson-dialogue__message--character {
+  position: relative;
   align-self: flex-start;
+  margin-left: 18px;
   border-bottom-left-radius: var(--radius-control);
   background: linear-gradient(145deg, var(--color-bg-white), var(--color-bg-teacher-to));
   color: var(--color-text);
+}
+
+.lesson-dialogue__avatar {
+  position: absolute;
+  top: 12px;
+  left: -18px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--color-bg-content);
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
+  transform: translateX(-50%);
 }
 
 .lesson-dialogue__message--learner {
@@ -6502,10 +6523,7 @@ button:focus-visible {
 }
 
 .active-recall {
-  padding: var(--space-6);
-  border: var(--border-subtle);
-  border-radius: var(--radius-feature);
-  background: linear-gradient(145deg, var(--color-bg-white), var(--color-bg-card-warm));
+  padding: 0;
 }
 
 .active-recall__eyebrow {
@@ -6522,6 +6540,10 @@ button:focus-visible {
   font-family: var(--font-ui);
   font-size: var(--text-screen-title);
   line-height: 1.35;
+}
+
+.active-recall__thread {
+  margin-bottom: 0;
 }
 
 .active-recall__hint {
@@ -6595,6 +6617,11 @@ button:focus-visible {
   gap: var(--space-1);
 }
 
+.active-recall__answer.lesson-dialogue__message {
+  gap: var(--space-1);
+  padding: var(--space-4);
+}
+
 .active-recall__answer strong {
   color: var(--color-text-strong);
   font-family: var(--font-armenian);
@@ -6607,9 +6634,34 @@ button:focus-visible {
 }
 
 .active-recall__answer > p {
-  margin: 0 0 var(--space-4);
+  margin: 0;
   color: var(--color-text);
   font-size: var(--text-translation);
+}
+
+.lesson-interaction-dock {
+  flex-shrink: 0;
+}
+
+.lesson-interaction-dock:empty {
+  display: none;
+}
+
+.lesson-interaction-actions {
+  width: min(calc(100% - 40px), 600px);
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-3) auto calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  padding: 10px;
+  border: var(--border-subtle);
+  border-radius: 20px;
+  background: var(--color-bg-content);
+  box-shadow: var(--shadow-floating);
+}
+
+.lesson-interaction-actions > .btn,
+.lesson-interaction-actions > .active-recall__rating {
+  flex: 1;
 }
 
 .lesson-complete__skills {
@@ -6641,9 +6693,10 @@ button:focus-visible {
 }
 
 @media (max-width: 360px) {
-  .active-recall { padding: var(--space-4); }
+  .active-recall { padding: 0; }
   .lesson-dialogue__message { max-width: 92%; }
   .lesson-dialogue__option { align-items: flex-start; flex-direction: column; }
+  .lesson-interaction-actions { width: calc(100% - 24px); }
 }
 .profile-dev-tools {
   display: grid;

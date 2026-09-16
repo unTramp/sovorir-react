@@ -38,6 +38,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
   const previousVisibleCountRef = useRef(0);
   const recordPromptRef = useRef<HTMLDivElement>(null);
   const [recordPromptVisible, setRecordPromptVisible] = useState(false);
+  const [interactionDock, setInteractionDock] = useState<HTMLDivElement | null>(null);
 
   // Scroll to top on section change
   useEffect(() => {
@@ -177,6 +178,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
                   recordCompleted={isCompletedRecord}
                   sectionId={currentSection}
                   recordIndex={recIdx}
+                  actionDock={interactionDock}
                 />
               </div>
             );
@@ -186,6 +188,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
         </div>
       </div>
       {showCompletionDock && <LessonCompleteCard />}
+      <div ref={setInteractionDock} className="lesson-interaction-dock" />
       {showRecordCTA && (
         <StickyRecordCTA
           onComplete={handleRecordComplete}

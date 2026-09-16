@@ -19,6 +19,7 @@ export function MiniDialogue({ block, completed = false, onComplete }: Props) {
   const [retryCount, setRetryCount] = useState(0);
   const pendingAttemptId = useRef<string | null>(null);
   const selected = block.options.find((option) => option.id === selectedId);
+  const characterInitial = (block.characterRole || block.characterName).trim().charAt(0).toLocaleUpperCase('ru-RU');
   const startAttempt = useInteractionAttemptStore((state) => state.startAttempt);
   const completeAttempt = useInteractionAttemptStore((state) => state.completeAttempt);
   const getOrCreateLessonAttemptId = useLessonAttemptSessionStore((state) => state.getOrCreateAttemptId);
@@ -68,6 +69,7 @@ export function MiniDialogue({ block, completed = false, onComplete }: Props) {
       <p id={`dialogue-${block.tracking?.interactionId ?? 'instruction'}`} className="lesson-dialogue__instruction">{block.instruction}</p>
       <div className="lesson-dialogue__thread" aria-live="polite">
         <div className="lesson-dialogue__message lesson-dialogue__message--character">
+          <span className="lesson-dialogue__avatar" aria-hidden="true">{characterInitial}</span>
           <span className="lesson-dialogue__speaker">{block.characterName}{block.characterRole ? ` · ${block.characterRole}` : ''}</span>
           <span lang="hy">{block.message}</span>
         </div>
@@ -90,6 +92,7 @@ export function MiniDialogue({ block, completed = false, onComplete }: Props) {
         )}
         {reply && (
           <div className="lesson-dialogue__message lesson-dialogue__message--character">
+            <span className="lesson-dialogue__avatar" aria-hidden="true">{characterInitial}</span>
             <span className="lesson-dialogue__speaker">{block.characterName}</span>
             <span lang="hy">{reply}</span>
           </div>

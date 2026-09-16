@@ -27,9 +27,12 @@ beforeEach(() => {
 describe('ActiveRecall', () => {
   it('keeps the answer hidden and uses a neutral hint action', () => {
     const onComplete = vi.fn();
-    render(<ActiveRecall block={block} onComplete={onComplete} />);
+    const actionDock = document.createElement('div');
+    document.body.append(actionDock);
+    render(<ActiveRecall block={block} onComplete={onComplete} actionDock={actionDock} />);
 
     expect(screen.queryByText('Բարև ձեզ։')).not.toBeInTheDocument();
+    expect(actionDock).toContainElement(screen.getByRole('button', { name: 'Я ответил' }));
     fireEvent.click(screen.getByRole('button', { name: 'Нужна подсказка' }));
     expect(screen.getByRole('dialog', { name: 'Вспомните звучание' })).toBeInTheDocument();
     expect(screen.getByText('Начните с «Барев…»')).toBeInTheDocument();

@@ -18,6 +18,7 @@ interface Props {
   recordCompleted?: boolean;
   sectionId?: number;
   recordIndex?: number;
+  actionDock?: HTMLElement | null;
 }
 
 function toAudioMessage(
@@ -62,7 +63,7 @@ function toAudioMessage(
   };
 }
 
-export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex }: Props) {
+export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex, actionDock }: Props) {
   switch (block.type) {
     case 'heading':
       return <h2 className="lesson-heading">{block.text}</h2>;
@@ -115,6 +116,6 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
     case 'dialogue':
       return <MiniDialogue block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
     case 'activeRecall':
-      return <ActiveRecall block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
+      return <ActiveRecall block={block} completed={recordCompleted} onComplete={onSkipRecord} actionDock={actionDock} />;
   }
 }
