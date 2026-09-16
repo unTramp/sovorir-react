@@ -2177,7 +2177,12 @@ html.drawer-lock {
 }
 
 .lesson-block-enter {
-  animation: blockSlideIn 0.2s ease-out both;
+  animation: lessonFadeIn 0.16s ease-out both;
+}
+
+@keyframes lessonFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ==================== Typing Indicator ==================== */
@@ -2328,7 +2333,6 @@ html.drawer-lock {
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid rgb(var(--color-primary-rgb) / 0.12);
   z-index: 10;
-  animation: blockSlideIn 0.3s ease-out both;
 }
 
 .lesson-record-sticky__error {
@@ -2466,7 +2470,6 @@ html.drawer-lock {
     inset 0 0 0 1px rgb(var(--color-primary-rgb) / 0.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  animation: blockSlideIn 0.24s ease-out both;
 }
 
 .lesson-action-dock__content {

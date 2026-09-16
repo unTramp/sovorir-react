@@ -37,8 +37,6 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevSectionRef = useRef(currentSection);
   const previousVisibleCountRef = useRef(0);
-  const recordPromptRef = useRef<HTMLDivElement>(null);
-  const [recordPromptVisible, setRecordPromptVisible] = useState(false);
   const [interactionDock, setInteractionDock] = useState<HTMLDivElement | null>(null);
 
   // Scroll to top on section change
@@ -77,24 +75,10 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
       return;
     }
     if (visibleBlocks.length > previousVisibleCountRef.current && bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      bottomRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest' });
     }
     previousVisibleCountRef.current = visibleBlocks.length;
   }, [visibleBlocks.length, allRecordsCompleted, currentSection]);
-
-  // Show/hide sticky CTA based on record prompt visibility
-  useEffect(() => {
-    const el = recordPromptRef.current;
-    const root = scrollRef.current;
-    if (!el || !root) { setRecordPromptVisible(false); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setRecordPromptVisible(entry.isIntersecting),
-      { root, threshold: 0.3 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [visibleBlocks.length, currentSection]);
 
   const handleRecordComplete = useCallback(() => {
     onRecordComplete();
@@ -132,10 +116,11 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
     isRequiredInteraction(visibleBlocks[visibleBlocks.length - 1]);
   const activeBlock = visibleBlocks[visibleBlocks.length - 1];
   const showRecordCTA = hasActiveRecord
-    && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt')
-    && recordPromptVisible;
+    && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt');
 
-  const showCompletionDock = allRecordsCompleted && !sectionCompleted;
+  const isLastSection = currentSection >= allSections.length;
+  const showCompletedSuccessInScroll = allRecordsCompleted && sectionCompleted && isLastSection;
+  const showCompletionDock = allRecordsCompleted && (!sectionCompleted || !isLastSection);
 
   return (
     <div className="lesson-section-layout">
@@ -175,7 +160,6 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
                   block={block}
                   index={i}
                   onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
-                  recordRef={isLastRecord ? recordPromptRef : undefined}
                   recordCompleted={isCompletedRecord}
                   sectionId={currentSection}
                   recordIndex={recIdx}
@@ -185,7 +169,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
               </div>
             );
           })}
-          {allRecordsCompleted && sectionCompleted && <LessonCompleteCard />}
+          {showCompletedSuccessInScroll && <LessonCompleteCard />}
           <div ref={bottomRef} />
         </div>
       </div>
@@ -193,6 +177,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
       <div ref={setInteractionDock} className="lesson-interaction-dock" />
       {showRecordCTA && (
         <StickyRecordCTA
+          key={`${currentSection}-${completedRecords}`}
           onComplete={handleRecordComplete}
           sectionId={currentSection}
           recordIndex={completedRecords}

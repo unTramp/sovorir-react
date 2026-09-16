@@ -54,7 +54,9 @@ vi.mock('../../components/lesson/BlockRenderer', () => ({
 }));
 
 vi.mock('../../components/lesson/StickyRecordCTA', () => ({
-  StickyRecordCTA: () => null,
+  StickyRecordCTA: ({ recordIndex }: { recordIndex: number }) => (
+    <div data-testid="record-action-dock">Запись {recordIndex + 1}</div>
+  ),
 }));
 
 vi.mock('../../components/lesson/LessonCompleteCard', () => ({
@@ -116,6 +118,24 @@ describe('LessonView', () => {
   });
 
   it('renders completion CTA outside the scrollable lesson content', () => {
+    const { container } = renderLesson();
+    const scroll = container.querySelector('.lesson-scroll');
+    const action = screen.getByTestId('lesson-completion-action');
+
+    expect(scroll).not.toContainElement(action);
+    expect(action.parentElement).toHaveClass('lesson-section-layout');
+  });
+
+  it('keeps the next-section CTA docked when a non-final section is already completed', () => {
+    useLessonProgress.setState({
+      sections: {
+        1: {
+          completedRecords: [],
+          completed: true,
+          completionStatus: 'confirmed',
+        },
+      },
+    });
     const { container } = renderLesson();
     const scroll = container.querySelector('.lesson-scroll');
     const action = screen.getByTestId('lesson-completion-action');
@@ -194,5 +214,27 @@ describe('LessonView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Завершить интерактив' }));
     expect(useLessonProgress.getState().sections[1]?.completedRecords).toEqual([0, 1]);
+  });
+
+  it('keeps the recording action dock mounted while skipping between audio answers', () => {
+    const recordingSections = [
+      {
+        id: 1,
+        title: 'Слушаем и повторяем',
+        type: 'practice',
+        blocks: [
+          { type: 'record', prompt: 'Произнесите: Բարև' },
+          { type: 'record', prompt: 'Произнесите: Առայժմ' },
+        ],
+      },
+    ] as unknown as LessonContentSection[];
+
+    useLessonStore.setState({ currentSection: 1, totalSections: 1 });
+    useLessonSectionsStore.setState({ sections: recordingSections, isLoading: false, error: null });
+    renderLesson('/lesson?section=1');
+
+    expect(screen.getByTestId('record-action-dock')).toHaveTextContent('Запись 1');
+    fireEvent.click(screen.getByRole('button', { name: 'Завершить интерактив' }));
+    expect(screen.getByTestId('record-action-dock')).toHaveTextContent('Запись 2');
   });
 });
