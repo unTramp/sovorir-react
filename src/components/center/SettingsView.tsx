@@ -24,6 +24,7 @@ export function SettingsView() {
     .filter((section) => section.type !== 'video' && section.status === 'completed').length;
   const xp = completedSections * 32;
   const isStudent = profile?.role === 'student';
+  const devToolsEnabled = import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEV_TOOLS === 'true';
   const coursePercent = lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0;
 
   const handleResetProgress = async () => {
@@ -93,7 +94,7 @@ export function SettingsView() {
         </button>
       </section>
 
-      {import.meta.env.DEV && isStudent && (
+      {devToolsEnabled && isStudent && (
         <section className="profile-dev-tools" aria-labelledby="dev-tools-title">
           <div>
             <span className="profile-account__label">Для разработки</span>
