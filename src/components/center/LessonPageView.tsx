@@ -2,6 +2,7 @@ import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { ContentBlock } from '../../types/lessonContent';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { useLessonProgress } from '../../stores/useLessonProgress';
 import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
@@ -28,6 +29,7 @@ interface Props {
 export function LessonSectionView({ completedRecords, onRecordComplete }: Props) {
   const currentSection = useLessonStore((s) => s.currentSection);
   const allSections = useLessonSectionsStore((s) => s.sections);
+  const sectionCompleted = useLessonProgress((s) => Boolean(s.sections[currentSection]?.completed));
 
   const section = allSections.find((item) => item.id === currentSection);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -131,54 +133,59 @@ export function LessonSectionView({ completedRecords, onRecordComplete }: Props)
     && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt')
     && recordPromptVisible;
 
+  const showCompletionDock = allRecordsCompleted && !sectionCompleted;
+
   return (
-    <div ref={scrollRef} className="lesson-scroll">
-      <div className={`max-w-3xl mx-auto px-6 pt-8 ${allRecordsCompleted ? 'pb-6' : 'pb-32'}`}>
-        <header className="lesson-step-heading">
-          <h1 className="lesson-step-heading__title">{section.title}</h1>
-        </header>
-        {visibleBlocks.map((block, i) => {
-          if (isPhraseBlock(block)) {
-            if (i > 0 && isPhraseBlock(visibleBlocks[i - 1])) return null;
+    <div className="lesson-section-layout">
+      <div ref={scrollRef} className="lesson-scroll">
+        <div className="lesson-section-content">
+          <header className="lesson-step-heading">
+            <h1 className="lesson-step-heading__title">{section.title}</h1>
+          </header>
+          {visibleBlocks.map((block, i) => {
+            if (isPhraseBlock(block)) {
+              if (i > 0 && isPhraseBlock(visibleBlocks[i - 1])) return null;
 
-            const items: Array<{
-              block: Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }>;
-              index: number;
-            }> = [];
+              const items: Array<{
+                block: Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }>;
+                index: number;
+              }> = [];
 
-            for (let phraseIndex = i; phraseIndex < visibleBlocks.length; phraseIndex++) {
-              const phraseBlock = visibleBlocks[phraseIndex];
-              if (!isPhraseBlock(phraseBlock)) break;
-              items.push({ block: phraseBlock, index: phraseIndex });
+              for (let phraseIndex = i; phraseIndex < visibleBlocks.length; phraseIndex++) {
+                const phraseBlock = visibleBlocks[phraseIndex];
+                if (!isPhraseBlock(phraseBlock)) break;
+                items.push({ block: phraseBlock, index: phraseIndex });
+              }
+
+              return (
+                <div key={`${currentSection}-phrases-${i}`} className="lesson-block-enter">
+                  <PhraseGroup items={items} sectionId={currentSection} />
+                </div>
+              );
             }
 
+            const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
+            const isCompletedRecord = isRequiredInteraction(block) && !isLastRecord;
+            const recIdx = recordIndexMap.get(i);
             return (
-              <div key={`${currentSection}-phrases-${i}`} className="lesson-block-enter">
-                <PhraseGroup items={items} sectionId={currentSection} />
+              <div key={`${currentSection}-${i}`} className="lesson-block-enter">
+                <BlockRenderer
+                  block={block}
+                  index={i}
+                  onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
+                  recordRef={isLastRecord ? recordPromptRef : undefined}
+                  recordCompleted={isCompletedRecord}
+                  sectionId={currentSection}
+                  recordIndex={recIdx}
+                />
               </div>
             );
-          }
-
-          const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
-          const isCompletedRecord = isRequiredInteraction(block) && !isLastRecord;
-          const recIdx = recordIndexMap.get(i);
-          return (
-            <div key={`${currentSection}-${i}`} className="lesson-block-enter">
-              <BlockRenderer
-                block={block}
-                index={i}
-                onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
-                recordRef={isLastRecord ? recordPromptRef : undefined}
-                recordCompleted={isCompletedRecord}
-                sectionId={currentSection}
-                recordIndex={recIdx}
-              />
-            </div>
-          );
-        })}
-        {allRecordsCompleted && <LessonCompleteCard />}
-        <div ref={bottomRef} />
+          })}
+          {allRecordsCompleted && sectionCompleted && <LessonCompleteCard />}
+          <div ref={bottomRef} />
+        </div>
       </div>
+      {showCompletionDock && <LessonCompleteCard />}
       {showRecordCTA && (
         <StickyRecordCTA
           onComplete={handleRecordComplete}

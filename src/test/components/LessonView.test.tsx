@@ -58,7 +58,7 @@ vi.mock('../../components/lesson/StickyRecordCTA', () => ({
 }));
 
 vi.mock('../../components/lesson/LessonCompleteCard', () => ({
-  LessonCompleteCard: () => null,
+  LessonCompleteCard: () => <div data-testid="lesson-completion-action" />,
 }));
 
 const MOCK_SECTIONS: LessonContentSection[] = [
@@ -113,6 +113,15 @@ describe('LessonView', () => {
   it('shows section 1 content by default', () => {
     renderLesson();
     expect(screen.getByTestId('block-heading')).toBeInTheDocument();
+  });
+
+  it('renders completion CTA outside the scrollable lesson content', () => {
+    const { container } = renderLesson();
+    const scroll = container.querySelector('.lesson-scroll');
+    const action = screen.getByTestId('lesson-completion-action');
+
+    expect(scroll).not.toContainElement(action);
+    expect(action.parentElement).toHaveClass('lesson-section-layout');
   });
 
   it('shows section 2 content when currentSection is 2', () => {

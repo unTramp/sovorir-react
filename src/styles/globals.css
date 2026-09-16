@@ -2307,10 +2307,8 @@ html.drawer-lock {
 
 /* ==================== Sticky Record CTA ==================== */
 .lesson-record-sticky {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: relative;
+  flex-shrink: 0;
   padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 0px));
   background: rgb(var(--color-bg-content-rgb) / 0.85);
   backdrop-filter: blur(12px);
@@ -2437,15 +2435,15 @@ html.drawer-lock {
 
 /* ==================== Lesson Step Navigation ==================== */
 .lesson-action-dock {
-  position: sticky;
-  bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  position: relative;
+  flex-shrink: 0;
   z-index: 12;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  width: min(100%, 600px);
-  margin: var(--space-8) auto 0;
+  width: min(calc(100% - 40px), 600px);
+  margin: var(--space-3) auto calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   padding: 10px 10px 10px 16px;
   border-radius: 20px;
   background: var(--color-bg-content);
@@ -2521,7 +2519,8 @@ html.drawer-lock {
     align-items: stretch;
     flex-direction: column;
     gap: 8px;
-    margin-top: var(--space-6);
+    width: calc(100% - 24px);
+    margin: var(--space-2) auto calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
     padding: 10px;
   }
 
@@ -4999,6 +4998,10 @@ html.drawer-lock {
   background: var(--color-bg-content);
 }
 
+.app-shell--lesson {
+  padding-bottom: 0;
+}
+
 .mobile-header {
   background: var(--color-bg-content);
   padding-top: env(safe-area-inset-top, 0px);
@@ -5308,13 +5311,30 @@ button:focus-visible {
 }
 
 /* ── LessonPageView scroll container ── */
+.lesson-section-layout {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg-content);
+}
+
 .lesson-scroll {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   background: var(--color-bg-content);
 }
 .lesson-scroll::-webkit-scrollbar { display: none; }
 .lesson-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+.lesson-section-content {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+}
 
 .lesson-step-heading {
   margin: 0 0 24px;
