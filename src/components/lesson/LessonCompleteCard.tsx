@@ -55,7 +55,7 @@ export function LessonCompleteCard() {
     saveQuizResult(currentSection, result);
   }, [currentSection, saveQuizResult]);
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = () => {
     void (async () => {
       const confirmed = await completeSection(currentSection);
       if (!confirmed) return;
@@ -78,7 +78,7 @@ export function LessonCompleteCard() {
         navigate(getLessonPath(lessonApiId, nextSectionNumber));
       }
     })();
-  }, [allSections, canonical, completeSection, currentSection, finishLessonAttempt, isLastSection, lessonApiId, navigate, nextSection, unlockWords]);
+  };
 
   return (
     <>
