@@ -4,6 +4,7 @@ import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
 import { LessonSectionView } from './LessonPageView';
 import { useAppStore } from '../../stores/useAppStore';
 
@@ -18,6 +19,7 @@ export function LessonView() {
   const lessonToOpen = selectedLesson ?? currentLesson;
   const currentLessonId = lessonToOpen?.id;
   const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
+  const hydrateLessonAttempts = useInteractionAttemptStore((state) => state.hydrateLessonAttempts);
 
   // Redirect to home if course complete or no current lesson (once catalog is loaded)
   useEffect(() => {
@@ -42,6 +44,11 @@ export function LessonView() {
     selectLesson(lessonToOpen.apiId);
     reloadSections(true);
   }, [currentLessonId, lessonToOpen, reloadSections, selectLesson]);
+
+  useEffect(() => {
+    if (!lessonToOpen?.apiId) return;
+    void hydrateLessonAttempts(lessonToOpen.apiId);
+  }, [hydrateLessonAttempts, lessonToOpen?.apiId]);
 
   // Sync totalSections into useLessonStore whenever sections change
   useEffect(() => {
