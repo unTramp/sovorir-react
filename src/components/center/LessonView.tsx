@@ -7,7 +7,7 @@ import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
 import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
 import { completedRecordIndicesFromAttempts, latestLessonAttemptId } from '../../lib/interactionResume';
-import { getLessonPath } from '../../lib/lessonNavigation';
+import { getLessonPath, resolveLessonForRoute } from '../../lib/lessonNavigation';
 import { LessonSectionView } from './LessonPageView';
 
 const EMPTY_COMPLETED_RECORDS: number[] = [];
@@ -20,10 +20,7 @@ export function LessonView() {
     () => new URLSearchParams(location.search).get('lesson'),
     [location.search],
   );
-  const requestedLesson = requestedLessonApiId
-    ? lessons.find((lesson) => lesson.apiId === requestedLessonApiId && lesson.status !== 'locked') ?? null
-    : null;
-  const lessonToOpen = requestedLessonApiId ? requestedLesson : currentLesson;
+  const lessonToOpen = resolveLessonForRoute(lessons, currentLesson, requestedLessonApiId);
   const currentLessonId = lessonToOpen?.id;
   const lessonApiId = lessonToOpen?.apiId;
   const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
