@@ -8,6 +8,7 @@ import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { usePracticeSessionStore } from '../../stores/usePracticeSessionStore';
 import { useRecordingStore } from '../../stores/useRecordingStore';
 
 const id = '0e4f97bb-9e24-4fbb-8f88-c44a3ff6e710';
@@ -27,6 +28,14 @@ describe('resetUserProgress', () => {
       availableWordIds: ['word'],
       session: { cards: ['word'], currentIndex: 0, results: {} },
     });
+    usePracticeSessionStore.setState({
+      session: {
+        cards: [{ itemId: id, mode: 'recall' }],
+        currentIndex: 0,
+        results: {},
+        startedAt: '2026-09-18T00:00:00.000Z',
+      },
+    });
     useRecordingStore.setState({ recordings: {} });
     useAppStore.getState().setCurrentLesson(3);
     useLessonStore.setState({ currentSection: 4, isFullscreen: true });
@@ -40,6 +49,7 @@ describe('resetUserProgress', () => {
     expect(useInteractionAttemptStore.getState()).toMatchObject({ attempts: {}, syncState: {} });
     expect(useLessonAttemptSessionStore.getState().attemptIds).toEqual({});
     expect(useFlashcardStore.getState()).toMatchObject({ progress: {}, availableWordIds: [], session: null });
+    expect(usePracticeSessionStore.getState().session).toBeNull();
     expect(useRecordingStore.getState().recordings).toEqual({});
     expect(useAppStore.getState().currentLesson).toBe(1);
     expect(useLessonStore.getState()).toMatchObject({ currentSection: 1, isFullscreen: false });
