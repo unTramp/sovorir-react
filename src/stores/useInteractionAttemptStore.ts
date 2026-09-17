@@ -157,6 +157,6 @@ export const useInteractionAttemptStore = create<InteractionAttemptState>()(
         }),
       };
     },
-    { name: 'sovorir-interaction-attempts-v1', version: 2 },
+    { name: 'sovorir-interaction-attempts-v1', version: 1 },
   ),
 );
