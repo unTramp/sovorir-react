@@ -41,7 +41,7 @@ export function semanticBlockLabel(type: SemanticBlockType) {
     case 'multipleChoice':
       return 'Тест с выбором';
     case 'teacherBubble':
-      return 'Бабл преподавателя';
+      return 'Бабл наставника';
     case 'phraseCard':
       return 'Карточка фразы';
     case 'rule':
@@ -49,7 +49,7 @@ export function semanticBlockLabel(type: SemanticBlockType) {
     case 'readingText':
       return 'Текст для чтения';
     case 'video':
-      return 'Видео';
+      return 'Видео / кружок / сцена';
   }
 }
 
@@ -156,8 +156,8 @@ export function makeDefaultSemanticBlockContent(type: SemanticBlockType): Conten
       return {
         type: 'audio',
         sender: 'teacher',
-        senderName: 'Лусине',
-        text: 'Короткое сообщение преподавателя с аудио.',
+        senderName: 'Ани',
+        text: 'Короткое сообщение наставника с аудио.',
         src: 'https://example.com/audio.opus',
       };
     case 'phraseCard':
@@ -183,10 +183,11 @@ export function makeDefaultSemanticBlockContent(type: SemanticBlockType): Conten
     case 'video':
       return {
         type: 'video',
-        senderName: 'Лусине',
-        text: 'Видео-объяснение преподавателя',
+        presentation: 'lesson',
+        senderName: 'Ани',
+        text: 'Видео с конкретной учебной ролью',
         videoSrc: 'https://example.com/video.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80',
+        posterMode: 'first-frame',
       };
   }
 }
