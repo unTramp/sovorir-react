@@ -6,6 +6,7 @@ export interface DrawerItemProps {
   label: string;
   icon: React.ReactNode;
   viewId?: SectionType;
+  path?: string;
   badge?: string;
   pro?: boolean;
 }
@@ -14,15 +15,15 @@ function viewToPath(viewId: SectionType): string {
   return viewId === 'home' ? '/' : `/${viewId}`;
 }
 
-export function DrawerItem({ label, icon, viewId, badge, pro }: DrawerItemProps) {
+export function DrawerItem({ label, icon, viewId, path, badge, pro }: DrawerItemProps) {
   const navigate = useNavigate();
   const toggleSidebar = useAppStore((s) => s.toggleSidebar);
-  const path = viewId ? viewToPath(viewId) : '/';
-  const match = useMatch(path);
+  const targetPath = path ?? (viewId ? viewToPath(viewId) : '/');
+  const match = useMatch(targetPath);
   const isActive = !!match;
 
   function handleClick() {
-    if (viewId) navigate(path);
+    if (viewId || path) navigate(targetPath);
     toggleSidebar(false);
   }
 

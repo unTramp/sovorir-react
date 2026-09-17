@@ -2,35 +2,42 @@ import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
 import type { ContentBlock } from '../../types/lessonContent';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { useLessonProgress } from '../../stores/useLessonProgress';
 import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
+import { PhraseGroup } from '../lesson/PhraseGroup';
 
-function isRecordLikeBlock(block: ContentBlock) {
-  return block.type === 'record' || block.type === 'pronunciationPrompt';
+function isRequiredInteraction(block: ContentBlock) {
+  return block.type === 'record'
+    || block.type === 'pronunciationPrompt'
+    || block.type === 'dialogue'
+    || block.type === 'activeRecall';
 }
 
-type LessonTab = 'materials' | 'dictionary' | 'audio' | 'video';
-
-const AUDIO_BLOCK_TYPES = new Set(['audio', 'audioExample', 'teacherBubble', 'studentBubble']);
-const DICTIONARY_BLOCK_TYPES = new Set(['phrase', 'phraseCard']);
+function isPhraseBlock(
+  block: ContentBlock,
+): block is Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }> {
+  return block.type === 'phrase' || block.type === 'phraseCard';
+}
 
 interface Props {
   completedRecords: number;
   onRecordComplete: () => void;
-  activeTab?: LessonTab;
+  onRecordRetry: (recordIndex: number) => void;
 }
 
-export function LessonSectionView({ completedRecords, onRecordComplete, activeTab = 'materials' }: Props) {
+export function LessonSectionView({ completedRecords, onRecordComplete, onRecordRetry }: Props) {
   const currentSection = useLessonStore((s) => s.currentSection);
   const allSections = useLessonSectionsStore((s) => s.sections);
+  const sectionCompleted = useLessonProgress((s) => Boolean(s.sections[currentSection]?.completed));
 
   const section = allSections.find((item) => item.id === currentSection);
   const bottomRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevSectionRef = useRef(currentSection);
-  const recordPromptRef = useRef<HTMLDivElement>(null);
-  const [recordPromptVisible, setRecordPromptVisible] = useState(false);
+  const previousVisibleCountRef = useRef(0);
+  const [interactionDock, setInteractionDock] = useState<HTMLDivElement | null>(null);
 
   // Scroll to top on section change
   useEffect(() => {
@@ -38,61 +45,40 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
   }, [currentSection]);
 
   // Compute record indices and visible blocks
-  const tabFilteredBlocks = useMemo(() => {
-    if (!section) return [] as ContentBlock[];
-    if (activeTab === 'dictionary') return section.blocks.filter((b) => DICTIONARY_BLOCK_TYPES.has(b.type));
-    if (activeTab === 'audio') return section.blocks.filter((b) => AUDIO_BLOCK_TYPES.has(b.type));
-    if (activeTab === 'video') return section.blocks.filter((b) => b.type === 'video');
-    return section.blocks;
-  }, [section, activeTab]);
-
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
     if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
-    // Non-materials tabs show all filtered blocks without record gating
-    if (activeTab !== 'materials') {
-      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: false };
-    }
-
     const recIndices: number[] = [];
-    tabFilteredBlocks.forEach((b, i) => {
-      if (isRecordLikeBlock(b)) recIndices.push(i);
+    section.blocks.forEach((b, i) => {
+      if (isRequiredInteraction(b)) recIndices.push(i);
     });
 
-    const allDone = completedRecords >= recIndices.length;
+    const allDone = sectionCompleted || completedRecords >= recIndices.length;
 
     if (allDone) {
-      return { visibleBlocks: tabFilteredBlocks, allRecordsCompleted: true };
+      return { visibleBlocks: section.blocks, allRecordsCompleted: true };
     }
 
     const cutoffIndex = recIndices[completedRecords];
-    return { visibleBlocks: tabFilteredBlocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords, activeTab, tabFilteredBlocks]);
+    return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
+  }, [section, completedRecords, sectionCompleted]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
     if (prevSectionRef.current !== currentSection) {
       prevSectionRef.current = currentSection;
+      previousVisibleCountRef.current = visibleBlocks.length;
       return;
     }
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (previousVisibleCountRef.current === 0) {
+      previousVisibleCountRef.current = visibleBlocks.length;
+      return;
     }
+    if (visibleBlocks.length > previousVisibleCountRef.current && bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+    }
+    previousVisibleCountRef.current = visibleBlocks.length;
   }, [visibleBlocks.length, allRecordsCompleted, currentSection]);
-
-  // Show/hide sticky CTA based on record prompt visibility
-  useEffect(() => {
-    const el = recordPromptRef.current;
-    const root = scrollRef.current;
-    if (!el || !root) { setRecordPromptVisible(false); return; }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setRecordPromptVisible(entry.isIntersecting),
-      { root, threshold: 0.3 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [visibleBlocks.length, currentSection]);
 
   const handleRecordComplete = useCallback(() => {
     onRecordComplete();
@@ -104,7 +90,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
     const map = new Map<number, number>();
     let counter = 0;
     visibleBlocks.forEach((block, i) => {
-      if (isRecordLikeBlock(block)) map.set(i, counter++);
+      if (isRequiredInteraction(block)) map.set(i, counter++);
     });
     return map;
   }, [visibleBlocks]);
@@ -117,50 +103,86 @@ export function LessonSectionView({ completedRecords, onRecordComplete, activeTa
     );
   }
 
-  if (visibleBlocks.length === 0 && activeTab !== 'materials') {
-    const labels: Record<string, string> = { dictionary: 'слов', audio: 'аудио', video: 'видео' };
+  if (section.blocks.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-muted text-sm">
-        В этом разделе нет {labels[activeTab] ?? 'контента'}
+      <div className="flex-1 flex items-center justify-center px-6 text-center text-muted text-sm">
+        Этот шаг ещё не наполнен. Вернитесь к нему немного позже.
       </div>
     );
   }
 
   const hasActiveRecord = !allRecordsCompleted &&
     visibleBlocks.length > 0 &&
-    isRecordLikeBlock(visibleBlocks[visibleBlocks.length - 1]);
-  const showRecordCTA = hasActiveRecord && recordPromptVisible;
+    isRequiredInteraction(visibleBlocks[visibleBlocks.length - 1]);
+  const activeBlock = visibleBlocks[visibleBlocks.length - 1];
+  const showRecordCTA = hasActiveRecord
+    && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt');
+
+  const isLastSection = currentSection >= allSections.length;
+  const showCompletedSuccessInScroll = allRecordsCompleted && sectionCompleted && isLastSection;
+  const showCompletionDock = allRecordsCompleted && (!sectionCompleted || !isLastSection);
 
   return (
-    <div ref={scrollRef} className="lesson-scroll">
-      <div className="max-w-4xl mx-auto px-6 pt-8 pb-32">
-        {visibleBlocks.map((block, i) => {
-          const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
-          const isCompletedRecord = isRecordLikeBlock(block) && !isLastRecord;
-          const recIdx = recordIndexMap.get(i);
-          return (
-            <div key={`${currentSection}-${i}`} className="lesson-block-enter">
-              <BlockRenderer
-                block={block}
-                index={i}
-                onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
-                recordRef={isLastRecord ? recordPromptRef : undefined}
-                recordCompleted={isCompletedRecord}
-                sectionId={currentSection}
-                recordIndex={recIdx}
-              />
-            </div>
-          );
-        })}
-        {allRecordsCompleted && (
-          <div className="lesson-block-enter">
-            <LessonCompleteCard />
-          </div>
-      )}
-      <div ref={bottomRef} />
+    <div className="lesson-section-layout">
+      <div ref={scrollRef} className="lesson-scroll">
+        <div className="lesson-section-content">
+          <header className="lesson-step-heading">
+            <h1 className="lesson-step-heading__title">{section.title}</h1>
+          </header>
+          {visibleBlocks.map((block, i) => {
+            if (isPhraseBlock(block)) {
+              if (i > 0 && isPhraseBlock(visibleBlocks[i - 1])) return null;
+
+              const items: Array<{
+                block: Extract<ContentBlock, { type: 'phrase' | 'phraseCard' }>;
+                index: number;
+              }> = [];
+
+              for (let phraseIndex = i; phraseIndex < visibleBlocks.length; phraseIndex++) {
+                const phraseBlock = visibleBlocks[phraseIndex];
+                if (!isPhraseBlock(phraseBlock)) break;
+                items.push({ block: phraseBlock, index: phraseIndex });
+              }
+
+              return (
+                <div key={`${currentSection}-phrases-${i}`} className="lesson-block-enter">
+                  <PhraseGroup items={items} sectionId={currentSection} />
+                </div>
+              );
+            }
+
+            const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
+            const isCompletedRecord = isRequiredInteraction(block) && !isLastRecord;
+            const recIdx = recordIndexMap.get(i);
+            return (
+              <div key={`${currentSection}-${i}`} className="lesson-block-enter">
+                <BlockRenderer
+                  block={block}
+                  index={i}
+                  onSkipRecord={isLastRecord ? handleRecordComplete : undefined}
+                  recordCompleted={isCompletedRecord}
+                  sectionId={currentSection}
+                  recordIndex={recIdx}
+                  actionDock={interactionDock}
+                  onRecordRetry={recIdx == null ? undefined : () => onRecordRetry(recIdx)}
+                />
+              </div>
+            );
+          })}
+          {showCompletedSuccessInScroll && <LessonCompleteCard />}
+          <div ref={bottomRef} />
+        </div>
       </div>
+      {showCompletionDock && <LessonCompleteCard />}
+      <div ref={setInteractionDock} className="lesson-interaction-dock" />
       {showRecordCTA && (
-        <StickyRecordCTA onComplete={handleRecordComplete} sectionId={currentSection} recordIndex={completedRecords} />
+        <StickyRecordCTA
+          key={`${currentSection}-${completedRecords}`}
+          onComplete={handleRecordComplete}
+          sectionId={currentSection}
+          recordIndex={completedRecords}
+          tracking={activeBlock.type === 'record' || activeBlock.type === 'pronunciationPrompt' ? activeBlock.tracking : undefined}
+        />
       )}
     </div>
   );

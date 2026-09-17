@@ -4,80 +4,72 @@ import type { FlashcardProgress, FlashcardSession } from '../types/flashcard';
 import type { DictionaryWord } from '../types/dictionary';
 import { contentRepository } from '../lib/contentRepository';
 import { practiceEvents } from '../lib/practiceEvents';
+import { useLearningItemStore } from './useLearningItemStore';
 
 interface FlashcardState {
   progress: Record<string, FlashcardProgress>;
+  availableWordIds: string[];
   session: FlashcardSession | null;
   wordsReady: boolean;
+  words: Record<string, DictionaryWord>;
 
   _initWords: (words: DictionaryWord[]) => void;
   startSession: () => void;
+  unlockWords: (wordIds: string[]) => void;
   answerCard: (wordId: string, quality: 'again' | 'hard' | 'easy') => void;
   getNextReviewDate: (wordId: string) => number;
   getLearnedCount: () => number;
+  getDueCount: () => number;
+  getAvailableCount: () => number;
 }
 
 const SESSION_SIZE = 10;
-
-let _flashcardWords: DictionaryWord[] = [];
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 contentRepository.getFlashcardWords().then((words) => {
   useFlashcardStore.getState()._initWords(words);
 });
 
-function selectCards(progress: Record<string, FlashcardProgress>): string[] {
+function selectCards(
+  progress: Record<string, FlashcardProgress>,
+  availableWordIds: string[],
+  words: Record<string, DictionaryWord>,
+): string[] {
   const now = Date.now();
-  const allIds = _flashcardWords.map((w) => w.id);
-
-  const overdue: { id: string; priority: number }[] = [];
-  const newCards: string[] = [];
-  const reviewed: { id: string; interval: number }[] = [];
-
-  for (const id of allIds) {
-    const p = progress[id];
-    if (!p) {
-      newCards.push(id);
-    } else if (p.nextReview <= now) {
-      overdue.push({ id, priority: now - p.nextReview });
-    } else {
-      reviewed.push({ id, interval: p.interval });
-    }
-  }
-
-  overdue.sort((a, b) => b.priority - a.priority);
-  reviewed.sort((a, b) => a.interval - b.interval);
-
-  const selected: string[] = [];
-  for (const o of overdue) {
-    if (selected.length >= SESSION_SIZE) break;
-    selected.push(o.id);
-  }
-  for (const n of newCards) {
-    if (selected.length >= SESSION_SIZE) break;
-    selected.push(n);
-  }
-  for (const r of reviewed) {
-    if (selected.length >= SESSION_SIZE) break;
-    selected.push(r.id);
-  }
-
-  return selected;
+  return availableWordIds
+    .filter((id) => words[id] && (!progress[id] || progress[id].nextReview <= now))
+    .sort((a, b) => (progress[a]?.nextReview ?? 0) - (progress[b]?.nextReview ?? 0))
+    .slice(0, SESSION_SIZE);
 }
 
 export const useFlashcardStore = create<FlashcardState>()(
   persist(
     (set, get) => ({
       progress: {},
+      availableWordIds: [],
       session: null,
       wordsReady: false,
+      words: {},
 
       _initWords: (words: DictionaryWord[]) => {
-        _flashcardWords = words;
-        set({ wordsReady: true });
+        set((state) => {
+          const mergedWords = {
+            ...state.words,
+            ...Object.fromEntries(words.map((word) => [word.id, word])),
+          };
+          return {
+            words: mergedWords,
+            wordsReady: true,
+            availableWordIds: Array.from(new Set([
+              ...state.availableWordIds,
+              ...Object.keys(state.progress),
+            ])).filter((id) => Boolean(mergedWords[id])),
+          };
+        });
       },
 
       startSession: () => {
-        const cards = selectCards(get().progress);
+        const cards = selectCards(get().progress, get().availableWordIds, get().words);
         set({
           session: {
             cards,
@@ -86,6 +78,21 @@ export const useFlashcardStore = create<FlashcardState>()(
           },
         });
       },
+
+      unlockWords: (wordIds) => set((state) => {
+        const nextIds = wordIds.filter((id) => state.words[id]);
+        const nextReview = Date.now() + DAY_MS;
+        const progress = { ...state.progress };
+        nextIds.forEach((id) => {
+          if (!progress[id]) {
+            progress[id] = { wordId: id, interval: 1, nextReview, easeFactor: 2.5 };
+          }
+        });
+        return {
+          progress,
+          availableWordIds: Array.from(new Set([...state.availableWordIds, ...nextIds])),
+        };
+      }),
 
       answerCard: (wordId, quality) =>
         set((state) => {
@@ -108,9 +115,11 @@ export const useFlashcardStore = create<FlashcardState>()(
           const newProgress: FlashcardProgress = {
             wordId,
             interval: Math.round(interval),
-            nextReview: now + interval * 24 * 60 * 60 * 1000,
+            nextReview: now + interval * DAY_MS,
             easeFactor,
           };
+
+          useLearningItemStore.getState().scheduleReview(wordId, quality);
 
           const session = state.session;
           if (!session) return state;
@@ -134,12 +143,19 @@ export const useFlashcardStore = create<FlashcardState>()(
       },
 
       getLearnedCount: () => {
-        return Object.keys(get().progress).length;
+        return get().availableWordIds.length;
       },
+
+      getDueCount: () => selectCards(get().progress, get().availableWordIds, get().words).length,
+
+      getAvailableCount: () => get().availableWordIds.length,
     }),
     {
       name: 'sovorir-flashcard-progress',
-      partialize: (state) => ({ progress: state.progress }),
+      partialize: (state) => ({
+        progress: state.progress,
+        availableWordIds: state.availableWordIds,
+      }),
     },
   ),
 );

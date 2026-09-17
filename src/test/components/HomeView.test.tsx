@@ -5,6 +5,7 @@ import { HomeView } from '../../components/center/HomeView';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
+import { useReviewStore } from '../../stores/useReviewStore';
 import type { Lesson } from '../../types/lesson';
 
 // Prevent actual API / network calls
@@ -80,6 +81,12 @@ beforeEach(() => {
     hasLoaded: true,
     error: null,
   });
+  useReviewStore.setState({
+    queue: [],
+    isLoading: false,
+    error: null,
+    loadQueue: vi.fn().mockResolvedValue(undefined),
+  });
 });
 
 afterEach(() => {
@@ -111,8 +118,8 @@ describe('HomeView', () => {
 
   it('renders practice items', () => {
     renderHome();
-    expect(screen.getByText('Карточки')).toBeInTheDocument();
-    expect(screen.getByText('Ежедневный квиз')).toBeInTheDocument();
+    expect(screen.getByText('Повторение')).toBeInTheDocument();
+    expect(screen.queryByText('Ежедневный квиз')).not.toBeInTheDocument();
   });
 
   it('shows 0 steps left when all sections completed', () => {

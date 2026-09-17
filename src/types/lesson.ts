@@ -12,6 +12,7 @@ export interface Section {
 
 export interface Lesson {
   id: number;
+  apiId?: string;
   title: string;
   icon: string;
   status: LessonStatus;

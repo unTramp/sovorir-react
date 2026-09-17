@@ -11,22 +11,6 @@ vi.mock('../../lib/apiClient', () => ({
   },
 }));
 
-vi.mock('../../hooks/useMediaRecorder', () => ({
-  useMediaRecorder: () => ({
-    start: vi.fn(),
-    stop: vi.fn(),
-    isRecording: false,
-    audioBlob: null,
-    audioLevel: 0,
-    duration: 0,
-    error: null,
-  }),
-}));
-
-vi.mock('../../components/audio/AudioLevelMeter', () => ({
-  AudioLevelMeter: () => null,
-}));
-
 const mockAssignment: Assignment = {
   id: 'asgn-1',
   sectionId: 'sec-1',
@@ -44,10 +28,10 @@ beforeEach(() => {
 });
 
 describe('SubmitModal', () => {
-  it('renders text input and record button', () => {
+  it('renders the text response field without promising an unavailable audio upload', () => {
     render(<SubmitModal assignment={mockAssignment} onClose={mockOnClose} />);
     expect(screen.getByPlaceholderText('Напишите ответ...')).toBeInTheDocument();
-    expect(screen.getByText(/Удерживайте для записи/)).toBeInTheDocument();
+    expect(screen.queryByText(/Удерживайте для записи/)).not.toBeInTheDocument();
   });
 
   it('shows assignment title and description', () => {

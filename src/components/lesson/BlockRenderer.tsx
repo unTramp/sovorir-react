@@ -7,6 +7,8 @@ import { LessonVideoBubble } from './LessonVideoBubble';
 import { RecordPrompt } from './RecordPrompt';
 import { LessonAudioCard } from './LessonAudioCard';
 import { MultipleChoiceCard } from '../quiz/MultipleChoiceCard';
+import { MiniDialogue } from './MiniDialogue';
+import { ActiveRecall } from './ActiveRecall';
 
 interface Props {
   block: ContentBlock;
@@ -16,6 +18,8 @@ interface Props {
   recordCompleted?: boolean;
   sectionId?: number;
   recordIndex?: number;
+  actionDock?: HTMLElement | null;
+  onRecordRetry?: () => void;
 }
 
 function toAudioMessage(
@@ -60,7 +64,7 @@ function toAudioMessage(
   };
 }
 
-export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex }: Props) {
+export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCompleted, sectionId, recordIndex, actionDock, onRecordRetry }: Props) {
   switch (block.type) {
     case 'heading':
       return <h2 className="lesson-heading">{block.text}</h2>;
@@ -69,7 +73,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
       return <p className="lesson-text">{block.content}</p>;
     case 'phrase':
     case 'phraseCard':
-      return <PhraseCard block={block} />;
+      return <PhraseCard block={block} audioId={`phrase-${sectionId ?? 'section'}-${index}`} />;
     case 'audioExample':
       return <LessonAudioCard block={block} index={index} />;
     case 'multipleChoice':
@@ -101,12 +105,19 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
       return (
         <RecordPrompt
           ref={recordRef}
-          block={block.type === 'pronunciationPrompt' ? { type: 'record', prompt: block.prompt } : block}
+          block={block.type === 'pronunciationPrompt'
+            ? { type: 'record', prompt: block.prompt, tracking: block.tracking }
+            : block}
           onSkip={onSkipRecord}
           completed={recordCompleted}
           sectionId={sectionId}
           recordIndex={recordIndex}
+          onRetry={onRecordRetry}
         />
       );
+    case 'dialogue':
+      return <MiniDialogue block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
+    case 'activeRecall':
+      return <ActiveRecall block={block} completed={recordCompleted} onComplete={onSkipRecord} actionDock={actionDock} />;
   }
 }

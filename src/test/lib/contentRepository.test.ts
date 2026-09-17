@@ -55,7 +55,7 @@ describe('FallbackContentRepository', () => {
     expect(seedRepository.getLessonSections).not.toHaveBeenCalled();
   });
 
-  it('falls back to the local draft repository when api content calls fail', async () => {
+  it('surfaces api failures in live mode instead of showing draft content', async () => {
     const seedRepository = createRepositoryStub({
       getLessonSections: vi.fn().mockResolvedValue([{ id: 1, title: 'Static fallback', blocks: [] }]),
       getQuizForSection: vi.fn().mockResolvedValue({
@@ -78,17 +78,15 @@ describe('FallbackContentRepository', () => {
     });
 
     const repository = new FallbackContentRepository(seedRepository, apiRepository, false, localDraftRepository);
-    const sections = await repository.getLessonSections();
-    const quiz = await repository.getQuizForSection(1);
+    await expect(repository.getLessonSections()).rejects.toThrow('network failed');
+    await expect(repository.getQuizForSection(1)).rejects.toThrow('network failed');
 
-    expect(sections[0]?.title).toBe('Draft fallback');
-    expect(quiz?.id).toBe('quiz-draft');
-    expect(localDraftRepository.getLessonSections).toHaveBeenCalledOnce();
-    expect(localDraftRepository.getQuizForSection).toHaveBeenCalledWith(1);
+    expect(localDraftRepository.getLessonSections).not.toHaveBeenCalled();
+    expect(localDraftRepository.getQuizForSection).not.toHaveBeenCalled();
     expect(seedRepository.getLessonSections).not.toHaveBeenCalled();
   });
 
-  it('falls back to the seed repository when neither api nor local draft can provide content', async () => {
+  it('does not fall back to seed lessons when the live api is unavailable', async () => {
     const seedRepository = createRepositoryStub({
       getLessonSections: vi.fn().mockResolvedValue([{ id: 1, title: 'Seed fallback', blocks: [] }]),
     });
@@ -100,9 +98,9 @@ describe('FallbackContentRepository', () => {
     });
 
     const repository = new FallbackContentRepository(seedRepository, apiRepository, false, localDraftRepository);
-    const sections = await repository.getLessonSections();
+    await expect(repository.getLessonSections()).rejects.toThrow('network failed');
 
-    expect(sections[0]?.title).toBe('Seed fallback');
-    expect(seedRepository.getLessonSections).toHaveBeenCalledOnce();
+    expect(localDraftRepository.getLessonSections).not.toHaveBeenCalled();
+    expect(seedRepository.getLessonSections).not.toHaveBeenCalled();
   });
 });

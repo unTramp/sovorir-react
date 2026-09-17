@@ -4,6 +4,7 @@ import type { DictionaryWord } from '../types/dictionary';
 import type { Quiz } from '../types/quiz';
 import type { LiveLesson, ConversationClubSession } from '../types/liveLesson';
 import type { Lesson, Section, SectionStatus, SectionType } from '../types/lesson';
+import type { LearningItem } from '../domain/learning';
 import { lessonPages } from '../data/lessonPages';
 import { dictionary } from '../data/dictionary';
 import { liveLessons } from '../data/liveLessons';
@@ -90,6 +91,52 @@ interface ApiLessonDetail {
   }>;
 }
 
+interface ApiLearningItem extends LearningItem {
+  stableKey: string;
+  schoolId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapApiLearningItem(item: ApiLearningItem): LearningItem {
+  return {
+    id: item.id,
+    revision: item.revision,
+    type: item.type,
+    armenian: item.armenian,
+    transliteration: item.transliteration,
+    translation: item.translation,
+    phoneticHint: item.phoneticHint,
+    audio: item.audio,
+    contexts: item.contexts,
+    register: item.register,
+    difficulty: item.difficulty,
+    tags: item.tags,
+    reviewable: item.reviewable,
+  };
+}
+
+function blockLearningItemIds(block: LessonContentSection['blocks'][number]): string[] {
+  const tracked = 'tracking' in block && block.tracking ? block.tracking.learningItemIds : [];
+  const direct = (block.type === 'phrase' || block.type === 'phraseCard')
+    ? [block.learningItemId ?? block.id].filter((id): id is string => Boolean(id))
+    : [];
+  return [...tracked, ...direct];
+}
+
+function normalizeApiBlock(
+  block: LessonContentSection['blocks'][number],
+  lessonId: string,
+  lessonRevision: number,
+  stepId: string,
+): LessonContentSection['blocks'][number] {
+  if (!('tracking' in block) || !block.tracking) return block;
+  return {
+    ...block,
+    tracking: { ...block.tracking, lessonId, lessonRevision, stepId },
+  };
+}
+
 interface CatalogSnapshot {
   lessons: Lesson[];
   currentLessonApiId: string | null;
@@ -169,7 +216,7 @@ function deriveSectionStatuses(
 
 function mapApiLessonsToFrontend(apiLessons: ApiCourseLesson[]): CatalogSnapshot {
   const ordered = apiLessons
-    .filter((lesson) => lesson.status === 'published')
+    .filter((lesson) => lesson.status === 'published' && lesson.description !== 'Будущий урок курса.')
     .slice()
     .sort((a, b) => a.orderIndex - b.orderIndex);
   const lessonStatuses = deriveLessonStatuses(ordered);
@@ -179,6 +226,7 @@ function mapApiLessonsToFrontend(apiLessons: ApiCourseLesson[]): CatalogSnapshot
 
     return {
       id: lessonIndex + 1,
+      apiId: lesson.id,
       title: lesson.title,
       icon: '\u{1F4D6}',
       status: lessonStatuses[lessonIndex],
@@ -299,6 +347,13 @@ export class LocalAdminDraftContentRepository implements ContentRepository {
 export class ApiContentRepository implements ContentRepository {
   private catalogCache: CatalogSnapshot | null = null;
   private currentSectionsCache: LessonContentSection[] | null = null;
+  private selectedLessonApiId: string | null = null;
+
+  selectLesson(apiId: string | null): void {
+    if (this.selectedLessonApiId === apiId) return;
+    this.selectedLessonApiId = apiId;
+    this.currentSectionsCache = null;
+  }
 
   invalidate(): void {
     this.catalogCache = null;
@@ -328,22 +383,33 @@ export class ApiContentRepository implements ContentRepository {
     }
 
     const catalog = await this.loadCatalog();
-    if (!catalog.currentLessonApiId) {
+    const lessonApiId = this.selectedLessonApiId ?? catalog.currentLessonApiId;
+    if (!lessonApiId) {
       this.currentSectionsCache = [];
       return this.currentSectionsCache;
     }
 
-    const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${catalog.currentLessonApiId}`);
-    this.currentSectionsCache = sortSections(detail.sections).map((section, index) => ({
-      id: index + 1,
-      apiId: section.id,
-      title: section.title,
-      quizId:
-        typeof section.content?.quizId === 'string'
-          ? section.content.quizId
-          : undefined,
-      blocks: sortSections(section.blocks).map((block) => block.content),
-    }));
+    const detail = await apiClient.get<ApiLessonDetail>(`/lessons/${lessonApiId}`);
+    const orderedSections = sortSections(detail.sections);
+    const itemIds = [...new Set(orderedSections.flatMap((section) => section.blocks.flatMap((block) => blockLearningItemIds(block.content))))];
+    const learningItems = itemIds.length > 0
+      ? await apiClient.get<ApiLearningItem[]>(`/learning-items?ids=${encodeURIComponent(itemIds.join(','))}`)
+      : [];
+    const canonicalItems = learningItems.map(mapApiLearningItem);
+
+    this.currentSectionsCache = orderedSections.map((section, index) => {
+      const stepId = typeof section.content?.stepId === 'string' ? section.content.stepId : section.id;
+      const lessonRevision = typeof section.content?.lessonRevision === 'number' ? section.content.lessonRevision : 1;
+      return {
+        id: index + 1,
+        apiId: section.id,
+        serverCompleted: section.progress?.completed ?? false,
+        title: section.title,
+        quizId: typeof section.content?.quizId === 'string' ? section.content.quizId : undefined,
+        canonical: { lessonId: detail.id, lessonRevision, stepId, learningItems: canonicalItems },
+        blocks: sortSections(section.blocks).map((block) => normalizeApiBlock(block.content, detail.id, lessonRevision, stepId)),
+      };
+    });
     return this.currentSectionsCache;
   }
 
@@ -419,11 +485,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getLessonSections());
     }
-    try {
-      return await this.apiRepository.getLessonSections();
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getLessonSections());
-    }
+    return this.apiRepository.getLessonSections();
   }
 
   getDictionary() {
@@ -434,11 +496,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getQuizForSection(sectionId));
     }
-    try {
-      return await this.apiRepository.getQuizForSection(sectionId);
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getQuizForSection(sectionId));
-    }
+    return this.apiRepository.getQuizForSection(sectionId);
   }
 
   getLiveLessons() {
@@ -457,11 +515,7 @@ export class FallbackContentRepository implements ContentRepository {
     if (this.mockApiEnabled) {
       return this.readFromLocalDraftOrSeed((repository) => repository.getLessons());
     }
-    try {
-      return await this.apiRepository.getLessons();
-    } catch {
-      return this.readFromLocalDraftOrSeed((repository) => repository.getLessons());
-    }
+    return this.apiRepository.getLessons();
   }
 }
 

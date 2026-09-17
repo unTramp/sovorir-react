@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useStreakStore } from '../../stores/useStreakStore';
 import { useAssignmentStore } from '../../stores/useAssignmentStore';
@@ -53,7 +53,8 @@ function StudentStats() {
 }
 
 function TeacherStats() {
-  const { queue, loadQueue } = useReviewStore();
+  const { queue = [], loadQueue } = useReviewStore();
+  const [now] = useState(() => Date.now());
 
   useEffect(() => { void loadQueue(); }, [loadQueue]);
 
@@ -64,7 +65,7 @@ function TeacherStats() {
   const staleMs = 3 * 24 * 60 * 60 * 1000;
   const stale = queue.filter((i) => {
     if (!i.submission.submittedAt) return false;
-    return Date.now() - new Date(i.submission.submittedAt).getTime() > staleMs;
+    return now - new Date(i.submission.submittedAt).getTime() > staleMs;
   }).length;
 
   return (

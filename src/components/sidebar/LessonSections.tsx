@@ -28,8 +28,8 @@ export function LessonSections() {
       <div className="space-y-2 pb-4" role="list">
         {currentLesson.sections
           .filter((s) => s.type !== 'video')
-          .map((section) => (
-            <SectionItem key={section.id} section={section} />
+          .map((section, index) => (
+            <SectionItem key={section.id} section={section} sectionNumber={index + 1} />
           ))}
       </div>
     </div>

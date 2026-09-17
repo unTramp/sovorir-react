@@ -1,42 +1,47 @@
 import { useEffect, useMemo, useCallback } from 'react';
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { LessonSectionView } from './LessonPageView';
-
-type LessonTab = 'materials' | 'dictionary' | 'audio' | 'video';
-
-const LESSON_TABS: { id: LessonTab; label: string }[] = [
-  { id: 'materials', label: 'Материалы' },
-  { id: 'dictionary', label: 'Словарь' },
-  { id: 'audio', label: 'Аудио' },
-  { id: 'video', label: 'Видео' },
-];
+import { useAppStore } from '../../stores/useAppStore';
 
 const EMPTY_COMPLETED_RECORDS: number[] = [];
 
 export function LessonView() {
-  const [activeTab, setActiveTab] = useState<LessonTab>('materials');
   const location = useLocation();
   const navigate = useNavigate();
-  const { currentLesson, allCompleted, hasLoaded } = useLessonCatalog();
+  const { lessons = [], currentLesson, hasLoaded } = useLessonCatalog();
+  const selectedLessonId = useAppStore((state) => state.currentLesson);
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId && lesson.status !== 'locked');
+  const lessonToOpen = selectedLesson ?? currentLesson;
+  const currentLessonId = lessonToOpen?.id;
+  const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
 
   // Redirect to home if course complete or no current lesson (once catalog is loaded)
   useEffect(() => {
-    if (hasLoaded && (allCompleted || !currentLesson)) {
+    if (hasLoaded && !lessonToOpen) {
       navigate('/', { replace: true });
     }
-  }, [hasLoaded, allCompleted, currentLesson, navigate]);
+  }, [hasLoaded, lessonToOpen, navigate]);
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentSection = useLessonStore((s) => s.currentSection);
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
   const setTotalSections = useLessonStore((s) => s.setTotalSections);
   const completeRecord = useLessonProgress((s) => s.completeRecord);
+  const retryRecord = useLessonProgress((s) => s.retryRecord);
   const sectionProgress = useLessonProgress((s) => s.sections[currentSection]);
   const allSections = useLessonSectionsStore((s) => s.sections);
+  const sectionsLoading = useLessonSectionsStore((s) => s.isLoading);
+  const sectionsError = useLessonSectionsStore((s) => s.error);
+  const reloadSections = useLessonSectionsStore((s) => s.reload);
+
+  useEffect(() => {
+    if (!lessonToOpen) return;
+    selectLesson(lessonToOpen.apiId);
+    reloadSections(true);
+  }, [currentLessonId, lessonToOpen, reloadSections, selectLesson]);
 
   // Sync totalSections into useLessonStore whenever sections change
   useEffect(() => {
@@ -47,14 +52,21 @@ export function LessonView() {
   useEffect(() => {
     if (!allSections.length) return;
     const params = new URLSearchParams(location.search);
-    const requestedSection = Number(params.get('section'));
+    const sectionParam = params.get('section');
+
+    if (!sectionParam) {
+      navigate(`/lesson?section=${currentSection}`, { replace: true });
+      return;
+    }
+
+    const requestedSection = Number(sectionParam);
     if (!Number.isFinite(requestedSection) || requestedSection < 1) return;
 
     const boundedSection = Math.min(allSections.length, Math.max(1, requestedSection));
     if (boundedSection !== currentSection) {
       setCurrentSection(boundedSection);
     }
-  }, [allSections.length, currentSection, location.search, setCurrentSection]);
+  }, [allSections.length, currentSection, location.search, navigate, setCurrentSection]);
 
   const completedSet = sectionProgress?.completedRecords ?? EMPTY_COMPLETED_RECORDS;
   const completedRecords = completedSet.length;
@@ -64,7 +76,8 @@ export function LessonView() {
     if (!section) return 0;
     let recordCounter = 0;
     for (let i = 0; i < section.blocks.length; i++) {
-      if (section.blocks[i].type === 'record' || section.blocks[i].type === 'pronunciationPrompt') {
+      const blockType = section.blocks[i].type;
+      if (blockType === 'record' || blockType === 'pronunciationPrompt' || blockType === 'dialogue' || blockType === 'activeRecall') {
         if (!completedSet.includes(recordCounter)) return recordCounter;
         recordCounter++;
       }
@@ -76,23 +89,30 @@ export function LessonView() {
     completeRecord(currentSection, nextRecordIndex);
   }, [completeRecord, currentSection, nextRecordIndex]);
 
+  const handleRecordRetry = useCallback((recordIndex: number) => {
+    retryRecord(currentSection, recordIndex);
+  }, [currentSection, retryRecord]);
+
+  if (sectionsLoading && allSections.length === 0) {
+    return <div className="flex flex-1 items-center justify-center text-sm text-muted">Загружаем урок…</div>;
+  }
+
+  if (sectionsError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="text-base font-semibold text-dark">Не удалось загрузить урок</div>
+        <div className="max-w-sm text-sm text-muted">Проверьте соединение и попробуйте ещё раз.</div>
+        <button className="btn btn--primary btn--md" onClick={() => reloadSections(true)}>Повторить</button>
+      </div>
+    );
+  }
+
   return (
     <div className={`view-panel flex flex-col h-full ${isFullscreen ? 'lesson-fullscreen' : ''}`}>
-      <div className="lesson-tabs">
-        {LESSON_TABS.map((tab) => (
-          <button
-            key={tab.id}
-            className={`lesson-tabs__item${activeTab === tab.id ? ' active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
       <LessonSectionView
         completedRecords={completedRecords}
         onRecordComplete={handleRecordComplete}
-        activeTab={activeTab}
+        onRecordRetry={handleRecordRetry}
       />
     </div>
   );

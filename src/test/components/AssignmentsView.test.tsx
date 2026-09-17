@@ -78,10 +78,11 @@ describe('AssignmentsView', () => {
     expect(screen.getByText('Загрузка...')).toBeInTheDocument();
   });
 
-  it('shows "Отправить" button when no submission', () => {
+  it('shows pending status and an action when no submission', () => {
     useAssignmentStore.setState({ assignments: [mockAssignment], submissions: [] } as never);
     render(<AssignmentsView />);
-    expect(screen.getByText('Отправить')).toBeInTheDocument();
+    expect(screen.getByText('Нужно выполнить')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Перевод текста. Выполнить' })).toBeInTheDocument();
   });
 
   it('shows correct status badge for submitted assignment', () => {
@@ -100,25 +101,48 @@ describe('AssignmentsView', () => {
       submissions: [revisionSubmission],
     } as never);
     render(<AssignmentsView />);
-    expect(screen.getByText('Доработать')).toBeInTheDocument();
+    expect(screen.getByText('Нужна доработка')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Перевод текста. Доработать' })).toBeInTheDocument();
   });
 
-  it('hides submit button when assignment is accepted', () => {
+  it('shows a checked assignment as an openable answer', () => {
     const acceptedSubmission = { ...mockSubmission, status: 'accepted' as const };
     useAssignmentStore.setState({
       assignments: [mockAssignment],
       submissions: [acceptedSubmission],
     } as never);
     render(<AssignmentsView />);
-    expect(screen.queryByText('Отправить')).not.toBeInTheDocument();
-    expect(screen.queryByText('Доработать')).not.toBeInTheDocument();
-    expect(screen.getByText('Принято')).toBeInTheDocument();
+    expect(screen.getByText('Проверено')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Перевод текста. Посмотреть ответ' })).toBeInTheDocument();
   });
 
   it('opens SubmitModal on button click', () => {
     useAssignmentStore.setState({ assignments: [mockAssignment], submissions: [] } as never);
     render(<AssignmentsView />);
-    fireEvent.click(screen.getByText('Отправить'));
+    fireEvent.click(screen.getByRole('button', { name: 'Перевод текста. Выполнить' }));
     expect(screen.getByPlaceholderText('Напишите ответ...')).toBeInTheDocument();
+  });
+
+  it('opens a submitted assignment in read-only mode', () => {
+    useAssignmentStore.setState({
+      assignments: [mockAssignment],
+      submissions: [mockSubmission],
+    } as never);
+    render(<AssignmentsView />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Перевод текста. Посмотреть ответ' }));
+
+    expect(screen.getByDisplayValue('Мой ответ')).toHaveAttribute('readonly');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('marks an unfinished past-due assignment as overdue', () => {
+    useAssignmentStore.setState({
+      assignments: [{ ...mockAssignment, dueAt: '2020-01-01T00:00:00.000Z' }],
+      submissions: [],
+    } as never);
+    render(<AssignmentsView />);
+
+    expect(screen.getByText('Просрочено')).toBeInTheDocument();
   });
 });

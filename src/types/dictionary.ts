@@ -6,4 +6,6 @@ export interface DictionaryWord {
   example: string;
   exampleTranslation: string;
   category: string;
+  syllables?: string[];
+  audioSrc?: string;
 }

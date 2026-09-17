@@ -1,30 +1,75 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { useMediaRecorder } from '../../hooks/useMediaRecorder';
 import { useRecordingStore } from '../../stores/useRecordingStore';
+import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
+import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
 import { AudioLevelMeter } from '../audio/AudioLevelMeter';
+import type { InteractionTracking } from '../../types/lessonContent';
 
 interface Props {
   onComplete: () => void;
   sectionId: number;
   recordIndex: number;
+  tracking?: InteractionTracking;
 }
 
-export function StickyRecordCTA({ onComplete, sectionId, recordIndex }: Props) {
+function recordingUuid(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (char) => {
+    const random = Math.floor(Math.random() * 16);
+    return (char === 'x' ? random : (random & 0x3) | 0x8).toString(16);
+  });
+}
+
+export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }: Props) {
   const { start, stop, isRecording, audioBlob, audioLevel, duration, error } = useMediaRecorder();
   const saveRecording = useRecordingStore((s) => s.saveRecording);
+  const startAttempt = useInteractionAttemptStore((s) => s.startAttempt);
+  const completeAttempt = useInteractionAttemptStore((s) => s.completeAttempt);
+  const getOrCreateLessonAttemptId = useLessonAttemptSessionStore((s) => s.getOrCreateAttemptId);
+  const attemptIdRef = useRef<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!audioBlob) return;
-    const id = `rec-${sectionId}-${recordIndex}-${Date.now()}`;
+    const id = recordingUuid();
+    const lessonAttemptId = tracking ? getOrCreateLessonAttemptId(tracking.lessonId) : undefined;
     void saveRecording(
-      { id, sectionId, recordIndex, duration, createdAt: Date.now() },
+      {
+        id,
+        sectionId,
+        recordIndex,
+        duration,
+        createdAt: Date.now(),
+        lessonAttemptId,
+        interactionId: tracking?.interactionId,
+        learningItemIds: tracking?.learningItemIds,
+      },
       audioBlob,
-    ).then(() => onComplete());
-  }, [audioBlob, duration, onComplete, recordIndex, saveRecording, sectionId]);
+    ).then(() => {
+      if (attemptIdRef.current) completeAttempt(attemptIdRef.current, 'completed', { recordingId: id });
+      onComplete();
+    }).catch(() => {
+      setSaveError('Не удалось сохранить запись. Освободите место и попробуйте ещё раз.');
+    });
+  }, [audioBlob, completeAttempt, duration, getOrCreateLessonAttemptId, onComplete, recordIndex, saveRecording, sectionId, tracking]);
 
   const handleStart = useCallback(() => {
+    setSaveError(null);
+    if (tracking) {
+      const lessonAttemptId = getOrCreateLessonAttemptId(tracking.lessonId);
+      attemptIdRef.current = startAttempt({
+        lessonAttemptId,
+        lessonId: tracking.lessonId,
+        lessonRevision: tracking.lessonRevision,
+        stepId: tracking.stepId,
+        interactionId: tracking.interactionId,
+        hintUsed: false,
+        retryCount: 0,
+      });
+    }
     void start();
-  }, [start]);
+  }, [getOrCreateLessonAttemptId, start, startAttempt, tracking]);
 
   const handleStop = useCallback(() => {
     stop();
@@ -32,25 +77,25 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex }: Props) {
 
   return (
     <div className="lesson-record-sticky">
-      {error && (
-        <div className="lesson-record-sticky__error">{error}</div>
+      {(error || saveError) && (
+        <div className="lesson-record-sticky__error" role="alert">{error || saveError}</div>
       )}
       <div className="lesson-record-sticky__actions">
         {isRecording && <AudioLevelMeter level={audioLevel} />}
         {isRecording ? (
           <button
             className="lesson-record-sticky__btn lesson-record-sticky__btn--recording"
-            onMouseUp={handleStop}
-            onTouchEnd={(e) => { e.preventDefault(); handleStop(); }}
+            onClick={handleStop}
+            aria-label="Остановить запись"
           >
-            <span className="lesson-record-sticky__pulse" /> {duration}с
+            <span className="lesson-record-sticky__pulse" /> Остановить · {duration}с
           </button>
         ) : (
           <div className="lesson-record-sticky__mic-wrap">
             <button
               className="lesson-record-sticky__mic-btn"
-              onMouseDown={handleStart}
-              onTouchStart={(e) => { e.preventDefault(); handleStart(); }}
+              onClick={handleStart}
+              aria-label="Начать запись"
             >
               <svg width="140" height="140" viewBox="0 0 140 140" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="38" y="13" width="64" height="64" rx="32" fill="url(#rec_grad)"/>
@@ -77,7 +122,7 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex }: Props) {
                 </defs>
               </svg>
             </button>
-            <span className="lesson-record-sticky__hint">Удерживайте</span>
+            <span className="lesson-record-sticky__hint">Нажмите, чтобы записать</span>
           </div>
         )}
       </div>

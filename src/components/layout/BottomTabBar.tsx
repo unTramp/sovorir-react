@@ -1,36 +1,31 @@
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate, useMatch, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../stores/useAuthStore';
 import {
   HouseIcon,
   BookOpenIcon,
   ZapIcon,
-  SettingsGearIcon,
+  UserIcon,
   ClipboardIcon,
-  UsersIcon,
-  BarChartIcon,
 } from '../../icons';
 
 type TabConfig = { label: string; path: string; icon: React.ComponentType<{ size?: number }> };
 
 const STUDENT_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',             icon: HouseIcon },
-  { label: 'Уроки',    path: '/lesson',        icon: BookOpenIcon },
-  { label: 'Задания',  path: '/assignments',   icon: ClipboardIcon },
-  { label: 'Профиль',  path: '/settings',      icon: SettingsGearIcon },
+  { label: 'Курс',      path: '/course',        icon: BookOpenIcon },
+  { label: 'Практика',  path: '/practice',      icon: ZapIcon },
+  { label: 'Профиль',  path: '/settings',      icon: UserIcon },
 ];
 
 const TEACHER_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Задания',   path: '/teacher',   icon: ClipboardIcon },
-  { label: 'Студенты',  path: '/students',  icon: UsersIcon },
-  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+  { label: 'Проверка',  path: '/review-queue', icon: ClipboardIcon },
+  { label: 'Профиль',   path: '/settings',  icon: UserIcon },
 ];
 
 const ADMIN_TABS: TabConfig[] = [
   { label: 'Главная',   path: '/',          icon: HouseIcon },
-  { label: 'Уроки',     path: '/lesson',    icon: BookOpenIcon },
-  { label: 'Аналитика', path: '/statistics',icon: BarChartIcon },
-  { label: 'Профиль',   path: '/settings',  icon: SettingsGearIcon },
+  { label: 'Профиль',   path: '/settings',  icon: UserIcon },
 ];
 
 function Tab({ label, path, icon: Icon }: TabConfig) {
@@ -52,7 +47,10 @@ function Tab({ label, path, icon: Icon }: TabConfig) {
 
 export function BottomTabBar() {
   const role = useAuthStore((s) => s.profile?.role);
+  const location = useLocation();
   const tabs = role === 'teacher' ? TEACHER_TABS : role === 'admin' ? ADMIN_TABS : STUDENT_TABS;
+
+  if (location.pathname === '/lesson') return null;
 
   return (
     <nav className="bottom-tab-bar">
