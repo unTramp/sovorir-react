@@ -15,16 +15,20 @@ interface LessonSectionsState {
   selectLesson: (apiId?: string) => void;
 }
 
+let reloadSequence = 0;
+
 export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
   sections: [],
   isLoading: true,
   error: null,
 
   reload: (invalidate = false) => {
+    const requestId = ++reloadSequence;
     if (invalidate) apiContentRepository.invalidate();
     set({ isLoading: true, error: null });
     void contentRepository.getLessonSections()
       .then((sections) => {
+        if (requestId !== reloadSequence) return;
         set({ sections, isLoading: false });
         const canonicalItems = [...new Map(sections
           .flatMap((section) => section.canonical?.learningItems ?? [])
@@ -43,14 +47,16 @@ export const useLessonSectionsStore = create<LessonSectionsState>((set) => ({
           }));
           useFlashcardStore.getState()._initWords(practiceWords);
         }
-        syncLessonSectionsCache(sections); // keep useLessonProgress._lessonSections in sync
+        syncLessonSectionsCache(sections);
       })
       .catch((error: unknown) => {
+        if (requestId !== reloadSequence) return;
         const message = error instanceof Error ? error.message : 'Не удалось загрузить урок';
         set({ sections: [], isLoading: false, error: message });
       });
   },
   selectLesson: (apiId) => {
+    reloadSequence++;
     apiContentRepository.selectLesson(apiId ?? null);
     set({ sections: [], isLoading: true, error: null });
   },
