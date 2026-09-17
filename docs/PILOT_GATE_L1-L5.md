@@ -47,7 +47,9 @@ Required on `main`:
 - [x] Practice Engine uses canonical review queue as its primary source;
 - [x] Practice can interleave recall / listening / recognition;
 - [x] Practice falls back safely when audio is unavailable;
-- [x] Reset Progress clears canonical review/practice state.
+- [x] Reset Progress clears canonical review/practice state;
+- [x] normalized public lesson-detail fixture with `dialogue`, `activeRecall` and full tracking passes the production runtime Zod schema;
+- [x] leaked DB storage aliases remain rejected by the learner API schema.
 
 ---
 
@@ -69,10 +71,10 @@ Required on the backend default branch:
 - [x] curriculum publication validates before mutation;
 - [x] curriculum publication creates a PostgreSQL backup before sync;
 - [x] publication explicitly uses `RESET_PILOT_PROGRESS=false`;
-- [ ] learner API semantic-block round-trip is merged and green;
-- [ ] public interaction tracking contains lessonId + lessonRevision + stepId + interactionId + learningItemIds.
+- [x] learner API semantic-block round-trip is merged and green;
+- [x] public interaction tracking contains lessonId + lessonRevision + stepId + interactionId + learningItemIds.
 
-The last two items are covered by backend PR #6 while this document is being created.
+The public lesson contract is now guarded on both sides: backend CI validates `semantic → storage → public API`, and frontend CI validates the resulting public payload through the production runtime schema.
 
 ---
 
