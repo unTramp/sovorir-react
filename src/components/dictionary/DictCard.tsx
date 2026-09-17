@@ -1,12 +1,18 @@
 import { memo } from 'react';
 import type { DictionaryWord } from '../../types/dictionary';
-import { PlayIcon } from '../../icons';
+import { PauseIcon, PlayIcon } from '../../icons';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 interface Props {
   word: DictionaryWord;
 }
 
 export const DictCard = memo(function DictCard({ word }: Props) {
+  const { togglePlay, playingId, loadingId } = useAudioPlayer();
+  const audioId = `dictionary-${word.id}`;
+  const isPlaying = playingId === audioId;
+  const isLoading = loadingId === audioId;
+
   return (
     <div className="dict-bubble">
       <div className="dict-bubble__head">
@@ -16,12 +22,18 @@ export const DictCard = memo(function DictCard({ word }: Props) {
           </span>
           <span className="dict-bubble__tr">{word.transcription}</span>
         </div>
-        <button
-          className="dict-bubble__play"
-          aria-label={`Прослушать ${word.armenian}`}
-        >
-          <PlayIcon size={14} />
-        </button>
+        {word.audioSrc && (
+          <button
+            className="dict-bubble__play"
+            type="button"
+            aria-label={isPlaying ? `Поставить ${word.armenian} на паузу` : `Прослушать ${word.armenian}`}
+            aria-pressed={isPlaying}
+            disabled={isLoading}
+            onClick={() => togglePlay(audioId, word.audioSrc!)}
+          >
+            {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
+          </button>
+        )}
       </div>
       <div className="dict-bubble__meaning">{word.translation}</div>
       <div className="dict-bubble__detail">

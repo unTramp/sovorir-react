@@ -11,6 +11,7 @@ import { useLearningItemStore } from '../../stores/useLearningItemStore';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { getResumeSectionNumber } from '../../lib/lessonNavigation';
 
 function CheckIcon() {
   return (
@@ -56,10 +57,11 @@ function StudentHomeView() {
 
   const continueLesson = () => {
     if (!currentLesson) return;
+    const resumeSection = getResumeSectionNumber(currentLesson);
     setCurrentLesson(currentLesson.id);
-    setCurrentSection(1);
+    setCurrentSection(resumeSection);
     selectLesson(currentLesson.apiId);
-    navigate('/lesson');
+    navigate(`/lesson?section=${resumeSection}`);
   };
 
   const { completedPct, stepsLeft } = useMemo(() => {

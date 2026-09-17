@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { contentRepository } from '../lib/contentRepository';
 import { isMockApiEnabled } from '../lib/apiClient';
 import type { LessonContentSection } from '../types/lessonContent';
 import type { QuizResult } from '../types/quiz';
@@ -35,15 +34,13 @@ interface LessonProgressState {
   isQuizPassed: (sectionId: number) => boolean;
 }
 
-// Module-level cache — kept in sync with useLessonSectionsStore (which has apiId from real API).
+// Module-level cache — populated only by useLessonSectionsStore.
 let _lessonSections: LessonContentSection[] = [];
 
-/** Call this once the sections store is available to keep _lessonSections up to date. */
+/** Keep progress calculations aligned with the latest accepted sections response. */
 export function syncLessonSectionsCache(sections: LessonContentSection[]): void {
-  if (sections.length > 0) {
-    _lessonSections = sections;
-    useLessonProgress.getState()._initSections(sections);
-  }
+  _lessonSections = sections;
+  useLessonProgress.getState()._initSections(sections);
 }
 
 /** POSTs all locally-completed sections that have a server UUID — awaitable before navigation. */
@@ -59,12 +56,6 @@ export async function syncCompletedSectionsToServer(): Promise<void> {
       .map((s) => apiClient.post(`/sections/${s.apiId}/complete`, {})),
   );
 }
-
-// Kick off the load immediately; the store action will set sectionsReady when done.
-contentRepository.getLessonSections().then((sections) => {
-  _lessonSections = sections;
-  useLessonProgress.getState()._initSections(sections);
-});
 
 function countRecords(sectionId: number): number {
   const section = _lessonSections.find((item) => item.id === sectionId);
