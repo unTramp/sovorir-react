@@ -8,6 +8,7 @@ vi.mock('../../hooks/useLessonCatalog', () => ({
     lessons: [
       {
         id: 1,
+        apiId: 'api-lesson-1',
         title: 'Поздороваться и попрощаться',
         icon: '📖',
         status: 'current',
@@ -18,6 +19,7 @@ vi.mock('../../hooks/useLessonCatalog', () => ({
       },
       {
         id: 2,
+        apiId: 'api-lesson-2',
         title: 'Армянский алфавит',
         icon: '📖',
         status: 'locked',
@@ -33,13 +35,13 @@ vi.mock('../../hooks/useLessonCatalog', () => ({
 
 function LocationProbe() {
   const location = useLocation();
-  return <output data-testid="location">{location.pathname}</output>;
+  return <output data-testid="location">{`${location.pathname}${location.search}`}</output>;
 }
 
 describe('CourseView', () => {
   afterEach(cleanup);
 
-  it('opens the current lesson and keeps locked lessons unavailable', () => {
+  it('opens the current lesson by stable api id and keeps locked lessons unavailable', () => {
     render(
       <MemoryRouter initialEntries={['/course']}>
         <CourseView />
@@ -54,6 +56,6 @@ describe('CourseView', () => {
     expect(lockedLesson).toBeDisabled();
 
     fireEvent.click(currentLesson);
-    expect(screen.getByTestId('location')).toHaveTextContent('/lesson');
+    expect(screen.getByTestId('location')).toHaveTextContent('/lesson?lesson=api-lesson-1&section=1');
   });
 });
