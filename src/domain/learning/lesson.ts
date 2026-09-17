@@ -10,6 +10,8 @@ export type LessonStepType =
   | 'active-recall'
   | 'completion';
 
+export type VideoPresentation = 'circle' | 'lesson' | 'scene';
+
 export type PresentationNode =
   | { id: UUID; type: 'text'; variant: 'body' | 'instruction' | 'note'; text: string }
   | { id: UUID; type: 'learning-item'; itemId: UUID; variant: 'phrase-card' | 'compact-row' }
@@ -17,7 +19,15 @@ export type PresentationNode =
   | { id: UUID; type: 'student-bubble'; text: string; audio?: MediaAsset }
   | { id: UUID; type: 'audio'; title: string; description?: string; asset: MediaAsset }
   | { id: UUID; type: 'rule'; title: string; items: string[] }
-  | { id: UUID; type: 'video'; title: string; asset: MediaAsset; thumbnailUrl?: string };
+  | {
+      id: UUID;
+      type: 'video';
+      title: string;
+      asset: MediaAsset;
+      thumbnailUrl?: string;
+      presentation?: VideoPresentation;
+      transcript?: string;
+    };
 
 export interface LessonStep {
   id: UUID;
@@ -62,4 +72,3 @@ export interface Lesson {
   status: 'draft' | 'published' | 'archived';
   publishedAt?: string;
 }
-

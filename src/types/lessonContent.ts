@@ -101,10 +101,20 @@ export interface StudentBubbleBlock {
 
 export interface VideoBubbleBlock {
   type: 'video';
-  senderName: string;
-  text: string;
+  /** Visual/learning role. Legacy blocks default to `lesson`. */
+  presentation?: 'circle' | 'lesson' | 'scene';
+  senderName?: string;
+  text?: string;
   videoSrc: string;
-  thumbnail: string;
+  thumbnail?: string;
+  duration?: number;
+  transcript?: string;
+  captions?: Array<{
+    startMs: number;
+    endMs: number;
+    text: string;
+  }>;
+  posterMode?: 'image' | 'first-frame';
 }
 
 export interface RecordBlock {

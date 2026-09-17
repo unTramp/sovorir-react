@@ -70,10 +70,29 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('video'),
-    senderName: z.string(),
-    text: z.string(),
+    presentation: z.enum(['circle', 'lesson', 'scene']).optional(),
+    senderName: z.string().optional(),
+    text: z.string().optional(),
     videoSrc: z.string(),
-    thumbnail: z.string(),
+    thumbnail: z.string().optional(),
+    duration: z.number().positive().optional(),
+    transcript: z.string().optional(),
+    captions: z.array(z.object({
+      startMs: z.number().int().nonnegative(),
+      endMs: z.number().int().positive(),
+      text: z.string(),
+    }).refine((caption) => caption.endMs > caption.startMs, {
+      message: 'Caption endMs must be greater than startMs',
+    })).optional(),
+    posterMode: z.enum(['image', 'first-frame']).optional(),
+  }).superRefine((video, ctx) => {
+    if (video.posterMode === 'image' && !video.thumbnail) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['thumbnail'],
+        message: 'thumbnail is required when posterMode is image',
+      });
+    }
   }),
   z.object({ type: z.literal('record'), prompt: z.string(), tracking: InteractionTrackingSchema.optional() }),
   z.object({ type: z.literal('pronunciationPrompt'), prompt: z.string(), tracking: InteractionTrackingSchema.optional() }),
