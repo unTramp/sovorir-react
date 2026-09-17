@@ -1,4 +1,5 @@
 import { RefreshResponseSchema } from './apiSchemas';
+import { validateApiResponse } from './apiResponseValidation';
 import { mockApiRequest } from './mockApi';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000';
@@ -121,7 +122,8 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  return res.json() as Promise<T>;
+  const data = await res.json();
+  return validateApiResponse(method, path, data) as T;
 }
 
 async function transportRequest(
