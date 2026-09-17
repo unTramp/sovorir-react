@@ -14,7 +14,6 @@ export interface Lesson {
   id: number;
   apiId?: string;
   title: string;
-  objective?: string;
   icon: string;
   status: LessonStatus;
   sections: Section[];
