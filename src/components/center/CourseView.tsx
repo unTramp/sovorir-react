@@ -5,6 +5,7 @@ import type { Lesson } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
+import { getResumeSectionNumber } from '../../lib/lessonNavigation';
 
 function lessonMeta(lesson: Lesson) {
   const availableSections = lesson.sections.filter((section) => section.type !== 'video');
@@ -24,10 +25,11 @@ export function CourseView() {
   const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
 
   const openLesson = (lesson: Lesson) => {
+    const resumeSection = getResumeSectionNumber(lesson);
     setCurrentLesson(lesson.id);
-    setCurrentSection(1);
+    setCurrentSection(resumeSection);
     selectLesson(lesson.apiId);
-    navigate('/lesson?section=1');
+    navigate(`/lesson?section=${resumeSection}`);
   };
 
   if (isLoading && lessons.length === 0) {
