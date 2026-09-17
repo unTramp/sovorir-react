@@ -5,6 +5,8 @@ import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
+import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
+import { completedRecordIndicesFromAttempts, latestLessonAttemptId } from '../../lib/interactionResume';
 import { LessonSectionView } from './LessonPageView';
 import { useAppStore } from '../../stores/useAppStore';
 
@@ -18,8 +20,14 @@ export function LessonView() {
   const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId && lesson.status !== 'locked');
   const lessonToOpen = selectedLesson ?? currentLesson;
   const currentLessonId = lessonToOpen?.id;
+  const lessonApiId = lessonToOpen?.apiId;
   const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
   const hydrateLessonAttempts = useInteractionAttemptStore((state) => state.hydrateLessonAttempts);
+  const attempts = useInteractionAttemptStore((state) => state.attempts);
+  const adoptAttemptId = useLessonAttemptSessionStore((state) => state.adoptAttemptId);
+  const activeAttemptId = useLessonAttemptSessionStore((state) => (
+    lessonApiId ? state.attemptIds[lessonApiId] : undefined
+  ));
 
   // Redirect to home if course complete or no current lesson (once catalog is loaded)
   useEffect(() => {
@@ -38,6 +46,7 @@ export function LessonView() {
   const sectionsLoading = useLessonSectionsStore((s) => s.isLoading);
   const sectionsError = useLessonSectionsStore((s) => s.error);
   const reloadSections = useLessonSectionsStore((s) => s.reload);
+  const attemptList = useMemo(() => Object.values(attempts), [attempts]);
 
   useEffect(() => {
     if (!lessonToOpen) return;
@@ -46,9 +55,15 @@ export function LessonView() {
   }, [currentLessonId, lessonToOpen, reloadSections, selectLesson]);
 
   useEffect(() => {
-    if (!lessonToOpen?.apiId) return;
-    void hydrateLessonAttempts(lessonToOpen.apiId);
-  }, [hydrateLessonAttempts, lessonToOpen?.apiId]);
+    if (!lessonApiId) return;
+    void hydrateLessonAttempts(lessonApiId);
+  }, [hydrateLessonAttempts, lessonApiId]);
+
+  useEffect(() => {
+    if (!lessonApiId || lessonToOpen?.status !== 'current' || activeAttemptId) return;
+    const latestAttemptId = latestLessonAttemptId(attemptList, lessonApiId);
+    if (latestAttemptId) adoptAttemptId(lessonApiId, latestAttemptId);
+  }, [activeAttemptId, adoptAttemptId, attemptList, lessonApiId, lessonToOpen?.status]);
 
   // Sync totalSections into useLessonStore whenever sections change
   useEffect(() => {
@@ -75,11 +90,38 @@ export function LessonView() {
     }
   }, [allSections.length, currentSection, location.search, navigate, setCurrentSection]);
 
-  const completedSet = sectionProgress?.completedRecords ?? EMPTY_COMPLETED_RECORDS;
+  const currentSectionData = useMemo(
+    () => allSections.find((item) => item.id === currentSection),
+    [allSections, currentSection],
+  );
+
+  const hydratedCompletedRecords = useMemo(() => {
+    if (sectionProgress || lessonToOpen?.status !== 'current') return EMPTY_COMPLETED_RECORDS;
+    return completedRecordIndicesFromAttempts(currentSectionData, attemptList, activeAttemptId);
+  }, [activeAttemptId, attemptList, currentSectionData, lessonToOpen?.status, sectionProgress]);
+
+  useEffect(() => {
+    if (sectionProgress || hydratedCompletedRecords.length === 0) return;
+    useLessonProgress.setState((state) => {
+      if (state.sections[currentSection]) return {};
+      return {
+        sections: {
+          ...state.sections,
+          [currentSection]: {
+            completedRecords: hydratedCompletedRecords,
+            completed: false,
+            completionStatus: 'idle',
+          },
+        },
+      };
+    });
+  }, [currentSection, hydratedCompletedRecords, sectionProgress]);
+
+  const completedSet = sectionProgress?.completedRecords ?? hydratedCompletedRecords;
   const completedRecords = completedSet.length;
 
   const nextRecordIndex = useMemo(() => {
-    const section = allSections.find((item) => item.id === currentSection);
+    const section = currentSectionData;
     if (!section) return 0;
     let recordCounter = 0;
     for (let i = 0; i < section.blocks.length; i++) {
@@ -90,7 +132,7 @@ export function LessonView() {
       }
     }
     return recordCounter;
-  }, [allSections, completedSet, currentSection]);
+  }, [completedSet, currentSectionData]);
 
   const handleRecordComplete = useCallback(() => {
     completeRecord(currentSection, nextRecordIndex);
