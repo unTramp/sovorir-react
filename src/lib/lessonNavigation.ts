@@ -24,3 +24,19 @@ export function getLessonPath(lessonApiId: string | undefined, section: number):
   params.set('section', String(Math.max(1, Math.trunc(section))));
   return `/lesson?${params.toString()}`;
 }
+
+/**
+ * Resolves lesson identity from the URL. A direct legacy `/lesson` intentionally
+ * follows the catalog's current lesson instead of an in-memory numeric selection.
+ * Explicit deep links may reopen completed lessons, but never locked lessons.
+ */
+export function resolveLessonForRoute(
+  lessons: Lesson[],
+  currentLesson: Lesson | null,
+  requestedLessonApiId: string | null,
+): Lesson | null {
+  if (!requestedLessonApiId) return currentLesson;
+  return lessons.find(
+    (lesson) => lesson.apiId === requestedLessonApiId && lesson.status !== 'locked',
+  ) ?? null;
+}
