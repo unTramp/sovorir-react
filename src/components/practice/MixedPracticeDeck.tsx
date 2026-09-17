@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PauseIcon, PlayIcon } from '../../icons';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useAudioStore } from '../../stores/useAudioStore';
@@ -21,17 +21,14 @@ export function MixedPracticeDeck() {
   const answerCurrent = usePracticeSessionStore((state) => state.answerCurrent);
   const clearSession = usePracticeSessionStore((state) => state.clearSession);
   const items = useLearningItemStore((state) => state.items);
-  const [revealed, setRevealed] = useState(false);
+  const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
   const { togglePlay, playingId, loadingId, errorId } = useAudioPlayer();
 
   const card = session?.cards[session.currentIndex];
   const item = card ? items[card.itemId] : undefined;
   const audioId = card ? `practice:${card.itemId}` : '';
   const audioProgress = useAudioStore((state) => audioId ? state.progress[audioId] || 0 : 0);
-
-  useEffect(() => {
-    setRevealed(false);
-  }, [session?.currentIndex]);
+  const revealed = Boolean(session && revealedIndex === session.currentIndex);
 
   if (!session) return null;
 
@@ -126,7 +123,7 @@ export function MixedPracticeDeck() {
             <button
               type="button"
               className="btn btn--primary btn--md mt-7 w-full"
-              onClick={() => setRevealed(true)}
+              onClick={() => setRevealedIndex(session.currentIndex)}
             >
               Показать ответ
             </button>
