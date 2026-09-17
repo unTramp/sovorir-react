@@ -200,7 +200,15 @@ export function adaptLegacyLessonContent(
           content.push({ id: nodeId, type: 'audio', title: block.title, description: block.description, asset: mediaAsset(`node:${nodeId}`, block.audioSrc, block.duration) });
           break;
         case 'video':
-          content.push({ id: nodeId, type: 'video', title: block.text, asset: mediaAsset(`node:${nodeId}`, block.videoSrc, undefined, 'video'), thumbnailUrl: block.thumbnail });
+          content.push({
+            id: nodeId,
+            type: 'video',
+            title: block.text ?? block.senderName ?? 'Видео',
+            asset: mediaAsset(`node:${nodeId}`, block.videoSrc, block.duration, 'video'),
+            thumbnailUrl: block.thumbnail,
+            presentation: block.presentation,
+            transcript: block.transcript,
+          });
           break;
         case 'record':
         case 'pronunciationPrompt':
@@ -316,4 +324,3 @@ export function adaptLegacyLessonContent(
     learningItems,
   };
 }
-
