@@ -29,6 +29,13 @@ export function LessonCompleteCard() {
   const finishLessonAttempt = useLessonAttemptSessionStore((s) => s.finishAttempt);
 
   const allSections = useLessonSectionsStore((s) => s.sections);
+  const canonical = allSections.find((section) => section.canonical)?.canonical;
+  const routeLessonId = new URLSearchParams(location.search).get('lesson') ?? undefined;
+  const lessonApiId = canonical?.lessonId ?? routeLessonId;
+  const lessonTitle = useLessonCatalogStore((s) => (
+    lessonApiId ? s.lessons.find((lesson) => lesson.apiId === lessonApiId)?.title : undefined
+  ));
+  const recapItems = canonical?.learningItems.slice(0, 5) ?? [];
   const [quiz, setQuiz] = useState<Quiz | null>(null);
 
   useEffect(() => {
@@ -53,12 +60,7 @@ export function LessonCompleteCard() {
       const confirmed = await completeSection(currentSection);
       if (!confirmed) return;
 
-      const canonicalLessonId = allSections.find((section) => section.canonical)?.canonical?.lessonId;
-      const routeLessonId = new URLSearchParams(location.search).get('lesson') ?? undefined;
-      const lessonApiId = canonicalLessonId ?? routeLessonId;
-
       if (isLastSection) {
-        const canonical = allSections.find((section) => section.canonical)?.canonical;
         if (canonical) {
           handoffLessonItemsToReview(canonical.lessonId, canonical.learningItems);
           finishLessonAttempt(canonical.lessonId);
@@ -76,7 +78,7 @@ export function LessonCompleteCard() {
         navigate(getLessonPath(lessonApiId, nextSectionNumber));
       }
     })();
-  }, [allSections, completeSection, currentSection, finishLessonAttempt, isLastSection, location.search, navigate, nextSection, unlockWords]);
+  }, [allSections, canonical, completeSection, currentSection, finishLessonAttempt, isLastSection, lessonApiId, navigate, nextSection, unlockWords]);
 
   return (
     <>
@@ -90,13 +92,20 @@ export function LessonCompleteCard() {
         isCurrentSectionDone ? (
           <div className="lesson-complete lesson-complete--done">
             <div className="lesson-complete__title">Урок завершён!</div>
-            <div className="lesson-complete__summary">Отличная работа — вы стали ещё немного увереннее говорить по-армянски.</div>
-            <ul className="lesson-complete__skills" aria-label="Теперь вы умеете">
-              <li>Поздороваться с другом</li>
-              <li>Вежливо поздороваться с незнакомым человеком</li>
-              <li>Формально сказать «до свидания»</li>
-              <li>Неформально сказать «пока»</li>
-            </ul>
+            <div className="lesson-complete__summary">
+              {lessonTitle
+                ? `Вы завершили «${lessonTitle}». Новые фразы уже добавлены в план повторения.`
+                : 'Новые фразы уже добавлены в план повторения.'}
+            </div>
+            {recapItems.length > 0 && (
+              <ul className="lesson-complete__skills" aria-label="Ключевые фразы урока">
+                {recapItems.map((item) => (
+                  <li key={item.id}>
+                    <span lang="hy">{item.armenian}</span> — {item.translation}
+                  </li>
+                ))}
+              </ul>
+            )}
             <button
               className="lesson-complete__btn"
               onClick={() => {
