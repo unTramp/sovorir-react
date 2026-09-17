@@ -14,6 +14,7 @@ function createUuid(): UUID {
 interface LessonAttemptSessionState {
   attemptIds: Record<UUID, UUID>;
   getOrCreateAttemptId: (lessonId: UUID) => UUID;
+  adoptAttemptId: (lessonId: UUID, attemptId: UUID) => void;
   finishAttempt: (lessonId: UUID) => void;
 }
 
@@ -28,6 +29,10 @@ export const useLessonAttemptSessionStore = create<LessonAttemptSessionState>()(
         set((state) => ({ attemptIds: { ...state.attemptIds, [lessonId]: attemptId } }));
         return attemptId;
       },
+      adoptAttemptId: (lessonId, attemptId) => set((state) => {
+        if (state.attemptIds[lessonId]) return state;
+        return { attemptIds: { ...state.attemptIds, [lessonId]: attemptId } };
+      }),
       finishAttempt: (lessonId) => set((state) => {
         const attemptIds = { ...state.attemptIds };
         delete attemptIds[lessonId];
