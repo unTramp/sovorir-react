@@ -9,6 +9,7 @@ import { useLessonProgress } from '../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../stores/useLessonSectionsStore';
 import { useLessonStore } from '../stores/useLessonStore';
 import { useFlashcardStore } from '../stores/useFlashcardStore';
+import { usePracticeSessionStore } from '../stores/usePracticeSessionStore';
 import { useRecordingStore } from '../stores/useRecordingStore';
 
 export async function resetUserProgress(): Promise<void> {
@@ -21,6 +22,7 @@ export async function resetUserProgress(): Promise<void> {
   useInteractionAttemptStore.setState({ attempts: {}, syncState: {} });
   useLessonAttemptSessionStore.setState({ attemptIds: {} });
   useFlashcardStore.setState({ progress: {}, availableWordIds: [], session: null });
+  usePracticeSessionStore.setState({ session: null });
   await useRecordingStore.getState().clearRecordings();
 
   useAppStore.getState().setCurrentLesson(1);
