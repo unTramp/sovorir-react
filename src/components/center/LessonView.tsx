@@ -7,8 +7,8 @@ import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
 import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
 import { completedRecordIndicesFromAttempts, latestLessonAttemptId } from '../../lib/interactionResume';
+import { getLessonPath, resolveLessonForRoute } from '../../lib/lessonNavigation';
 import { LessonSectionView } from './LessonPageView';
-import { useAppStore } from '../../stores/useAppStore';
 
 const EMPTY_COMPLETED_RECORDS: number[] = [];
 
@@ -16,9 +16,11 @@ export function LessonView() {
   const location = useLocation();
   const navigate = useNavigate();
   const { lessons = [], currentLesson, hasLoaded } = useLessonCatalog();
-  const selectedLessonId = useAppStore((state) => state.currentLesson);
-  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId && lesson.status !== 'locked');
-  const lessonToOpen = selectedLesson ?? currentLesson;
+  const requestedLessonApiId = useMemo(
+    () => new URLSearchParams(location.search).get('lesson'),
+    [location.search],
+  );
+  const lessonToOpen = resolveLessonForRoute(lessons, currentLesson, requestedLessonApiId);
   const currentLessonId = lessonToOpen?.id;
   const lessonApiId = lessonToOpen?.apiId;
   const selectLesson = useLessonSectionsStore((state) => state.selectLesson);
@@ -29,12 +31,14 @@ export function LessonView() {
     lessonApiId ? state.attemptIds[lessonApiId] : undefined
   ));
 
-  // Redirect to home if course complete or no current lesson (once catalog is loaded)
+  // Redirect only after the catalog has resolved. An explicit invalid/locked lesson
+  // must never silently fall back to another lesson.
   useEffect(() => {
     if (hasLoaded && !lessonToOpen) {
       navigate('/', { replace: true });
     }
   }, [hasLoaded, lessonToOpen, navigate]);
+
   const isFullscreen = useLessonStore((s) => s.isFullscreen);
   const currentSection = useLessonStore((s) => s.currentSection);
   const setCurrentSection = useLessonStore((s) => s.setCurrentSection);
@@ -49,10 +53,10 @@ export function LessonView() {
   const attemptList = useMemo(() => Object.values(attempts), [attempts]);
 
   useEffect(() => {
-    if (!lessonToOpen) return;
-    selectLesson(lessonToOpen.apiId);
+    if (!lessonApiId) return;
+    selectLesson(lessonApiId);
     reloadSections(true);
-  }, [currentLessonId, lessonToOpen, reloadSections, selectLesson]);
+  }, [currentLessonId, lessonApiId, reloadSections, selectLesson]);
 
   useEffect(() => {
     if (!lessonApiId) return;
@@ -65,30 +69,35 @@ export function LessonView() {
     if (latestAttemptId) adoptAttemptId(lessonApiId, latestAttemptId);
   }, [activeAttemptId, adoptAttemptId, attemptList, lessonApiId, lessonToOpen?.status]);
 
-  // Sync totalSections into useLessonStore whenever sections change
+  // Sync totalSections into useLessonStore whenever sections change.
   useEffect(() => {
     setTotalSections(allSections.length);
   }, [allSections.length, setTotalSections]);
 
-  // Jump to section from URL query param
+  // Resolve section from URL and canonicalize legacy/deep links with stable lesson identity.
   useEffect(() => {
     if (!allSections.length) return;
+
     const params = new URLSearchParams(location.search);
     const sectionParam = params.get('section');
+    const parsedSection = sectionParam == null ? currentSection : Number(sectionParam);
+    const requestedSection = Number.isFinite(parsedSection) && parsedSection >= 1
+      ? parsedSection
+      : currentSection;
+    const boundedSection = Math.min(allSections.length, Math.max(1, Math.trunc(requestedSection)));
 
-    if (!sectionParam) {
-      navigate(`/lesson?section=${currentSection}`, { replace: true });
-      return;
-    }
-
-    const requestedSection = Number(sectionParam);
-    if (!Number.isFinite(requestedSection) || requestedSection < 1) return;
-
-    const boundedSection = Math.min(allSections.length, Math.max(1, requestedSection));
     if (boundedSection !== currentSection) {
       setCurrentSection(boundedSection);
     }
-  }, [allSections.length, currentSection, location.search, navigate, setCurrentSection]);
+
+    if (lessonApiId) {
+      const canonicalPath = getLessonPath(lessonApiId, boundedSection);
+      const currentPath = `/lesson${location.search}`;
+      if (currentPath !== canonicalPath) {
+        navigate(canonicalPath, { replace: true });
+      }
+    }
+  }, [allSections.length, currentSection, lessonApiId, location.search, navigate, setCurrentSection]);
 
   const currentSectionData = useMemo(
     () => allSections.find((item) => item.id === currentSection),

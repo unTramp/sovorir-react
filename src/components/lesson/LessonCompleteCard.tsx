@@ -1,10 +1,11 @@
 import { useEffect, useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonProgress, syncCompletedSectionsToServer } from '../../stores/useLessonProgress';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
 import { useLessonCatalogStore } from '../../stores/useLessonCatalogStore';
 import { contentRepository } from '../../lib/contentRepository';
+import { getLessonPath } from '../../lib/lessonNavigation';
 import { QuizContainer } from '../quiz/QuizContainer';
 import type { Quiz, QuizResult } from '../../types/quiz';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
@@ -12,6 +13,7 @@ import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessi
 import { handoffLessonItemsToReview } from '../../lib/lessonReviewHandoff';
 
 export function LessonCompleteCard() {
+  const location = useLocation();
   const navigate = useNavigate();
   const currentSection = useLessonStore((s) => s.currentSection);
   const totalSections = useLessonStore((s) => s.totalSections);
@@ -51,6 +53,10 @@ export function LessonCompleteCard() {
       const confirmed = await completeSection(currentSection);
       if (!confirmed) return;
 
+      const canonicalLessonId = allSections.find((section) => section.canonical)?.canonical?.lessonId;
+      const routeLessonId = new URLSearchParams(location.search).get('lesson') ?? undefined;
+      const lessonApiId = canonicalLessonId ?? routeLessonId;
+
       if (isLastSection) {
         const canonical = allSections.find((section) => section.canonical)?.canonical;
         if (canonical) {
@@ -67,10 +73,10 @@ export function LessonCompleteCard() {
       if (!isLastSection) {
         const nextSectionNumber = currentSection + 1;
         nextSection();
-        navigate(`/lesson?section=${nextSectionNumber}`);
+        navigate(getLessonPath(lessonApiId, nextSectionNumber));
       }
     })();
-  }, [allSections, completeSection, currentSection, finishLessonAttempt, isLastSection, navigate, nextSection, unlockWords]);
+  }, [allSections, completeSection, currentSection, finishLessonAttempt, isLastSection, location.search, navigate, nextSection, unlockWords]);
 
   return (
     <>

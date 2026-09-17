@@ -5,7 +5,7 @@ import type { Lesson } from '../../types/lesson';
 import { useAppStore } from '../../stores/useAppStore';
 import { useLessonStore } from '../../stores/useLessonStore';
 import { useLessonSectionsStore } from '../../stores/useLessonSectionsStore';
-import { getResumeSectionNumber } from '../../lib/lessonNavigation';
+import { getLessonPath, getResumeSectionNumber } from '../../lib/lessonNavigation';
 
 function lessonMeta(lesson: Lesson) {
   const availableSections = lesson.sections.filter((section) => section.type !== 'video');
@@ -29,7 +29,7 @@ export function CourseView() {
     setCurrentLesson(lesson.id);
     setCurrentSection(resumeSection);
     selectLesson(lesson.apiId);
-    navigate(`/lesson?section=${resumeSection}`);
+    navigate(getLessonPath(lesson.apiId, resumeSection));
   };
 
   if (isLoading && lessons.length === 0) {
