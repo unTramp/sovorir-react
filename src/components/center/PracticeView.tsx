@@ -1,30 +1,42 @@
-import { useState } from 'react';
-import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { useMemo, useState } from 'react';
 import { dictionary } from '../../data/dictionary';
-import { FlashcardDeck } from '../practice/FlashcardDeck';
-import { SessionResult } from '../practice/SessionResult';
-import { PracticeStats } from '../practice/PracticeStats';
 import { PronunciationTrainer } from '../practice/PronunciationTrainer';
 import { PracticeModeHeader } from '../practice/PracticeModeHeader';
+import { MixedPracticeDeck } from '../practice/MixedPracticeDeck';
 import { BrainIcon } from '../../icons';
+import { useLearningItemStore } from '../../stores/useLearningItemStore';
+import { usePracticeSessionStore } from '../../stores/usePracticeSessionStore';
+import { buildPracticeQueue } from '../../lib/practiceEngine';
 
 type PracticeTab = 'flashcards' | 'pronunciation';
 
 export function PracticeView() {
   const [activeTab, setActiveTab] = useState<PracticeTab>('flashcards');
-  const session = useFlashcardStore((s) => s.session);
-  const startSession = useFlashcardStore((s) => s.startSession);
-  const dueCount = useFlashcardStore((s) => s.getDueCount());
-  const availableCount = useFlashcardStore((s) => s.getAvailableCount());
+  const items = useLearningItemStore((state) => state.items);
+  const reviewQueue = useLearningItemStore((state) => state.reviewQueue);
+  const session = usePracticeSessionStore((state) => state.session);
+  const startSession = usePracticeSessionStore((state) => state.startSession);
 
-  const sessionComplete = session && session.currentIndex >= session.cards.length;
+  const dueCount = useMemo(() => buildPracticeQueue({
+    items,
+    reviewQueue,
+    limit: Number.MAX_SAFE_INTEGER,
+  }).length, [items, reviewQueue]);
+  const availableCount = Object.keys(reviewQueue).length;
+
+  const sessionComplete = Boolean(session && session.currentIndex >= session.cards.length);
+  const sessionProgress = session
+    ? `${Math.min(session.currentIndex + (sessionComplete ? 0 : 1), session.cards.length)} / ${session.cards.length}`
+    : dueCount > 0
+      ? `${dueCount} к повторению`
+      : `${availableCount} в плане`;
 
   return (
     <div className="view-panel flex flex-col h-full">
       <PracticeModeHeader
         activeMode={activeTab}
         onModeChange={setActiveTab}
-        progress={activeTab === 'flashcards' ? <PracticeStats /> : <span>{dictionary.length} слов</span>}
+        progress={activeTab === 'flashcards' ? <span>{sessionProgress}</span> : <span>{dictionary.length} слов</span>}
       />
 
       <div className="flex-1 overflow-y-auto p-4 no-scrollbar">
@@ -34,24 +46,23 @@ export function PracticeView() {
               <div className="flashcard-start">
                 <div className="flashcard-start__icon"><BrainIcon size={28} /></div>
                 <div className="flashcard-start__title">
-                  {availableCount === 0 ? 'Повторение появится после урока' : dueCount === 0 ? 'На сегодня всё' : 'Пора повторить'}
+                  {availableCount === 0 ? 'Повторение появится после урока' : dueCount === 0 ? 'На сегодня всё' : 'Пора вспомнить'}
                 </div>
                 <div className="flashcard-start__desc">
                   {availableCount === 0
-                    ? 'Фразы из пройденных уроков автоматически появятся здесь в нужный день.'
+                    ? 'Фразы из завершённых уроков автоматически попадут сюда и вернутся в нужный день.'
                     : dueCount === 0
-                      ? `${availableCount} фраз уже в вашем плане. Мы вернём их, когда придёт время повторения.`
-                      : `${dueCount} ${dueCount === 1 ? 'фраза готова' : dueCount < 5 ? 'фразы готовы' : 'фраз готовы'} к короткому повторению.`}
+                      ? `${availableCount} ${availableCount === 1 ? 'фраза уже в плане' : 'фраз уже в плане'}. Вернём их тогда, когда повторение будет полезнее всего.`
+                      : `Сегодня ${dueCount} ${dueCount === 1 ? 'фраза готова' : dueCount < 5 ? 'фразы готовы' : 'фраз готовы'} к смешанному повторению: вспомнить, узнать и понять на слух.`}
                 </div>
                 {dueCount > 0 && (
-                  <button className="flashcard-start__btn" onClick={startSession}>
+                  <button className="flashcard-start__btn" onClick={() => startSession()}>
                     Начать повторение
                   </button>
                 )}
               </div>
             )}
-            {session && !sessionComplete && <FlashcardDeck />}
-            {session && sessionComplete && <SessionResult />}
+            {session && <MixedPracticeDeck />}
           </div>
         )}
 
