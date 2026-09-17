@@ -12,6 +12,7 @@ import type { ContentBlock } from '../../../types/lessonContent';
 import { PickerMenu } from './PickerMenu';
 import { semanticBlockDescription } from './utils';
 import { BlockTypedFields } from './BlockTypedFields';
+import { VideoBlockFields } from './VideoBlockFields';
 
 function GripIcon() {
   return (
@@ -57,7 +58,11 @@ function getBlockPreview(content: ContentBlock) {
     case 'rule':
       return normalizePreviewText([content.title, content.items[0]].filter(Boolean).join(' — '));
     case 'video':
-      return normalizePreviewText([content.senderName, content.text].filter(Boolean).join(' — '));
+      return normalizePreviewText([
+        content.presentation === 'circle' ? 'Видео-кружок' : content.presentation === 'scene' ? 'Сцена' : 'Видео',
+        content.senderName,
+        content.text,
+      ].filter(Boolean).join(' — '));
     case 'record':
     case 'pronunciationPrompt':
       return normalizePreviewText(content.prompt);
@@ -179,6 +184,13 @@ export function BlockEditor({
             {previewText || 'Пока нет заполненного содержимого.'}
           </div>
         </div>
+      ) : block.content.type === 'video' ? (
+        <VideoBlockFields
+          blockId={block.id}
+          content={block.content}
+          busy={busy}
+          onChange={handleTypedContentChange}
+        />
       ) : (
         <BlockTypedFields
           blockId={block.id}
