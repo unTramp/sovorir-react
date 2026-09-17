@@ -81,7 +81,15 @@ export const PresentationNodeSchema = z.discriminatedUnion('type', [
   z.object({ id: UUIDSchema, type: z.literal('student-bubble'), text: z.string(), audio: MediaAssetSchema.optional() }),
   z.object({ id: UUIDSchema, type: z.literal('audio'), title: z.string(), description: z.string().optional(), asset: MediaAssetSchema }),
   z.object({ id: UUIDSchema, type: z.literal('rule'), title: z.string(), items: z.array(z.string()) }),
-  z.object({ id: UUIDSchema, type: z.literal('video'), title: z.string(), asset: MediaAssetSchema, thumbnailUrl: z.string().optional() }),
+  z.object({
+    id: UUIDSchema,
+    type: z.literal('video'),
+    title: z.string(),
+    asset: MediaAssetSchema,
+    thumbnailUrl: z.string().optional(),
+    presentation: z.enum(['circle', 'lesson', 'scene']).optional(),
+    transcript: z.string().optional(),
+  }),
 ]);
 
 export const LessonStepSchema = z.object({
