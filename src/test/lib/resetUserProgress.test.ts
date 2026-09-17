@@ -20,7 +20,7 @@ describe('resetUserProgress', () => {
       sectionsReady: true,
     });
     useLearningItemStore.setState({ items: {}, reviewQueue: { [id]: { sourceLessonId: id, unlockedAt: '2026-09-15', nextReviewAt: '2026-09-16' } } });
-    useInteractionAttemptStore.setState({ attempts: { [id]: {} as never } });
+    useInteractionAttemptStore.setState({ attempts: { [id]: {} as never }, syncState: { [id]: 'error' } });
     useLessonAttemptSessionStore.setState({ attemptIds: { [id]: id } });
     useFlashcardStore.setState({
       progress: { word: { wordId: 'word', interval: 3, nextReview: Date.now(), easeFactor: 2.5 } },
@@ -37,7 +37,7 @@ describe('resetUserProgress', () => {
 
     expect(useLessonProgress.getState()).toMatchObject({ sections: {}, quizResults: {}, sectionsReady: false });
     expect(useLearningItemStore.getState()).toMatchObject({ items: {}, reviewQueue: {} });
-    expect(useInteractionAttemptStore.getState().attempts).toEqual({});
+    expect(useInteractionAttemptStore.getState()).toMatchObject({ attempts: {}, syncState: {} });
     expect(useLessonAttemptSessionStore.getState().attemptIds).toEqual({});
     expect(useFlashcardStore.getState()).toMatchObject({ progress: {}, availableWordIds: [], session: null });
     expect(useRecordingStore.getState().recordings).toEqual({});

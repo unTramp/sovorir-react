@@ -10,7 +10,7 @@ const ids = {
   recording: 'a0b58b59-6557-4d26-9613-b0b59b4be662',
 };
 
-beforeEach(() => useInteractionAttemptStore.setState({ attempts: {} }));
+beforeEach(() => useInteractionAttemptStore.setState({ attempts: {}, syncState: {} }));
 
 describe('useInteractionAttemptStore', () => {
   it('moves an attempt from started to completed and keeps learning signals', () => {

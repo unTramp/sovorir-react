@@ -18,7 +18,7 @@ export async function resetUserProgress(): Promise<void> {
 
   useLessonProgress.setState({ sections: {}, quizResults: {}, sectionsReady: false });
   useLearningItemStore.setState({ items: {}, reviewQueue: {} });
-  useInteractionAttemptStore.setState({ attempts: {} });
+  useInteractionAttemptStore.setState({ attempts: {}, syncState: {} });
   useLessonAttemptSessionStore.setState({ attemptIds: {} });
   useFlashcardStore.setState({ progress: {}, availableWordIds: [], session: null });
   await useRecordingStore.getState().clearRecordings();
