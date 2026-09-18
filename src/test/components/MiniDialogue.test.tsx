@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MiniDialogue } from '../../components/lesson/MiniDialogue';
+import { DialogueScene } from '../../components/lesson/DialogueScene';
 
 const block = {
   type: 'dialogue' as const,
@@ -19,14 +19,16 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe('MiniDialogue', () => {
+describe('DialogueScene', () => {
   it('keeps the learner in the conversation until the correct reply', () => {
     vi.useFakeTimers();
     const onComplete = vi.fn();
-    render(<MiniDialogue block={block} onComplete={onComplete} />);
+    render(<DialogueScene block={block} onComplete={onComplete} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Ցտեսություն։' }));
     expect(screen.getByText('Это прощание — разговор только начинается.')).toBeInTheDocument();
+    expect(screen.getByText('Лусине').closest('.voice-bubble--teacher')).toBeInTheDocument();
+    expect(screen.getByText('Ցտեսություն։').closest('.student-bubble')).toHaveClass('student-bubble--error');
 
     fireEvent.click(screen.getByRole('button', { name: 'Բարև ձեզ։' }));
     expect(screen.getByLabelText('Ани печатает')).toBeInTheDocument();
