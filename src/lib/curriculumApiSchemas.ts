@@ -199,6 +199,7 @@ export const ApiLessonDetailSchema = z.object({
 });
 
 export const ApiLearningItemSchema = LearningItemSchema.extend({
+  phoneticHint: z.string().nullish().transform((value) => value ?? undefined),
   stableKey: z.string().min(1),
   schoolId: UUID,
   createdAt: z.string(),
