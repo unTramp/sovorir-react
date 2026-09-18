@@ -7166,3 +7166,192 @@ button:focus-visible {
     animation: none;
   }
 }
+
+
+/* ==================== Dialogue Scene v2 ==================== */
+.dialogue-scene {
+  margin: var(--space-4) 0 var(--space-6);
+}
+
+.dialogue-scene__instruction {
+  margin: 0 0 var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+.dialogue-scene__thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.character-message-row,
+.character-typing-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.character-message {
+  position: relative;
+  max-width: 86%;
+  margin-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 12px 16px;
+  border: 1px solid rgb(var(--color-primary-rgb) / 0.10);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: linear-gradient(
+    160deg,
+    var(--color-bg-white) 0%,
+    var(--color-bg-card-warm) 100%
+  );
+  color: var(--color-text);
+  box-shadow: 0 2px 8px rgba(58, 42, 35, 0.06);
+}
+
+.character-message__avatar {
+  position: absolute;
+  top: 10px;
+  left: -20px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--color-bg-content);
+  border-radius: 50%;
+  background: var(--color-primary-soft, #F3E4DC);
+  color: var(--color-primary-dark);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 800;
+  box-shadow: var(--shadow-card);
+  transform: translateX(-50%);
+}
+
+.character-message__speaker {
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.character-message__text {
+  color: var(--color-text-strong);
+  font-family: var(--font-armenian);
+  font-size: var(--text-body-large);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.character-typing-row {
+  padding-left: 42px;
+}
+
+.character-typing {
+  min-width: 58px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 14px;
+  border: 1px solid rgb(var(--color-primary-rgb) / 0.08);
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  background: var(--color-bg-card-warm);
+}
+
+.character-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: dialogue-scene-dot 900ms ease-in-out infinite alternate;
+}
+
+.character-typing span:nth-child(2) { animation-delay: 150ms; }
+.character-typing span:nth-child(3) { animation-delay: 300ms; }
+
+@keyframes dialogue-scene-dot {
+  from { opacity: 0.35; transform: translateY(1px); }
+  to { opacity: 1; transform: translateY(-2px); }
+}
+
+.dialogue-scene__choices {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.dialogue-choice {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  padding: 13px 16px;
+  border: var(--border-interactive);
+  border-radius: 16px;
+  background: var(--color-bg-white);
+  color: var(--color-text);
+  text-align: left;
+  box-shadow: none;
+  transition:
+    border-color var(--duration-fast) ease,
+    background var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.dialogue-choice:hover {
+  border-color: rgb(var(--color-primary-rgb) / 0.34);
+  background: rgb(var(--color-primary-rgb) / 0.025);
+}
+
+.dialogue-choice:active {
+  transform: scale(0.99);
+}
+
+.dialogue-choice__text {
+  font-family: var(--font-armenian);
+  font-size: var(--text-body-large);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dialogue-choice__translation {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  line-height: 1.4;
+}
+
+.dialogue-choice--error {
+  border-color: rgb(183 71 58 / 0.48);
+  background: rgb(183 71 58 / 0.055);
+}
+
+@media (max-width: 480px) {
+  .character-message {
+    max-width: 88%;
+    padding: 12px 14px;
+  }
+
+  .dialogue-choice {
+    min-height: 56px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .character-typing span {
+    animation: none;
+  }
+
+  .dialogue-choice {
+    transition: none;
+  }
+}
