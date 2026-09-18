@@ -6,6 +6,7 @@ import { NotificationBell } from '../ui/NotificationBell';
 import type { SectionType } from '../../types/lesson';
 import { useLessonCatalog } from '../../hooks/useLessonCatalog';
 import { useAppStore } from '../../stores/useAppStore';
+import { getLessonPath } from '../../lib/lessonNavigation';
 
 const VIEW_TITLES: Partial<Record<SectionType, { title: string; subtitle?: string }>> & Record<string, { title: string; subtitle?: string }> = {
   home:                  { title: 'Главная' },
@@ -42,6 +43,8 @@ export function MobileHeader() {
   const location = useLocation();
   const lessonMatch = useMatch('/lesson');
   const isLesson = !!lessonMatch;
+  const requestedLessonApiId = new URLSearchParams(location.search).get('lesson');
+  const lessonApiId = requestedLessonApiId ?? lessonForHeader?.apiId;
   const showStreak = location.pathname === '/';
 
   const lessonHeaderTitle = lessonForHeader ? `Урок ${lessonForHeader.id}` : 'Урок';
@@ -54,7 +57,7 @@ export function MobileHeader() {
     if (currentSection > 1) {
       const previousSection = currentSection - 1;
       setCurrentSection(previousSection);
-      navigate(`/lesson?section=${previousSection}`, { replace: true });
+      navigate(getLessonPath(lessonApiId, previousSection), { replace: true });
       return;
     }
 
