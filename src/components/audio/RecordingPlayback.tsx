@@ -27,7 +27,14 @@ export function RecordingPlayback({ audioUrl, duration, id }: Props) {
       >
         {playing ? <PauseIcon /> : <PlayIcon />}
       </button>
-      <div className="recording-playback__bar">
+      <div
+        className="recording-playback__bar"
+        role="progressbar"
+        aria-label="Прогресс воспроизведения записи"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+      >
         <div className="recording-playback__fill" style={{ width: `${progress * 100}%` }} />
       </div>
       <span className="recording-playback__duration">{duration}с</span>
