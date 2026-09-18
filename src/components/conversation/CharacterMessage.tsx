@@ -5,7 +5,7 @@ interface CharacterMessageProps {
 }
 
 export function CharacterMessage({ name, role, text }: CharacterMessageProps) {
-  const initial = (role || name).trim().charAt(0).toLocaleUpperCase('ru-RU');
+  const initial = name.trim().charAt(0).toLocaleUpperCase('ru-RU');
 
   return (
     <div className="character-message-row">
