@@ -5,6 +5,7 @@ import type { ActiveRecallBlock } from '../../types/lessonContent';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
 import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
+import { StudentBubble } from '../conversation/StudentBubble';
 
 interface Props {
   block: ActiveRecallBlock;
@@ -71,12 +72,11 @@ export function ActiveRecall({ block, completed = false, onComplete, actionDock 
 
       {answerVisible && (
         <div className="lesson-dialogue__thread active-recall__thread">
-          <div className="lesson-dialogue__message lesson-dialogue__message--learner active-recall__answer">
-            <span className="lesson-dialogue__speaker">Вы</span>
+          <StudentBubble className="active-recall__answer">
             <strong lang="hy">{block.answer.armenian}</strong>
             <span>{block.answer.transcription}</span>
             <p>{block.answer.translation}</p>
-          </div>
+          </StudentBubble>
         </div>
       )}
 
