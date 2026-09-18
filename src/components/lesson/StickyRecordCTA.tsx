@@ -36,8 +36,6 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
 
     const id = recordingUuid();
     const lessonAttemptId = tracking ? getOrCreateLessonAttemptId(tracking.lessonId) : undefined;
-    setIsSaving(true);
-
     void saveRecording(
       {
         id,
@@ -96,6 +94,8 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
     stop();
   }, [stop]);
 
+  const showingSaveState = isSaving || Boolean(audioBlob && !saveError);
+
   return (
     <div className="lesson-record-sticky">
       {(error || saveError) && (
@@ -103,7 +103,7 @@ export function StickyRecordCTA({ onComplete, sectionId, recordIndex, tracking }
       )}
 
       <div className="speaking-record-dock">
-        {isSaving && !isRecording ? (
+        {showingSaveState && !isRecording ? (
           <div className="speaking-record-dock__saving" role="status">
             <span className="speaking-record-dock__saving-dot" aria-hidden="true" />
             Сохраняем запись…
