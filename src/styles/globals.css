@@ -6850,3 +6850,86 @@ button:focus-visible {
     padding: 12px 14px;
   }
 }
+
+
+/* ==================== Recording Playback v2 ==================== */
+.recording-playback {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.recording-playback__btn {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(var(--color-primary-rgb) / 0.10);
+  color: var(--color-primary-dark);
+  box-shadow: none;
+}
+
+.recording-playback__btn:hover {
+  transform: none;
+  background: rgb(var(--color-primary-rgb) / 0.15);
+  box-shadow: none;
+}
+
+.recording-playback__btn:active {
+  transform: scale(0.96);
+}
+
+.recording-playback__bar {
+  flex: 1;
+  min-width: 32px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgb(var(--color-primary-rgb) / 0.14);
+  overflow: hidden;
+}
+
+.recording-playback__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-primary);
+  transition: width 0.1s linear;
+}
+
+.recording-playback__duration {
+  min-width: 32px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* A learner recording inside StudentBubble inherits learner identity from the message,
+   while the playback primitive itself stays structurally identical. */
+.student-bubble .recording-playback__btn {
+  background: rgb(var(--color-student-rgb) / 0.13);
+  color: var(--color-student-dark);
+}
+
+.student-bubble .recording-playback__btn:hover {
+  background: rgb(var(--color-student-rgb) / 0.18);
+}
+
+.student-bubble .recording-playback__bar {
+  background: rgb(var(--color-student-rgb) / 0.16);
+}
+
+.student-bubble .recording-playback__fill {
+  background: var(--color-student-muted);
+}
