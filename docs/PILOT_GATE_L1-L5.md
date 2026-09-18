@@ -84,29 +84,28 @@ These checks require the actual server and cannot be inferred from CI.
 
 ### Infrastructure prerequisite
 
-GitHub Actions repository secrets must exist for the backend repository:
+The current Pilot Gate deploy was performed through the authenticated developer workstation over SSH to the intended production host. GitHub Actions deploy remains manual-only and can be configured later with repository secrets:
 
 - [ ] `SSH_HOST`;
 - [ ] `SSH_USER`;
 - [ ] `SSH_PRIVATE_KEY`;
 - [ ] optional `SSH_PORT` if the host does not use port 22.
 
-**Do not put the private key into issues, docs, commits, or chat.** Configure it directly in GitHub repository Actions secrets.
+**Do not put the private key into issues, docs, commits, or chat.**
 
-Current deploy state: the workflow correctly stops before SSH because required secrets are absent. The live server has therefore not been modified by the Pilot Gate deployment workflow.
+GitHub Actions secrets are no longer a blocker for this Pilot Gate because the production deployment and publication have already been completed through the controlled SSH path.
 
 ### Controlled publish sequence
 
-After secrets are configured:
+Production verification on 2026-09-18:
 
-- [ ] deploy backend default branch successfully;
-- [ ] migration step succeeds without `|| true`;
-- [ ] `/health` succeeds after deploy;
-- [ ] run manual workflow dispatch with `publish_pilot_content=true`;
-- [ ] `content:validate` succeeds inside production API container;
-- [ ] timestamped pg_dump backup is created and non-empty;
-- [ ] `content:pilot` syncs L1–L5 with progress reset disabled;
-- [ ] `/health` succeeds after content publication;
+- [x] backend default branch revision `bd9150b4de0d74ce6470fb2ca31dca3054794f1d` deployed to the intended production host;
+- [x] migration step succeeded without `|| true` and reported no schema changes required;
+- [x] `/health` succeeded after deploy;
+- [x] `content:validate` succeeded inside the production API container;
+- [x] timestamped pg_dump backup was created and verified non-empty;
+- [x] `content:pilot` synced five pilot lessons with `RESET_PILOT_PROGRESS=false`;
+- [x] `/health` succeeded after content publication;
 - [ ] authenticated lesson catalog returns five published pilot lessons;
 - [ ] lesson detail for each L1–L5 passes frontend runtime validation;
 - [ ] course status correctly advances completed → current → locked.
@@ -318,11 +317,10 @@ Only after this gate should L6/L7 become the main implementation focus.
 
 ### External / configuration
 
-**BLOCKER:** backend GitHub Actions cannot deploy because required SSH Actions secrets are not configured. The workflow now fails safely before attempting SSH.
+No external deployment blocker remains for the current Pilot Gate. GitHub Actions SSH secrets are still optional follow-up infrastructure work for future one-click deploys.
 
 ### Pending verification
 
-- production V5 sync;
 - authenticated live API validation;
 - real sequential L1–L5 learner pass;
 - physical iPhone/Android pass;
