@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   ApiCourseLessonListSchema,
+  ApiLearningItemListSchema,
   ApiLessonBlockSchema,
   ApiLessonDetailSchema,
 } from '../../lib/curriculumApiSchemas';
@@ -150,6 +151,29 @@ describe('curriculum API schemas', () => {
       },
       createdAt: '2026-09-15T09:00:00.000Z',
     })).toThrow();
+  });
+
+  it('accepts nullable phoneticHint from the API and normalizes it', () => {
+    const result = ApiLearningItemListSchema.parse([{
+      id: ids.item,
+      stableKey: 'lesson1.barev',
+      schoolId: '91517d78-45bb-49c0-b491-7d4a2e2e79f7',
+      revision: 1,
+      type: 'phrase',
+      armenian: 'Բարև',
+      transliteration: 'barev',
+      translation: 'Привет',
+      phoneticHint: null,
+      contexts: ['Приветствие'],
+      register: 'informal',
+      difficulty: 1,
+      tags: ['greeting'],
+      reviewable: true,
+      createdAt: '2026-09-15T09:00:00.000Z',
+      updatedAt: '2026-09-15T09:00:00.000Z',
+    }]);
+
+    expect(result[0].phoneticHint).toBeUndefined();
   });
 
   it('rejects malformed curriculum responses at the API boundary', () => {
