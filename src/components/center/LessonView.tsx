@@ -159,7 +159,9 @@ export function LessonView() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 text-center">
         <div className="text-base font-semibold text-dark">Не удалось загрузить урок</div>
-        <div className="max-w-sm text-sm text-muted">Проверьте соединение и попробуйте ещё раз.</div>
+        <div className="max-w-sm text-sm text-muted">
+          {sectionsError || 'Проверьте соединение и попробуйте ещё раз.'}
+        </div>
         <button className="btn btn--primary btn--md" onClick={() => reloadSections(true)}>Повторить</button>
       </div>
     );
