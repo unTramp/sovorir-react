@@ -28,7 +28,11 @@ describe('DialogueScene', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ցտեսություն։' }));
     expect(screen.getByText('Это прощание — разговор только начинается.')).toBeInTheDocument();
     expect(screen.getByText('Лусине').closest('.voice-bubble--teacher')).toBeInTheDocument();
-    expect(screen.getByText('Ցտեսություն։').closest('.student-bubble')).toHaveClass('student-bubble--error');
+    const learnerReply = screen
+      .getAllByText('Ցտեսություն։')
+      .find((node) => node.closest('.student-bubble'));
+    expect(learnerReply).toBeDefined();
+    expect(learnerReply?.closest('.student-bubble')).toHaveClass('student-bubble--error');
 
     fireEvent.click(screen.getByRole('button', { name: 'Բարև ձեզ։' }));
     expect(screen.getByLabelText('Ани печатает')).toBeInTheDocument();
