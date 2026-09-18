@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { DialogueBlock } from '../../types/lessonContent';
 import { useInteractionAttemptStore } from '../../stores/useInteractionAttemptStore';
 import { useLessonAttemptSessionStore } from '../../stores/useLessonAttemptSessionStore';
+import { StudentBubble } from '../conversation/StudentBubble';
 
 interface Props {
   block: DialogueBlock;
@@ -74,10 +75,9 @@ export function MiniDialogue({ block, completed = false, onComplete }: Props) {
           <span lang="hy">{block.message}</span>
         </div>
         {selected && (
-          <div className={`lesson-dialogue__message lesson-dialogue__message--learner${selected.correct ? '' : ' is-error'}`}>
-            <span className="lesson-dialogue__speaker">Вы</span>
+          <StudentBubble state={selected.correct ? 'default' : 'error'}>
             <span lang="hy">{selected.text}</span>
-          </div>
+          </StudentBubble>
         )}
         {selected && !selected.correct && (
           <div className="lesson-dialogue__mentor-feedback" role="status">

@@ -5,6 +5,7 @@ import { WaveformBars } from './WaveformBars';
 import { PlayIcon, PauseIcon } from '../../icons';
 import { formatDuration } from '../../lib/formatDuration';
 import type { AudioMessage } from '../../types/audio';
+import { StudentBubble } from '../conversation/StudentBubble';
 
 interface Props {
   message: AudioMessage;
@@ -54,41 +55,47 @@ export function VoiceBubble({ message }: Props) {
     ? Math.max(0, Math.ceil(resolvedDuration * (1 - progress)))
     : resolvedDuration;
 
-  return (
-    <div className={`flex ${isTeacher ? 'justify-start' : 'justify-end'}`}>
-      <div
-        className={`voice-bubble ${
-          isTeacher ? 'voice-bubble--teacher' : 'voice-bubble--student'
-        }`}
+  const player = (
+    <div className="voice-bubble__player">
+      <button
+        className="voice-bubble__play"
+        aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
+        onClick={() => togglePlay(message.id, message.src, resolvedDuration)}
       >
-        {isTeacher && (
-          <img
-            src="/assets/teacher-avatar.png"
-            className="voice-bubble__teacher-img"
-            alt="Лусине"
-          />
-        )}
+        {isPlaying ? <PauseIcon /> : <PlayIcon />}
+      </button>
+      <WaveformBars
+        messageId={message.id}
+        progress={progress}
+        isTeacher={isTeacher}
+      />
+      {remaining > 0 ? (
+        <span className="voice-bubble__duration">
+          {formatDuration(remaining)}
+        </span>
+      ) : null}
+    </div>
+  );
+
+  if (!isTeacher) {
+    return (
+      <StudentBubble label={message.senderName}>
+        {player}
+      </StudentBubble>
+    );
+  }
+
+  return (
+    <div className="flex justify-start">
+      <div className="voice-bubble voice-bubble--teacher">
+        <img
+          src="/assets/teacher-avatar.png"
+          className="voice-bubble__teacher-img"
+          alt="Лусине"
+        />
         <div className="voice-bubble__name">{message.senderName}</div>
-        {isTeacher && <div className="voice-bubble__text">{message.text}</div>}
-        <div className="voice-bubble__player">
-          <button
-            className="voice-bubble__play"
-            aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
-            onClick={() => togglePlay(message.id, message.src, resolvedDuration)}
-          >
-            {isPlaying ? <PauseIcon /> : <PlayIcon />}
-          </button>
-          <WaveformBars
-            messageId={message.id}
-            progress={progress}
-            isTeacher={isTeacher}
-          />
-          {remaining > 0 ? (
-            <span className="voice-bubble__duration">
-              {formatDuration(remaining)}
-            </span>
-          ) : null}
-        </div>
+        <div className="voice-bubble__text">{message.text}</div>
+        {player}
       </div>
     </div>
   );
