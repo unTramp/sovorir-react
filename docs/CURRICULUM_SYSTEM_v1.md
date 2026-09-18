@@ -235,9 +235,9 @@ Avoid long lecture bubbles.
 
 Recommended duration: **5–18 sec**.
 
-### 4.3 Video Circle (`presentation: circle`)
+### 4.3 Mentor Video
 
-Telegram-like circular mentor video. This is a first-class Sovorir mechanic.
+Short framed mentor video shown through the shared lesson VideoCard.
 
 Purpose:
 
@@ -245,18 +245,18 @@ Purpose:
 - mouth/articulation visibility;
 - greeting or reaction;
 - human transition between stages;
-- short cultural nuance.
+- short cultural or register nuance.
 
 Recommended duration: **4–20 sec**.
 
 Rules:
 
-- one idea per circle;
+- one idea per clip;
+- use a rounded rectangular frame rather than a circular messenger-style mask;
+- portrait-oriented 4:5 or 3:4 is the preferred default when the face is the focus;
 - no dense subtitles over the face;
-- tap opens/replays; inline preview remains circular;
-- muted autoplay is NOT required;
 - sound must never start unexpectedly;
-- circles should not be used simply because video exists.
+- mentor video should not be used simply because video exists.
 
 Examples:
 
@@ -264,9 +264,9 @@ Examples:
 - natural `Ո՞նց ես` with facial expression;
 - «С другом здесь скажите так, а со старшим — вот так».
 
-### 4.4 Lesson Video (`presentation: lesson`)
+### 4.4 Explanation Video
 
-A normal instructional video, usually 30–90 sec.
+Instructional video shown through the same VideoCard, usually 20–90 sec.
 
 Purpose:
 
@@ -277,14 +277,14 @@ Purpose:
 
 Should have:
 
-- thumbnail;
+- thumbnail or stable first-frame poster;
 - duration;
 - optional captions/transcript;
 - clear learning objective.
 
 Do not place a long teacher video before every lesson.
 
-### 4.5 Scene Video (`presentation: scene`)
+### 4.5 Scene Video
 
 Short realistic scene used as input before explanation or as a mission stimulus.
 
@@ -303,18 +303,22 @@ Purpose:
 
 Recommended duration: **8–35 sec**.
 
+Scene video uses the same rounded VideoCard. Wider 16:9 or 4:3 framing is preferred when environment or multiple speakers matter.
+
 A scene may contain more than one speaker and SHOULD be reusable in later review.
 
 ---
 
-## 5. Proposed media contract
+## 5. Media contract direction
 
-Keep one canonical `video` block type at the API/storage level and vary presentation through metadata.
+Keep one canonical `video` content type at the API/storage level and separate semantic role from visual geometry.
+
+Target v2 role model:
 
 ```ts
 interface VideoBlock {
   type: 'video';
-  presentation?: 'circle' | 'lesson' | 'scene';
+  role?: 'mentor' | 'scene' | 'explanation';
   senderName?: string;
   text?: string;
   videoSrc: string;
@@ -326,9 +330,17 @@ interface VideoBlock {
 }
 ```
 
-Default for legacy blocks: `presentation: 'lesson'`.
+All roles should render through a shared rounded rectangular VideoCard. Role may influence default aspect ratio and metadata, but should not create a separate storage type.
 
-Do NOT create separate storage block enums for circle/scene unless future behavior proves materially different.
+During migration, the existing public values remain accepted:
+
+- `presentation: 'circle'` → mentor;
+- `presentation: 'lesson'` → explanation;
+- `presentation: 'scene'` → scene.
+
+Do NOT author new circular video presentation. Do NOT create separate storage enums merely for visual shape.
+
+The detailed runtime contract lives in `LESSON_ENGINE_V2.md`.
 
 ---
 
