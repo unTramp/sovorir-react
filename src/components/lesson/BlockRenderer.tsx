@@ -4,7 +4,7 @@ import { VoiceBubble } from '../audio/VoiceBubble';
 import { PhraseCard } from './PhraseCard';
 import { RuleCard } from './RuleCard';
 import { LessonVideoBubble } from './LessonVideoBubble';
-import { RecordPrompt } from './RecordPrompt';
+import { SpeakingTurn } from './SpeakingTurn';
 import { LessonAudioCard } from './LessonAudioCard';
 import { MultipleChoiceCard } from '../quiz/MultipleChoiceCard';
 import { MiniDialogue } from './MiniDialogue';
@@ -103,7 +103,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
     case 'record':
     case 'pronunciationPrompt':
       return (
-        <RecordPrompt
+        <SpeakingTurn
           ref={recordRef}
           block={block.type === 'pronunciationPrompt'
             ? { type: 'record', prompt: block.prompt, tracking: block.tracking }

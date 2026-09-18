@@ -6933,3 +6933,236 @@ button:focus-visible {
 .student-bubble .recording-playback__fill {
   background: var(--color-student-muted);
 }
+
+
+/* ==================== Speaking Turn v2 ==================== */
+.speaking-turn {
+  margin: var(--space-5) 0 var(--space-6);
+  padding: var(--space-5);
+  border: 1px solid rgb(var(--color-primary-rgb) / 0.10);
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    160deg,
+    rgb(var(--color-primary-rgb) / 0.035),
+    rgb(var(--color-primary-rgb) / 0.065)
+  );
+}
+
+.speaking-turn__eyebrow {
+  margin-bottom: var(--space-2);
+  color: var(--color-primary-dark);
+  font-size: var(--text-caption);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.speaking-turn__instruction {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body);
+  line-height: 1.45;
+}
+
+.speaking-turn__phrase {
+  margin-top: var(--space-2);
+  color: var(--color-text-strong);
+  font-family: var(--font-armenian);
+  font-size: var(--text-armenian-phrase);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.speaking-turn__skip {
+  min-height: 44px;
+  margin-top: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: 650;
+}
+
+.speaking-turn__skip:hover {
+  color: var(--color-text-secondary);
+}
+
+.speaking-turn--completed {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.speaking-turn__completed-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-right: var(--space-2);
+}
+
+.speaking-turn__retry {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-student-dark);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.speaking-turn__completed-placeholder {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+.speaking-turn__error {
+  margin-top: var(--space-2);
+  color: var(--color-error-dark);
+  font-size: var(--text-caption);
+  text-align: right;
+}
+
+/* The bottom recorder is the action area of SpeakingTurn, not a second task card. */
+.lesson-record-sticky {
+  padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  border-top: 0;
+  background: linear-gradient(
+    to bottom,
+    rgb(var(--color-bg-content-rgb) / 0),
+    rgb(var(--color-bg-content-rgb) / 0.96) 28%
+  );
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.speaking-record-dock {
+  width: min(100%, 400px);
+  min-height: 84px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-subtle);
+  border-radius: 22px;
+  background: var(--color-bg-content);
+  box-shadow: 0 10px 28px rgba(58, 42, 35, 0.11);
+}
+
+.speaking-record-dock__idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.speaking-record-dock__mic {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--color-primary), var(--color-primary-dark));
+  color: white;
+  box-shadow: 0 6px 16px rgb(var(--color-primary-rgb) / 0.24);
+  transition: transform var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+.speaking-record-dock__mic svg {
+  width: 26px;
+  height: 26px;
+  color: white;
+}
+
+.speaking-record-dock__mic:active {
+  transform: scale(0.95);
+  box-shadow: 0 3px 10px rgb(var(--color-primary-rgb) / 0.18);
+}
+
+.speaking-record-dock__hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+  font-weight: 650;
+}
+
+.speaking-record-dock__status,
+.speaking-record-dock__saving {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+}
+
+.speaking-record-dock__live-dot,
+.speaking-record-dock__saving-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+
+.speaking-record-dock__live-dot {
+  animation: speaking-record-pulse 1.1s ease-in-out infinite;
+}
+
+.speaking-record-dock__saving-dot {
+  opacity: 0.55;
+  animation: speaking-save-pulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes speaking-record-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.82); }
+}
+
+@keyframes speaking-save-pulse {
+  from { opacity: 0.3; }
+  to { opacity: 0.9; }
+}
+
+.speaking-record-dock__finish {
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-dark);
+  color: white;
+  font-size: var(--text-button);
+  font-weight: 750;
+}
+
+.speaking-record-dock__error {
+  width: min(100%, 400px);
+  margin: 0 auto var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-error-bg);
+  color: var(--color-error-dark);
+  font-size: var(--text-caption);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .speaking-turn {
+    padding: var(--space-4);
+  }
+
+  .speaking-record-dock {
+    min-height: 80px;
+  }
+
+  .speaking-record-dock__mic {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .speaking-record-dock__live-dot,
+  .speaking-record-dock__saving-dot {
+    animation: none;
+  }
+}
