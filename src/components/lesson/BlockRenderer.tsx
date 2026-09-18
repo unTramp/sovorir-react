@@ -7,7 +7,7 @@ import { LessonVideoBubble } from './LessonVideoBubble';
 import { SpeakingTurn } from './SpeakingTurn';
 import { LessonAudioCard } from './LessonAudioCard';
 import { MultipleChoiceCard } from '../quiz/MultipleChoiceCard';
-import { MiniDialogue } from './MiniDialogue';
+import { DialogueScene } from './DialogueScene';
 import { ActiveRecall } from './ActiveRecall';
 
 interface Props {
@@ -116,7 +116,7 @@ export function BlockRenderer({ block, index, onSkipRecord, recordRef, recordCom
         />
       );
     case 'dialogue':
-      return <MiniDialogue block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
+      return <DialogueScene block={block} completed={recordCompleted} onComplete={onSkipRecord} />;
     case 'activeRecall':
       return <ActiveRecall block={block} completed={recordCompleted} onComplete={onSkipRecord} actionDock={actionDock} />;
   }

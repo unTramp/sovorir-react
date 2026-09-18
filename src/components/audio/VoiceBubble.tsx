@@ -6,6 +6,7 @@ import { PlayIcon, PauseIcon } from '../../icons';
 import { formatDuration } from '../../lib/formatDuration';
 import type { AudioMessage } from '../../types/audio';
 import { StudentBubble } from '../conversation/StudentBubble';
+import { TeacherBubble } from '../conversation/TeacherBubble';
 
 interface Props {
   message: AudioMessage;
@@ -86,17 +87,8 @@ export function VoiceBubble({ message }: Props) {
   }
 
   return (
-    <div className="flex justify-start">
-      <div className="voice-bubble voice-bubble--teacher">
-        <img
-          src="/assets/teacher-avatar.png"
-          className="voice-bubble__teacher-img"
-          alt="Лусине"
-        />
-        <div className="voice-bubble__name">{message.senderName}</div>
-        <div className="voice-bubble__text">{message.text}</div>
-        {player}
-      </div>
-    </div>
+    <TeacherBubble name={message.senderName} text={message.text}>
+      {player}
+    </TeacherBubble>
   );
 }
