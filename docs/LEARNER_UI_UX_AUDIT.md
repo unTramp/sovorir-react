@@ -421,7 +421,7 @@ This is a major coherence problem.
 
 The learner should understand “tap to hear language” and “listen to my recording” without each context inventing a new media player.
 
-## Specific problem: blue learner system
+## Student blue: keep the conversational identity, remove the technical subsystem
 
 Current tokens explicitly define:
 
@@ -430,23 +430,25 @@ Current tokens explicitly define:
 - blue learner playback;
 - blue student progress gradient.
 
-This is the source of the visually foreign blue indicators.
+The problem is **not the existence of blue itself**. Blue is useful as a semantic conversational cue for “это реплика ученика / это я”.
 
-The blue is internally consistent with the old “student = blue” idea, but it conflicts with the current warm Sovorir identity.
+The problem is that the same saturated blue currently becomes an independent technical media language across waveform, playback and progress controls.
 
 ## Decision
 
-Remove blue as a dominant learner-audio language.
+Keep a softened blue family for **Student Bubble / Learner Message** identity.
 
-Learner ownership should be communicated through:
+Do not use saturated student blue as the generic color for recording technology, progress meters or unrelated controls.
 
-- position;
+Learner ownership should be communicated primarily through:
+
+- right-side message position;
 - label “Вы” / “Ваша запись”;
-- surface tone;
-- iconography;
-- typography;
+- a soft blue message surface;
+- mirrored bubble geometry relative to Teacher Bubble;
+- consistent typography and audio layout.
 
-not through a saturated blue subsystem.
+Interactive media controls inside the bubble should belong to the shared Audio System rather than inventing a separate blue player system.
 
 ## Target audio primitives
 
@@ -613,10 +615,11 @@ The action may still use a sticky dock on small screens, but it must visually be
 
 ## Required palette
 
-- terracotta/warm neutral;
+- terracotta/warm neutral for actions and recording controls;
 - muted success;
 - subtle recording pulse;
-- no saturated student blue;
+- soft blue may identify the completed learner message / Student Bubble;
+- no saturated blue as the recording technology color;
 - red only for destructive/error state, not primary recording mode.
 
 ---
@@ -1130,7 +1133,7 @@ Keep:
 - warm borders;
 - muted green success.
 
-## Problem color family
+## Student color family
 
 The legacy learner/student blue system:
 
@@ -1146,11 +1149,23 @@ The legacy learner/student blue system:
 
 ## Decision
 
-Do not use saturated blue as the primary learner-interaction identity.
+Preserve **blue as a conversational identity for Student Bubble**, but soften and narrow its scope.
 
-Blue may survive only if a future semantic reason exists.
+Blue SHOULD mean:
 
-Learner voice identity should move to a warm/neutral system.
+- learner-authored / learner-spoken message;
+- the right side of a conversation;
+- “это моя реплика”.
+
+Blue SHOULD NOT automatically mean:
+
+- generic audio progress;
+- recording activity;
+- microphone state;
+- global student progress;
+- unrelated action buttons.
+
+The Student Bubble should be a visual sibling of Teacher Bubble, not a separate technical design system.
 
 ---
 
@@ -1428,7 +1443,7 @@ Before code, define:
 - interaction dock;
 - state colors.
 
-Explicitly deprecate saturated student blue as the main learner voice color.
+Explicitly keep soft student blue for Student Bubble identity while deprecating the saturated technical blue media subsystem.
 
 ## Phase 2 — SpeakingTurn redesign
 
