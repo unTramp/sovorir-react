@@ -7,6 +7,8 @@ import { BlockRenderer } from '../lesson/BlockRenderer';
 import { StickyRecordCTA } from '../lesson/StickyRecordCTA';
 import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
 import { PhraseGroup } from '../lesson/PhraseGroup';
+import { PhrasePracticeCard } from '../lesson/PhrasePracticeCard';
+import { getPhrasePracticePairs } from '../../lib/phrasePracticeFlow';
 
 function isRequiredInteraction(block: ContentBlock) {
   return block.type === 'record'
@@ -38,6 +40,13 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   const prevSectionRef = useRef(currentSection);
   const previousVisibleCountRef = useRef(0);
   const [interactionDock, setInteractionDock] = useState<HTMLDivElement | null>(null);
+  const phrasePracticePairs = useMemo(
+    () => section ? getPhrasePracticePairs(section.blocks) : null,
+    [section],
+  );
+  const activePhraseIndex = phrasePracticePairs
+    ? Math.min(completedRecords, phrasePracticePairs.length - 1)
+    : 0;
 
   // Scroll to top on section change
   useEffect(() => {
@@ -47,6 +56,15 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   // Compute record indices and visible blocks
   const { visibleBlocks, allRecordsCompleted } = useMemo(() => {
     if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
+
+    if (phrasePracticePairs) {
+      const phraseIndex = Math.min(completedRecords, phrasePracticePairs.length - 1);
+      const pair = phrasePracticePairs[phraseIndex];
+      return {
+        visibleBlocks: [pair.phrase, pair.interaction] as ContentBlock[],
+        allRecordsCompleted: sectionCompleted || completedRecords >= phrasePracticePairs.length,
+      };
+    }
 
     const recIndices: number[] = [];
     section.blocks.forEach((b, i) => {
@@ -61,7 +79,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
 
     const cutoffIndex = recIndices[completedRecords];
     return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords, sectionCompleted]);
+  }, [section, completedRecords, sectionCompleted, phrasePracticePairs]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
@@ -88,12 +106,20 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   // Must be before early return to satisfy Rules of Hooks
   const recordIndexMap = useMemo(() => {
     const map = new Map<number, number>();
+
+    if (phrasePracticePairs) {
+      visibleBlocks.forEach((block, i) => {
+        if (isRequiredInteraction(block)) map.set(i, activePhraseIndex);
+      });
+      return map;
+    }
+
     let counter = 0;
     visibleBlocks.forEach((block, i) => {
       if (isRequiredInteraction(block)) map.set(i, counter++);
     });
     return map;
-  }, [visibleBlocks]);
+  }, [activePhraseIndex, phrasePracticePairs, visibleBlocks]);
 
   if (!section) {
     return (
@@ -127,10 +153,29 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
       <div ref={scrollRef} className="lesson-scroll">
         <div className="lesson-section-content">
           <header className="lesson-step-heading">
+            {phrasePracticePairs && (
+              <span className="lesson-step-heading__eyebrow">
+                Шаг {currentSection} из {allSections.length} · Повторяем фразы
+              </span>
+            )}
             <h1 className="lesson-step-heading__title">{section.title}</h1>
           </header>
           {visibleBlocks.map((block, i) => {
             if (isPhraseBlock(block)) {
+              if (phrasePracticePairs) {
+                return (
+                  <div key={`${currentSection}-phrase-practice-${activePhraseIndex}`} className="lesson-block-enter phrase-practice-scene__phrase">
+                    <PhrasePracticeCard
+                      block={block}
+                      audioId={`phrase-practice-${currentSection}-${activePhraseIndex}`}
+                    />
+                    <p className="phrase-practice-scene__instruction">
+                      Сначала послушайте фразу. Затем повторите её вслух.
+                    </p>
+                  </div>
+                );
+              }
+
               if (i > 0 && isPhraseBlock(visibleBlocks[i - 1])) return null;
 
               const items: Array<{
