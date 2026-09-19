@@ -21,10 +21,7 @@ export function PhrasePracticeCard({ block, audioId }: Props) {
   const [metadataDuration, setMetadataDuration] = useState(0);
 
   useEffect(() => {
-    if (!block.audioSrc) {
-      setMetadataDuration(0);
-      return;
-    }
+    if (!block.audioSrc) return;
 
     let cancelled = false;
     const audio = new Audio();
