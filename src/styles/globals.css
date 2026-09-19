@@ -7355,3 +7355,168 @@ button:focus-visible {
     transition: none;
   }
 }
+
+
+/* ==================== Phrase Practice Scene ==================== */
+.phrase-practice-scene__phrase {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.phrase-practice-card {
+  width: 100%;
+  display: grid;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  border: var(--border-subtle);
+  border-radius: var(--radius-feature);
+  background: var(--color-bg-card-warm);
+  box-shadow: var(--shadow-feature);
+}
+
+.phrase-practice-card__content {
+  min-width: 0;
+}
+
+.phrase-practice-card__armenian {
+  color: var(--color-text-strong);
+  font-family: var(--font-armenian);
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.phrase-practice-card__transcription {
+  margin-top: 6px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-large);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.phrase-practice-card__translation {
+  margin-top: var(--space-1);
+  color: var(--color-text-strong);
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.phrase-practice-card__context {
+  margin-top: var(--space-5);
+  color: var(--color-primary-dark);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.phrase-practice-card__player {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgb(var(--color-primary-rgb) / 0.10);
+}
+
+.phrase-practice-card__play {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  box-shadow: 0 4px 12px rgb(var(--color-primary-rgb) / 0.20);
+  transition:
+    background var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.phrase-practice-card__play:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.phrase-practice-card__play:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.phrase-practice-card__play:disabled {
+  cursor: not-allowed;
+  opacity: var(--state-disabled-opacity);
+}
+
+.phrase-practice-card__play svg {
+  width: 20px;
+  height: 20px;
+}
+
+.phrase-practice-card__spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgb(255 255 255 / 0.45);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: phrase-practice-spin 700ms linear infinite;
+}
+
+@keyframes phrase-practice-spin {
+  to { transform: rotate(360deg); }
+}
+
+.phrase-practice-card .waveform-bar.played {
+  background: var(--color-waveform-teacher-played);
+}
+
+.phrase-practice-card .waveform-bar.unplayed {
+  background: var(--color-waveform-teacher-unplayed);
+}
+
+.phrase-practice-card__duration {
+  min-width: 34px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.phrase-practice-scene__instruction {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-large);
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .phrase-practice-card {
+    gap: var(--space-5);
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+  }
+
+  .phrase-practice-card__armenian {
+    font-size: clamp(1.75rem, 9vw, 2rem);
+  }
+
+  .phrase-practice-card__play {
+    width: 52px;
+    height: 52px;
+    flex-basis: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phrase-practice-card__spinner {
+    animation: none;
+  }
+}
