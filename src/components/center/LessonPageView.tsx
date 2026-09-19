@@ -9,6 +9,10 @@ import { LessonCompleteCard } from '../lesson/LessonCompleteCard';
 import { PhraseGroup } from '../lesson/PhraseGroup';
 import { PhrasePracticeCard } from '../lesson/PhrasePracticeCard';
 import { getPhrasePracticePairs } from '../../lib/phrasePracticeFlow';
+import { PhraseVoicePractice } from '../lesson/PhraseVoicePractice';
+import { PhrasePracticeFooter } from '../lesson/PhrasePracticeFooter';
+import { useRecordingStore } from '../../stores/useRecordingStore';
+import { audioController } from '../../services/audioController';
 
 function isRequiredInteraction(block: ContentBlock) {
   return block.type === 'record'
@@ -45,8 +49,18 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
     [section],
   );
   const activePhraseIndex = phrasePracticePairs
-    ? Math.min(completedRecords, phrasePracticePairs.length - 1)
+    ? sectionCompleted
+      ? phrasePracticePairs.length - 1
+      : Math.min(completedRecords, phrasePracticePairs.length - 1)
     : 0;
+  const activePhraseRecording = useRecordingStore((state) => (
+    phrasePracticePairs
+      ? Object.values(state.recordings).find(
+        (recording) => recording.sectionId === currentSection
+          && recording.recordIndex === activePhraseIndex,
+      )
+      : undefined
+  ));
 
   // Scroll to top on section change
   useEffect(() => {
@@ -58,8 +72,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
     if (!section) return { visibleBlocks: [] as ContentBlock[], allRecordsCompleted: false };
 
     if (phrasePracticePairs) {
-      const phraseIndex = Math.min(completedRecords, phrasePracticePairs.length - 1);
-      const pair = phrasePracticePairs[phraseIndex];
+      const pair = phrasePracticePairs[activePhraseIndex];
       return {
         visibleBlocks: [pair.phrase, pair.interaction] as ContentBlock[],
         allRecordsCompleted: sectionCompleted || completedRecords >= phrasePracticePairs.length,
@@ -79,7 +92,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
 
     const cutoffIndex = recIndices[completedRecords];
     return { visibleBlocks: section.blocks.slice(0, cutoffIndex + 1), allRecordsCompleted: false };
-  }, [section, completedRecords, sectionCompleted, phrasePracticePairs]);
+  }, [activePhraseIndex, section, completedRecords, sectionCompleted, phrasePracticePairs]);
 
   // Scroll to bottom when new blocks appear (skip on section change)
   useEffect(() => {
@@ -99,6 +112,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   }, [visibleBlocks.length, allRecordsCompleted, currentSection]);
 
   const handleRecordComplete = useCallback(() => {
+    audioController.stopAll();
     onRecordComplete();
   }, [onRecordComplete]);
 
@@ -141,7 +155,8 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
     visibleBlocks.length > 0 &&
     isRequiredInteraction(visibleBlocks[visibleBlocks.length - 1]);
   const activeBlock = visibleBlocks[visibleBlocks.length - 1];
-  const showRecordCTA = hasActiveRecord
+  const showRecordCTA = !phrasePracticePairs
+    && hasActiveRecord
     && (activeBlock?.type === 'record' || activeBlock?.type === 'pronunciationPrompt');
 
   const isLastSection = currentSection >= allSections.length;
@@ -151,7 +166,7 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
   return (
     <div className="lesson-section-layout">
       <div ref={scrollRef} className="lesson-scroll">
-        <div className="lesson-section-content">
+        <div className={`lesson-section-content${phrasePracticePairs ? ' phrase-practice-scene' : ''}`}>
           <header className="lesson-step-heading">
             {phrasePracticePairs && (
               <span className="lesson-step-heading__eyebrow">
@@ -199,6 +214,29 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
             const isLastRecord = hasActiveRecord && i === visibleBlocks.length - 1;
             const isCompletedRecord = isRequiredInteraction(block) && !isLastRecord;
             const recIdx = recordIndexMap.get(i);
+
+            if (
+              phrasePracticePairs
+              && (block.type === 'record' || block.type === 'pronunciationPrompt')
+            ) {
+              const activePair = phrasePracticePairs[activePhraseIndex];
+              return (
+                <div
+                  key={`${currentSection}-voice-practice-${activePhraseIndex}`}
+                  className="lesson-block-enter"
+                >
+                  <PhraseVoicePractice
+                    phrase={activePair.phrase}
+                    interaction={activePair.interaction}
+                    sectionId={currentSection}
+                    recordIndex={activePhraseIndex}
+                    onSkip={allRecordsCompleted ? undefined : handleRecordComplete}
+                    onRetry={() => onRecordRetry(activePhraseIndex)}
+                  />
+                </div>
+              );
+            }
+
             return (
               <div key={`${currentSection}-${i}`} className="lesson-block-enter">
                 <BlockRenderer
@@ -214,6 +252,14 @@ export function LessonSectionView({ completedRecords, onRecordComplete, onRecord
               </div>
             );
           })}
+          {phrasePracticePairs && !allRecordsCompleted && (
+            <PhrasePracticeFooter
+              current={activePhraseIndex + 1}
+              total={phrasePracticePairs.length}
+              canContinue={Boolean(activePhraseRecording)}
+              onContinue={handleRecordComplete}
+            />
+          )}
           {showCompletedSuccessInScroll && <LessonCompleteCard />}
           <div ref={bottomRef} />
         </div>
