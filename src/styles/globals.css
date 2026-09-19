@@ -7520,3 +7520,277 @@ button:focus-visible {
     animation: none;
   }
 }
+
+
+/* ==================== Phrase Voice Practice ==================== */
+.phrase-practice-scene {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.phrase-voice-practice {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  margin: var(--space-8) 0 0;
+}
+
+.phrase-voice-practice__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.phrase-voice-practice__eyebrow {
+  color: var(--color-text-strong);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-large);
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.phrase-voice-practice__subtitle {
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  line-height: 1.45;
+}
+
+.phrase-voice-practice__surface {
+  width: min(100%, 420px);
+  min-height: 132px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-6);
+  border: var(--border-subtle);
+  border-radius: var(--radius-feature);
+  background: var(--color-bg-card-light);
+  box-shadow: var(--shadow-card);
+}
+
+.phrase-voice-practice__surface.is-recorded {
+  align-items: stretch;
+  min-height: 116px;
+  background: var(--color-bg-card-warm);
+}
+
+.phrase-voice-practice__mic {
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: var(--color-text-white);
+  box-shadow: 0 4px 12px rgb(var(--color-primary-rgb) / 0.20);
+  transition:
+    background var(--duration-fast) ease,
+    transform var(--duration-fast) ease;
+}
+
+.phrase-voice-practice__mic:hover {
+  background: var(--color-primary-dark);
+}
+
+.phrase-voice-practice__mic:active {
+  transform: scale(0.96);
+}
+
+.phrase-voice-practice__mic svg {
+  width: 25px;
+  height: 25px;
+  color: currentColor;
+}
+
+.phrase-voice-practice__prompt {
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.phrase-voice-practice__prompt [lang="hy"] {
+  color: var(--color-text-strong);
+  font-family: var(--font-armenian);
+}
+
+.phrase-voice-practice__recording-status,
+.phrase-voice-practice__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body-large);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.phrase-voice-practice__pulse {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: phrase-voice-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes phrase-voice-pulse {
+  from { opacity: 0.38; transform: scale(0.82); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.phrase-voice-practice__stop {
+  min-height: 46px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-primary-dark);
+  color: var(--color-text-white);
+  font-family: var(--font-ui);
+  font-size: var(--text-button);
+  font-weight: 700;
+}
+
+.phrase-voice-practice__retry,
+.phrase-voice-practice__skip {
+  min-height: 44px;
+  padding: 0 var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--color-primary-dark);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+
+.phrase-voice-practice__retry {
+  align-self: center;
+}
+
+.phrase-voice-practice__skip {
+  color: var(--color-text-muted);
+}
+
+.phrase-voice-practice__retry:hover,
+.phrase-voice-practice__skip:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.phrase-voice-practice__error {
+  width: min(100%, 420px);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid rgb(153 27 27 / 0.14);
+  border-radius: var(--radius-control);
+  background: var(--color-error-form-bg);
+  color: var(--color-error-dark);
+  font-family: var(--font-ui);
+  font-size: var(--text-caption);
+  line-height: 1.45;
+  text-align: center;
+}
+
+.phrase-voice-practice .recording-playback {
+  min-height: 48px;
+}
+
+.phrase-voice-practice .recording-playback__btn {
+  background: rgb(var(--color-primary-rgb) / 0.12);
+  color: var(--color-primary-dark);
+}
+
+.phrase-voice-practice .recording-playback__bar {
+  background: rgb(var(--color-primary-rgb) / 0.14);
+}
+
+.phrase-voice-practice .recording-playback__fill {
+  background: var(--color-primary);
+}
+
+/* ==================== Phrase Practice Footer ==================== */
+.phrase-practice-footer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: auto;
+  padding-top: 64px;
+  padding-bottom: var(--space-2);
+}
+
+.phrase-practice-footer__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.phrase-practice-footer__eyebrow {
+  color: var(--color-primary);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.phrase-practice-footer__label {
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.phrase-practice-footer__btn {
+  min-height: 52px;
+  padding-inline: var(--space-6);
+}
+
+@media (max-width: 520px) {
+  .phrase-practice-scene {
+    min-height: auto;
+  }
+
+  .phrase-voice-practice {
+    margin-top: var(--space-6);
+  }
+
+  .phrase-voice-practice__surface {
+    width: 100%;
+    min-height: 126px;
+    padding: var(--space-5);
+    border-radius: var(--radius-card);
+  }
+
+  .phrase-practice-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+  }
+
+  .phrase-practice-footer__progress {
+    align-items: flex-start;
+  }
+
+  .phrase-practice-footer__btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phrase-voice-practice__pulse {
+    animation: none;
+  }
+}
